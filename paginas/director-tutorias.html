@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Director de Tutorías - Sistema PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
+                    <div class="border-l border-gray-300 pl-4">
+                        <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
+                        <p class="text-sm text-gray-600">Director de Tutorías</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                        <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
+                    </div>
+                    <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                        <i data-lucide="user-circle" class="h-6 w-6"></i>
+                    </div>
+                    <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
+                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl text-[#7B5936]">Gestión de Propuestas PAT</h1>
+                    <p class="text-gray-600 mt-2">Administra y controla las propuestas de planes de acción tutorial</p>
+                </div>
+                <button onclick="alert('Abriendo formulario de creación...')" class="flex items-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">
+                    <i data-lucide="plus" class="h-5 w-5 mr-2"></i> Crear Nuevo PAT
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <p class="text-sm font-medium text-gray-600 mb-3">Total Propuestas</p>
+                    <div id="stat-total" class="text-3xl text-[#69B22E]">0</div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <p class="text-sm font-medium text-gray-600 mb-3">Activas</p>
+                    <div id="stat-activas" class="text-3xl text-[#69B22E]">0</div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <p class="text-sm font-medium text-gray-600 mb-3">Inactivas</p>
+                    <div id="stat-inactivas" class="text-3xl text-gray-400">0</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <h3 class="text-lg font-medium text-[#7B5936]">Propuestas por Cuatrimestre</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-600">Filtrar:</span>
+                        <select id="filtro-cuatrimestre" onchange="renderizarUI()" class="px-3 py-2 border border-gray-300 rounded-lg focus:border-[#69B22E] focus:ring-[#69B22E] focus:outline-none text-sm">
+                            <option value="all">Todos los Cuatrimestres</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto p-6">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-4 py-3"><div class="flex items-center gap-2"><i data-lucide="book-open" class="h-4 w-4"></i>Cuatrimestre</div></th>
+                                <th class="px-4 py-3">Tutor</th>
+                                <th class="px-4 py-3">Grupo</th>
+                                <th class="px-4 py-3">Fecha Creación</th>
+                                <th class="px-4 py-3">Estado</th>
+                                <th class="px-4 py-3">Habilitar/Deshabilitar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="propuestas-tbody" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <p class="text-center text-sm text-gray-500">
+                © 2026 UPFIM - Sistema de Gestión PAT - Todos los derechos reservados
+            </p>
+        </div>
+    </footer>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+        let propuestas = [
+            { id: 1, cuatrimestre: '2024-1', tutor: 'Dr. María González', grupo: 'ING-2024-A', fecha: '2024-01-15', status: 'Activo', enabled: true },
+            { id: 2, cuatrimestre: '2024-1', tutor: 'Mtro. Carlos Ramírez', grupo: 'ADM-2024-B', fecha: '2024-01-18', status: 'Activo', enabled: true },
+            { id: 3, cuatrimestre: '2024-1', tutor: 'Dra. Ana Martínez', grupo: 'DER-2024-C', fecha: '2024-01-20', status: 'Inactivo', enabled: false },
+            { id: 4, cuatrimestre: '2024-2', tutor: 'Mtro. José Luis Hernández', grupo: 'MED-2024-A', fecha: '2024-05-10', status: 'Activo', enabled: true },
+            { id: 5, cuatrimestre: '2024-2', tutor: 'Dra. Laura Sánchez', grupo: 'PSI-2024-D', fecha: '2024-05-15', status: 'Activo', enabled: true },
+        ];
+
+        const cuatrimestres = [...new Set(propuestas.map(p => p.cuatrimestre))];
+        const selectFiltro = document.getElementById('filtro-cuatrimestre');
+        cuatrimestres.forEach(c => selectFiltro.innerHTML += `<option value="${c}">${c}</option>`);
+
+        function formatearFecha(fechaStr) {
+            return new Date(fechaStr + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function handleToggle(id) {
+            propuestas = propuestas.map(p => p.id === id ? { ...p, enabled: !p.enabled, status: !p.enabled ? 'Activo' : 'Inactivo' } : p);
+            renderizarUI();
+        }
+
+        function renderizarUI() {
+            const selectedVal = document.getElementById('filtro-cuatrimestre').value;
+            const filtradas = selectedVal === 'all' ? propuestas : propuestas.filter(p => p.cuatrimestre === selectedVal);
+
+            document.getElementById('stat-total').innerText = propuestas.length;
+            document.getElementById('stat-activas').innerText = propuestas.filter(p => p.enabled).length;
+            document.getElementById('stat-inactivas').innerText = propuestas.filter(p => !p.enabled).length;
+
+            const tbody = document.getElementById('propuestas-tbody');
+            tbody.innerHTML = '';
+
+            filtradas.forEach(prop => {
+                const badgeClass = prop.enabled ? 'bg-green-100 text-green-800 border-green-300' : 'bg-gray-100 text-gray-800 border-gray-300';
+                const switchHtml = `
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" ${prop.enabled ? 'checked' : ''} onchange="handleToggle(${prop.id})">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${prop.enabled ? 'bg-[#69B22E]' : ''}"></div>
+                    </label>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium">${prop.cuatrimestre}</td>
+                        <td class="px-4 py-3">${prop.tutor}</td>
+                        <td class="px-4 py-3">${prop.grupo}</td>
+                        <td class="px-4 py-3">${formatearFecha(prop.fecha)}</td>
+                        <td class="px-4 py-3"><span class="px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">${prop.status}</span></td>
+                        <td class="px-4 py-3"><div class="flex items-center gap-2">${switchHtml}<span class="text-sm text-gray-600">${prop.enabled ? 'Activo' : 'Inactivo'}</span></div></td>
+                    </tr>`;
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        renderizarUI();
+    </script>
+</body>
+</html>

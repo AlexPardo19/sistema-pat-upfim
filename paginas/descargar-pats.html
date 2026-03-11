@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargar PATs - Sistema PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 flex flex-col">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-10 w-auto" />
+                    <span class="font-semibold text-[#7B5936]">Sistema PAT</span>
+                </div>
+                <button onclick="toggleMenu()" class="lg:hidden">
+                    <i data-lucide="x" class="h-6 w-6 text-gray-600"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="asignacion-tutores.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="user-plus" class="h-5 w-5"></i>
+                    <span>Asignación de Tutores</span>
+                </a>
+                <a href="alta-docentes.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="users" class="h-5 w-5"></i>
+                    <span>Alta de Docentes</span>
+                </a>
+                <a href="consultar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="file-check-2" class="h-5 w-5"></i>
+                    <span>Consultar PATs</span>
+                </a>
+                <a href="descargar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="download" class="h-5 w-5"></i>
+                    <span>Descargar PATs</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="log-out" class="h-5 w-5"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="mobile-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleMenu()" class="lg:hidden">
+                            <i data-lucide="menu" class="h-6 w-6 text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl text-[#7B5936]">Descargar PATs</h1>
+                            <p class="text-sm text-gray-500 mt-1">Exporta la información en Excel o PDF</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-right hidden sm:block">
+                            <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                            <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
+                        </div>
+                        <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                            <span id="user-avatar-letter">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-auto p-6">
+                <div class="max-w-4xl mx-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg text-[#7B5936]">Formatos y Reportes</h2>
+                        <p class="text-sm text-gray-500 mt-1">Selecciona los filtros para descargar los documentos generados</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="space-y-6 max-w-2xl">
+                            
+                            <div class="space-y-2">
+                                <label for="filter-periodo" class="text-sm font-medium text-[#7B5936]">Filtrar por Período</label>
+                                <select id="filter-periodo" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]">
+                                    <option value="" disabled selected>Selecciona período</option>
+                                    <option value="2024-1">2024-1</option>
+                                    <option value="2024-2">2024-2</option>
+                                    <option value="2023-2">2023-2</option>
+                                    <option value="2023-1">2023-1</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="filter-status" class="text-sm font-medium text-[#7B5936]">Filtrar por Estado</label>
+                                <select id="filter-status" class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]">
+                                    <option value="" disabled selected>Selecciona estado</option>
+                                    <option value="validated">Validados</option>
+                                    <option value="pending">Pendientes</option>
+                                    <option value="all">Todos</option>
+                                </select>
+                            </div>
+
+                            <div class="pt-4 space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-[#69B22E] transition-colors flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-lg flex items-center justify-center bg-[#69B22E20]">
+                                            <i data-lucide="file-spreadsheet" class="h-6 w-6 text-[#69B22E]"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-[#7B5936]">PATs por Tutor</p>
+                                            <p class="text-sm text-gray-500">Archivo Excel</p>
+                                        </div>
+                                        <button onclick="alert('Descargando reporte por tutor...')" class="h-8 w-8 flex items-center justify-center rounded-md bg-[#69B22E] text-white hover:opacity-90">
+                                            <i data-lucide="download" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-[#69B22E] transition-colors flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-lg flex items-center justify-center bg-[#69B22E20]">
+                                            <i data-lucide="file-spreadsheet" class="h-6 w-6 text-[#69B22E]"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-[#7B5936]">PATs por Grupo</p>
+                                            <p class="text-sm text-gray-500">Archivo Excel</p>
+                                        </div>
+                                        <button onclick="alert('Descargando reporte por grupo...')" class="h-8 w-8 flex items-center justify-center rounded-md bg-[#69B22E] text-white hover:opacity-90">
+                                            <i data-lucide="download" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-[#69B22E] transition-colors flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-lg flex items-center justify-center bg-[#69B22E20]">
+                                            <i data-lucide="file-text" class="h-6 w-6 text-[#69B22E]"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-[#7B5936]">Reporte Mensual</p>
+                                            <p class="text-sm text-gray-500">Archivo PDF</p>
+                                        </div>
+                                        <button onclick="alert('Descargando PDF mensual...')" class="h-8 w-8 flex items-center justify-center rounded-md bg-[#69B22E] text-white hover:opacity-90">
+                                            <i data-lucide="download" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-[#69B22E] transition-colors flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-lg flex items-center justify-center bg-[#69B22E20]">
+                                            <i data-lucide="book" class="h-6 w-6 text-[#69B22E]"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-[#7B5936]">Reporte Completo</p>
+                                            <p class="text-sm text-gray-500">Archivo PDF</p>
+                                        </div>
+                                        <button onclick="alert('Descargando reporte global en PDF...')" class="h-8 w-8 flex items-center justify-center rounded-md bg-[#69B22E] text-white hover:opacity-90">
+                                            <i data-lucide="download" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/layout.js"></script>
+</body>
+</html>

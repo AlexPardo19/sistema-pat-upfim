@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema PAT UPFIM</title>
+    
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-50">
+
+    <div class="w-full max-w-md px-8 py-12">
+        <div class="flex justify-center mb-8">
+            <img src="../assets/logoUpfim.png" alt="UPFIM Logo" class="h-32 w-auto object-contain" />
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-3xl text-[#69B22E]">Sistema PAT</h1>
+            <p class="mt-2 text-[#7B5936]">Portal Universitario</p>
+        </div>
+
+        <div id="error-alert" class="hidden mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md flex items-center gap-2">
+            <i data-lucide="alert-circle" class="h-4 w-4"></i>
+            <span id="error-message" class="text-sm"></span>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+            <div class="space-y-2">
+                <label for="email" class="text-[#7B5936] text-sm font-medium">Correo Institucional</label>
+                <input 
+                    id="email" 
+                    type="email" 
+                    placeholder="usuario@upfim.edu.mx" 
+                    required
+                    class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]"
+                />
+            </div>
+
+            <div class="space-y-2">
+                <label for="password" class="text-[#7B5936] text-sm font-medium">Contraseña</label>
+                <input 
+                    id="password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    required
+                    class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]"
+                />
+            </div>
+
+            <div class="flex justify-end">
+                <a href="#" class="text-sm hover:underline text-[#69B22E]">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button type="submit" class="w-full h-10 rounded-md text-white font-medium hover:opacity-90 transition-opacity bg-[#69B22E]">
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p class="text-sm font-medium text-blue-900 mb-2">Credenciales de prueba:</p>
+            <div class="text-xs text-blue-700 space-y-1">
+                <p>• Director Tutorías: director.tutorias@upfim.edu.mx</p>
+                <p>• Jefe de Grupo: jefe.grupo@upfim.edu.mx</p>
+                <p>• Director Carrera: director.carrera@upfim.edu.mx</p>
+                <p class="mt-2 font-medium">Contraseña para todos: admin123</p>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>© 2026 UPFIM - Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        // Inicializamos los iconos de Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // Manejo del formulario usando la función de tu archivo auth.js
+        const form = document.getElementById('login-form');
+        const errorAlert = document.getElementById('error-alert');
+        const errorMessage = document.getElementById('error-message');
+        const emailInput = document.getElementById('email');
+
+        form.addEventListener('submit',async function(e) {
+            e.preventDefault();
+            
+            // Ocultar alerta previa al intentar de nuevo
+            errorAlert.classList.add('hidden');
+            emailInput.classList.remove('border-red-500');
+            
+            const email = emailInput.value;
+            const password = document.getElementById('password').value;
+
+            // Validación del dominio institucional de la universidad
+            if (!/^[^\s@]+@upfim\.edu\.mx$/.test(email)) {
+                errorMessage.textContent = 'Por favor, utiliza tu correo institucional (@upfim.edu.mx)';
+                errorAlert.classList.remove('hidden');
+                emailInput.classList.add('border-red-500');
+                return;
+            }
+
+            // Intento de login delegando la validación a la función login() en auth.js
+            const attempt = await login(email, password);
+            
+            // Si el login falla, mostramos el mensaje de error visual
+            if(!attempt.success) {
+                errorMessage.textContent = attempt.message;
+                errorAlert.classList.remove('hidden');
+            }
+        });
+
+        // Limpiar alertas cuando el usuario empieza a escribir de nuevo
+        emailInput.addEventListener('input', () => {
+            emailInput.classList.remove('border-red-500');
+            errorAlert.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

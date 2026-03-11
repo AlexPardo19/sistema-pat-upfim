@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docente Tutor - Sistema PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
+                    <div class="border-l border-gray-300 pl-4">
+                        <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
+                        <p class="text-sm text-gray-600">Portal del Docente Tutor</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Docente Tutor</p>
+                        <p id="user-email-display" class="text-xs text-gray-500">tutor@upfim.edu.mx</p>
+                    </div>
+                    <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                        <i data-lucide="user" class="h-6 w-6"></i>
+                    </div>
+                    <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
+                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="space-y-6">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-2xl text-[#7B5936]">Dashboard del Docente Tutor</h2>
+                    <p class="text-sm text-gray-500 mt-1">Ciclo Escolar 2025–2026 — Grupo: ISC-5A</p>
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200 self-start">
+                    <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-sm text-green-700">Sesión activa</span>
+                </div>
+            </div>
+
+            <div class="bg-gray-100 border border-gray-200 p-1 rounded-xl w-full sm:w-max flex">
+                <button onclick="switchTab('agenda')" id="tab-btn-agenda" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all">
+                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i> Agenda y PAT
+                </button>
+                <button onclick="switchTab('historial')" id="tab-btn-historial" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
+                    <i data-lucide="history" class="h-4 w-4"></i> Historial de PATs
+                </button>
+            </div>
+
+            <div id="tab-agenda" class="mt-5 block">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i data-lucide="book-open" class="h-5 w-5 text-[#7B5936]"></i>
+                                <h3 class="font-medium text-[#7B5936]">Mi Documento PAT</h3>
+                            </div>
+                            <div class="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200 mb-4">
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                                <span class="text-sm text-yellow-800">Borrador Local</span>
+                            </div>
+                            <div class="space-y-2.5">
+                                <button class="w-full flex items-center justify-center px-4 py-2 border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white transition-colors">
+                                    <i data-lucide="file-text" class="h-4 w-4 mr-2"></i> Continuar Edición
+                                </button>
+                                <button class="w-full flex items-center justify-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">
+                                    <i data-lucide="send" class="h-4 w-4 mr-2"></i> Enviar a Revisión
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i data-lucide="download" class="h-5 w-5 text-[#7B5936]"></i>
+                                <h3 class="font-medium text-[#7B5936]">Generar Evidencias</h3>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">Descarga un reporte PDF con todas las sesiones realizadas y validadas.</p>
+                            <button onclick="alert('Descargando reporte PDF...')" class="w-full flex items-center justify-center px-4 py-2 bg-[#7B5936] text-white rounded-md hover:opacity-90">
+                                <i data-lucide="download" class="h-4 w-4 mr-2"></i> Descargar Reporte
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm h-full">
+                            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="font-medium text-[#7B5936]">Agenda de Sesiones</h3>
+                                <button onclick="abrirModal('modal-programar')" class="flex items-center px-3 py-1.5 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm">
+                                    <i data-lucide="calendar-plus" class="h-4 w-4 mr-2"></i> Programar Sesión
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto p-6">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+                                        <tr>
+                                            <th class="px-4 py-3">Fecha y Hora</th>
+                                            <th class="px-4 py-3">Descripción</th>
+                                            <th class="px-4 py-3">Estado</th>
+                                            <th class="px-4 py-3">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sesiones-tbody" class="divide-y divide-gray-100">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-historial" class="mt-5 hidden space-y-6">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 border border-gray-200 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i data-lucide="history" class="h-4 w-4 text-[#7B5936]"></i>
+                            <span class="text-xs text-gray-500">Total PATs</span>
+                        </div>
+                        <p class="text-2xl text-[#7B5936]">5</p>
+                    </div>
+                    <div class="bg-white p-5 border border-gray-200 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i data-lucide="check-circle-2" class="h-4 w-4 text-green-600"></i>
+                            <span class="text-xs text-gray-500">Aprobados</span>
+                        </div>
+                        <p class="text-2xl text-green-700">3</p>
+                    </div>
+                </div>
+                <div id="historial-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-programar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-medium text-[#7B5936] mb-4">Programar Nueva Sesión</h3>
+            <form id="form-programar">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                        <input type="date" id="input-fecha" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                        <input type="time" id="input-hora" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <input type="text" id="input-desc" required placeholder="Ej: Revisión de calificaciones" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" onclick="cerrarModal('modal-programar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">Guardar Sesión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-cancelar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-medium text-red-600 mb-2">Cancelar Sesión</h3>
+            <p class="text-sm text-gray-600 mb-4">¿Estás seguro de que deseas cancelar esta sesión? Deberás proporcionar un motivo.</p>
+            <form id="form-cancelar">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de cancelación</label>
+                    <textarea id="input-motivo" required rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-red-500"></textarea>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" onclick="cerrarModal('modal-cancelar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Volver</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar Cancelación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+        // --- TABS LOGIC ---
+        function switchTab(tabId) {
+            document.getElementById('tab-agenda').classList.add('hidden');
+            document.getElementById('tab-historial').classList.add('hidden');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            const btnAgenda = document.getElementById('tab-btn-agenda');
+            const btnHistorial = document.getElementById('tab-btn-historial');
+
+            if (tabId === 'agenda') {
+                btnAgenda.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
+                btnHistorial.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
+            } else {
+                btnAgenda.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
+                btnHistorial.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
+            }
+        }
+
+        // --- MODALS LOGIC ---
+        let sesionAfectadaId = null;
+
+        function abrirModal(id, sesionId = null) {
+            document.getElementById(id).classList.remove('hidden');
+            if(sesionId) sesionAfectadaId = sesionId;
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            sesionAfectadaId = null;
+        }
+
+       // --- SESIONES LOGIC ---
+        let sesiones = [];
+
+        async function cargarSesiones() {
+            try {
+                const res = await fetch('http://localhost:5000/api/sesiones');
+                const data = await res.json();
+                if (data.success) {
+                    sesiones = data.sesiones;
+                    renderSesiones();
+                }
+            } catch (error) {
+                console.error("Error cargando sesiones:", error);
+            }
+        }
+
+        function renderSesiones() {
+            const tbody = document.getElementById('sesiones-tbody');
+            tbody.innerHTML = '';
+            
+            sesiones.forEach(sesion => {
+                let badge = '', actions = '';
+                
+                if (sesion.estado === 'Programada') {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-blue-100 text-blue-800 border-blue-300">Programada</span>`;
+                    actions = `
+                        <button onclick="cambiarEstado(${sesion.id}, 'En Curso')" class="text-white h-7 w-7 rounded bg-[#69B22E] hover:opacity-90 inline-flex items-center justify-center mr-2" title="Iniciar"><i data-lucide="play" class="h-3 w-3"></i></button>
+                        <button onclick="abrirModal('modal-cancelar', ${sesion.id})" class="text-white h-7 w-7 rounded bg-red-500 hover:bg-red-600 inline-flex items-center justify-center" title="Cancelar"><i data-lucide="x" class="h-3 w-3"></i></button>
+                    `;
+                } else if (sesion.estado === 'En Curso') {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-yellow-100 text-yellow-800 border-yellow-300">En Curso</span>`;
+                    // OJO AQUÍ: Ahora el tutor la pasa a 'Finalizada', no a 'Validada'
+                    actions = `<button onclick="cambiarEstado(${sesion.id}, 'Finalizada')" class="text-xs px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Finalizar</button>`;
+                } else if (sesion.estado === 'Finalizada') {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-indigo-100 text-indigo-800 border-indigo-300">Finalizada</span>`;
+                    actions = `<span class="text-xs text-indigo-700 flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> Esperando al Jefe</span>`;
+                } else if (sesion.estado === 'Validada') {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-green-100 text-green-800 border-green-300">Validada</span>`;
+                    actions = `<span class="text-xs text-green-700 flex items-center gap-1"><i data-lucide="check-double" class="h-4 w-4"></i> Aprobada por Jefe</span>`;
+                } else if (sesion.estado === 'Cancelada' || sesion.estado === 'Cancelacion Validada') {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-red-100 text-red-800 border-red-300">Cancelada</span>`;
+                    actions = `<span class="text-xs text-red-700 flex items-center gap-1"><i data-lucide="info" class="h-3 w-3"></i> ${sesion.estado === 'Cancelacion Validada' ? 'Revisada por Jefe' : 'Pendiente revisión'}</span>`;
+                }
+
+                let descHtml = `<p class="text-gray-700 font-medium">${sesion.descripcion}</p>`;
+                if (sesion.motivo_cancelacion) {
+                    descHtml += `<p class="text-xs text-red-600 mt-1"><strong>Motivo:</strong> ${sesion.motivo_cancelacion}</p>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 ${sesion.estado.includes('Cancelada') ? 'bg-red-50/30' : ''}">
+                        <td class="px-4 py-3 whitespace-nowrap"><p class="text-sm">${sesion.fecha}</p><p class="text-xs text-gray-500">${sesion.hora} hrs</p></td>
+                        <td class="px-4 py-3">${descHtml}</td>
+                        <td class="px-4 py-3">${badge}</td>
+                        <td class="px-4 py-3 flex items-center h-full">${actions}</td>
+                    </tr>
+                `;
+            });
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Eventos de los formularios (Conectados al Backend)
+        document.getElementById('form-programar').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                fecha: document.getElementById('input-fecha').value,
+                hora: document.getElementById('input-hora').value,
+                descripcion: document.getElementById('input-desc').value
+            };
+            
+            await fetch('http://localhost:5000/api/sesiones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            cargarSesiones();
+            cerrarModal('modal-programar');
+            this.reset();
+        });
+
+        document.getElementById('form-cancelar').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const motivo = document.getElementById('input-motivo').value;
+            
+            await fetch(`http://localhost:5000/api/sesiones/${sesionAfectadaId}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: 'Cancelada', motivo: motivo })
+            });
+            
+            cargarSesiones();
+            cerrarModal('modal-cancelar');
+            this.reset();
+        });
+
+        async function cambiarEstado(id, nuevoEstado) {
+            await fetch(`http://localhost:5000/api/sesiones/${id}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+            cargarSesiones();
+        }
+        // Bloquear fechas pasadas en el input de programar sesión
+        const fechaInput = document.getElementById('input-fecha');
+        if (fechaInput) {
+            // Obtenemos la fecha de hoy en formato YYYY-MM-DD
+            const hoy = new Date().toISOString().split('T')[0];
+            fechaInput.setAttribute('min', hoy);
+        }
+
+        // Cargamos los datos reales al abrir la página
+        cargarSesiones();
+        // --- HISTORIAL LOGIC ---
+        const historialData = [
+            { año: 2026, cuatrimestre: '1° Cuatrimestre', grupo: 'ISC-5A', version: 'v0.2', estado: 'Borrador' },
+            { año: 2025, cuatrimestre: '3° Cuatrimestre', grupo: 'ISC-5A', version: 'v1.2', estado: 'Aprobado' }
+        ];
+
+        function renderHistorial() {
+            const container = document.getElementById('historial-container');
+            const anios = [2026, 2025]; 
+            
+            anios.forEach(anio => {
+                const patsAnio = historialData.filter(p => p.año === anio);
+                let cardsHtml = patsAnio.map(pat => {
+                    let colorBadge = pat.estado === 'Aprobado' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                    return `
+                        <div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm mb-3 ml-2">
+                            <div class="flex items-center justify-between px-5 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-9 w-9 rounded-lg flex items-center justify-center bg-[#7B593615]">
+                                        <i data-lucide="file-text" class="h-4 w-4 text-[#7B5936]"></i>
+                                    </div>
+                                    <div><p class="text-sm text-[#7B5936]">${pat.cuatrimestre} — ${pat.año}</p></div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-xs border ${colorBadge}">${pat.estado}</span>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                container.innerHTML += `
+                    <div class="mb-4">
+                        <button onclick="toggleAccordion('year-${anio}')" class="flex items-center gap-3 w-full text-left mb-3">
+                            <div class="h-8 w-8 rounded-lg flex items-center justify-center bg-[#69B22E]"><i data-lucide="chevron-down" class="h-4 w-4 text-white"></i></div>
+                            <h3 class="text-base text-[#7B5936]">${anio}</h3>
+                        </button>
+                        <div id="year-${anio}" class="space-y-3 block">${cardsHtml}</div>
+                    </div>`;
+            });
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+        }
+
+        renderSesiones();
+        renderHistorial();
+    </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jefe de Grupo - Sistema PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
+                    <div class="border-l border-gray-300 pl-4">
+                        <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
+                        <p class="text-sm text-gray-600">Jefe de Grupo</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                        <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
+                    </div>
+                    <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                        <i data-lucide="user-circle" class="h-6 w-6"></i>
+                    </div>
+                    <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
+                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div>
+                <h1 class="text-3xl text-[#7B5936]">Seguimiento de Sesiones Tutoriales</h1>
+                <p class="text-gray-600 mt-2">Valida y realiza seguimiento de las sesiones planificadas</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <p class="text-sm font-medium text-gray-600 mb-3">Total Sesiones</p>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="calendar" class="h-8 w-8 text-[#69B22E]"></i>
+                        <div id="stat-total" class="text-3xl text-[#69B22E]">0</div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <p class="text-sm font-medium text-gray-600 mb-3">Pendientes</p>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="clock" class="h-8 w-8 text-yellow-500"></i>
+                        <div id="stat-pendientes" class="text-3xl text-yellow-600">0</div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <p class="text-sm font-medium text-gray-600 mb-3">Validadas</p>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check-circle" class="h-8 w-8 text-green-500"></i>
+                        <div id="stat-validadas" class="text-3xl text-green-600">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-[#7B5936]">Sesiones Programadas</h3>
+                </div>
+                <div class="overflow-x-auto p-6">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-4 py-3">Fecha</th>
+                                <th class="px-4 py-3">Descripción</th>
+                                <th class="px-4 py-3">Tutor</th>
+                                <th class="px-4 py-3">Estado</th>
+                                <th class="px-4 py-3">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sesiones-tbody" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-lg border border-blue-200 p-6">
+                <div class="flex items-start gap-3">
+                    <div class="h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#69B22E20]">
+                        <i data-lucide="calendar" class="h-5 w-5 text-[#69B22E]"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-blue-900 mb-1">Información importante</h3>
+                        <p class="text-sm text-blue-700">
+                            Las sesiones deben ser validadas después de su realización. Una vez validadas, 
+                            quedarán registradas en el sistema para su revisión por el Director de Carrera.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <p class="text-center text-sm text-gray-500">
+                © 2026 UPFIM - Sistema de Gestión PAT - Todos los derechos reservados
+            </p>
+        </div>
+    </footer>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+        let sesiones = [];
+
+        // 1. Obtener las sesiones reales desde la Base de Datos
+        async function cargarSesiones() {
+            try {
+                const res = await fetch('http://localhost:5000/api/sesiones');
+                const data = await res.json();
+                if (data.success) {
+                    sesiones = data.sesiones;
+                    renderizarUI();
+                }
+            } catch (error) {
+                console.error("Error cargando sesiones:", error);
+            }
+        }
+
+        // 2. Guardar la validación en la Base de Datos
+        async function validarSesion(id, esCancelacion = false) {
+            // Si es cancelación, la pasamos a 'Cancelacion Validada', si no, a 'Validada'
+            const nuevoEstado = esCancelacion ? 'Cancelacion Validada' : 'Validada';
+            
+            try {
+                const btn = document.getElementById(`btn-validar-${id}`);
+                if(btn) btn.innerHTML = '<i class="lucide-loader h-4 w-4 mr-2 animate-spin"></i> Guardando...';
+
+                await fetch(`http://localhost:5000/api/sesiones/${id}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+                
+                cargarSesiones(); // Recargamos para ver los cambios
+            } catch (error) {
+                console.error("Error al validar:", error);
+                alert("Hubo un error al guardar la validación.");
+            }
+        }
+
+        // 3. Renderizar la tabla con los estados reales
+        function renderizarUI() {
+            document.getElementById('stat-total').innerText = sesiones.length;
+            document.getElementById('stat-pendientes').innerText = sesiones.filter(s => ['Finalizada', 'Cancelada'].includes(s.estado)).length;
+            document.getElementById('stat-validadas').innerText = sesiones.filter(s => ['Validada', 'Cancelacion Validada'].includes(s.estado)).length;
+
+            const tbody = document.getElementById('sesiones-tbody');
+            tbody.innerHTML = '';
+
+            sesiones.forEach(sesion => {
+                const isNotStarted = ['Programada', 'En Curso'].includes(sesion.estado);
+                const isFinished = sesion.estado === 'Finalizada';
+                const isCancelled = sesion.estado === 'Cancelada';
+                const isValidated = ['Validada', 'Cancelacion Validada'].includes(sesion.estado);
+
+                let badgeClass = '';
+                let actionHtml = '';
+                let statusText = sesion.estado;
+
+                if (isNotStarted) {
+                    badgeClass = 'bg-gray-100 text-gray-800 border-gray-300';
+                    actionHtml = `<span class="text-xs text-gray-500">Esperando al tutor...</span>`;
+                } else if (isFinished) {
+                    badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                    statusText = 'Por Validar';
+                    actionHtml = `<button id="btn-validar-${sesion.id}" onclick="validarSesion(${sesion.id}, false)" class="flex items-center px-3 py-1 rounded text-white bg-[#69B22E] hover:opacity-90 text-sm"><i data-lucide="check-circle" class="h-4 w-4 mr-2"></i>Validar</button>`;
+                } else if (isCancelled) {
+                    badgeClass = 'bg-red-100 text-red-800 border-red-300';
+                    statusText = 'Cancelada (Pendiente)';
+                    actionHtml = `<button id="btn-validar-${sesion.id}" onclick="validarSesion(${sesion.id}, true)" class="flex items-center px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-sm shadow-sm"><i data-lucide="check-circle" class="h-4 w-4 mr-2"></i>Validar Cancelación</button>`;
+                } else if (isValidated) {
+                    badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                    statusText = sesion.estado === 'Cancelacion Validada' ? 'Cancelación Validada' : 'Validada';
+                    actionHtml = `<span class="text-sm text-green-600 flex items-center"><i data-lucide="check-double" class="h-4 w-4 mr-2"></i>Validada por ti</span>`;
+                }
+
+                let descHtml = `<p class="text-gray-800">${sesion.descripcion}</p>`;
+                if (sesion.motivo_cancelacion) {
+                    descHtml += `<div class="mt-1 p-2 bg-red-50 border border-red-100 rounded text-xs text-red-700"><strong>Motivo de cancelación:</strong> ${sesion.motivo_cancelacion}</div>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 ${isCancelled ? 'bg-red-50/40' : ''}">
+                        <td class="px-4 py-3 font-medium flex flex-col gap-1">
+                            <span class="flex items-center gap-2"><i data-lucide="calendar" class="h-4 w-4 text-gray-400"></i> ${sesion.fecha}</span>
+                            <span class="text-xs text-gray-500 ml-6">${sesion.hora} hrs</span>
+                        </td>
+                        <td class="px-4 py-3 max-w-md">${descHtml}</td>
+                        <td class="px-4 py-3 text-gray-600">Docente Tutor</td>
+                        <td class="px-4 py-3"><span class="px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">${statusText}</span></td>
+                        <td class="px-4 py-3">${actionHtml}</td>
+                    </tr>`;
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Ejecutar al iniciar
+        cargarSesiones();
+    </script>
+</body>
+</html>

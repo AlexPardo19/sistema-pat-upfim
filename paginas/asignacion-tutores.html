@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación de Tutores - Sistema PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 flex flex-col">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-10 w-auto" />
+                    <span class="font-semibold text-[#7B5936]">Sistema PAT</span>
+                </div>
+                <button onclick="toggleMenu()" class="lg:hidden">
+                    <i data-lucide="x" class="h-6 w-6 text-gray-600"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="asignacion-tutores.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="user-plus" class="h-5 w-5"></i>
+                    <span>Asignación de Tutores</span>
+                </a>
+                <a href="alta-docentes.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="users" class="h-5 w-5"></i>
+                    <span>Alta de Docentes</span>
+                </a>
+                <a href="consultar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="file-check-2" class="h-5 w-5"></i>
+                    <span>Consultar PATs</span>
+                </a>
+                <a href="descargar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="download" class="h-5 w-5"></i>
+                    <span>Descargar PATs</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="log-out" class="h-5 w-5"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="mobile-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleMenu()" class="lg:hidden">
+                            <i data-lucide="menu" class="h-6 w-6 text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl text-[#7B5936]">Asignación de Tutores</h1>
+                            <p class="text-sm text-gray-500 mt-1">Gestiona la asignación a grupos académicos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-right hidden sm:block">
+                            <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                            <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
+                        </div>
+                        <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                            <span id="user-avatar-letter">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-auto p-6">
+                <div class="max-w-4xl mx-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="p-6">
+                        <form id="asignacion-form" class="space-y-6 max-w-2xl">
+                            <div class="space-y-2">
+                                <label for="tutor-select" class="text-sm font-medium text-[#7B5936]">Seleccionar Tutor</label>
+                                <select id="tutor-select" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]">
+                                    <option value="" disabled selected>Selecciona un tutor</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="group-select" class="text-sm font-medium text-[#7B5936]">Seleccionar Grupo</label>
+                                <select id="group-select" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]">
+                                    <option value="" disabled selected>Selecciona un grupo</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="periodo" class="text-sm font-medium text-[#7B5936]">Período Académico</label>
+                                <input id="periodo" placeholder="Ej: 2024-1" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]" />
+                            </div>
+
+                            <button type="submit" class="h-10 px-4 py-2 rounded-md text-white hover:opacity-90 bg-[#69B22E]">
+                                Asignar Tutor
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+        // Lógica específica de esta pantalla
+        const tutores = [
+            { id: 1, name: 'Dr. María González' },
+            { id: 2, name: 'Mtro. Carlos Ramírez' },
+            { id: 3, name: 'Dra. Ana Martínez' }
+        ];
+        const grupos = [
+            { id: 1, code: 'ING-2024-A', name: 'Ingeniería 2024-A' },
+            { id: 2, code: 'ADM-2024-B', name: 'Administración 2024-B' }
+        ];
+
+        const tutorSelect = document.getElementById('tutor-select');
+        tutores.forEach(t => tutorSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`);
+
+        const groupSelect = document.getElementById('group-select');
+        grupos.forEach(g => groupSelect.innerHTML += `<option value="${g.id}">${g.code} - ${g.name}</option>`);
+
+        document.getElementById('asignacion-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Tutor asignado exitosamente');
+            this.reset();
+        });
+    </script>
+</body>
+</html>

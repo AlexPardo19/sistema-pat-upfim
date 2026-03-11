@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar PATs - Sistema PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 flex flex-col">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-10 w-auto" />
+                    <span class="font-semibold text-[#7B5936]">Sistema PAT</span>
+                </div>
+                <button onclick="toggleMenu()" class="lg:hidden">
+                    <i data-lucide="x" class="h-6 w-6 text-gray-600"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="asignacion-tutores.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="user-plus" class="h-5 w-5"></i>
+                    <span>Asignación de Tutores</span>
+                </a>
+                <a href="alta-docentes.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="users" class="h-5 w-5"></i>
+                    <span>Alta de Docentes</span>
+                </a>
+                <a href="consultar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="file-check-2" class="h-5 w-5"></i>
+                    <span>Consultar PATs</span>
+                </a>
+                <a href="descargar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="download" class="h-5 w-5"></i>
+                    <span>Descargar PATs</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="log-out" class="h-5 w-5"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="mobile-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleMenu()" class="lg:hidden">
+                            <i data-lucide="menu" class="h-6 w-6 text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl text-[#7B5936]">Consultar PATs Validados</h1>
+                            <p class="text-sm text-gray-500 mt-1">Revisa los planes de acción tutorial aprobados</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-right hidden sm:block">
+                            <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                            <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
+                        </div>
+                        <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                            <span id="user-avatar-letter">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-auto p-6">
+                <div class="max-w-6xl mx-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg text-[#7B5936]" id="titulo-tabla">PATs Validados</h2>
+                            </div>
+                            <div class="relative">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"></i>
+                                <input type="text" placeholder="Buscar..." class="pl-9 h-10 w-full md:w-64 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto p-6">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-4 py-3">Tutor</th>
+                                    <th class="px-4 py-3">Grupo</th>
+                                    <th class="px-4 py-3">Fecha</th>
+                                    <th class="px-4 py-3">Estado</th>
+                                    <th class="px-4 py-3">Validado Por</th>
+                                    <th class="px-4 py-3">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pats-tbody" class="divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/layout.js"></script>
+    <script>
+        const validatedPATs = [
+            { id: 1, tutorName: 'Dr. Patricia López', groupId: 'ING-2023-A', date: '2025-12-10', status: 'Validado', validatedBy: 'Director González' },
+            { id: 2, tutorName: 'Mtro. Fernando Ruiz', groupId: 'ADM-2023-B', date: '2025-12-15', status: 'Validado', validatedBy: 'Director González' },
+            { id: 3, tutorName: 'Dra. Isabel Torres', groupId: 'DER-2023-C', date: '2025-12-20', status: 'Validado', validatedBy: 'Director González' },
+        ];
+
+        document.getElementById('titulo-tabla').innerText = `PATs Validados (${validatedPATs.length})`;
+        const tbody = document.getElementById('pats-tbody');
+
+        validatedPATs.forEach(pat => {
+            const fechaFmt = new Date(pat.date + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+            
+            tbody.innerHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">${pat.tutorName}</td>
+                    <td class="px-4 py-3">${pat.groupId}</td>
+                    <td class="px-4 py-3">${fechaFmt}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-green-100 text-green-800 border-green-300">${pat.status}</span>
+                    </td>
+                    <td class="px-4 py-3">${pat.validatedBy}</td>
+                    <td class="px-4 py-3">
+                        <a href="pat-detail.html?id=${pat.id}" class="inline-flex items-center justify-center px-3 py-1 text-sm border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white transition-colors">
+                            Ver Detalles
+                        </a>
+                    </td>
+                </tr>
+            `;
+        });
+    </script>
+</body>
+</html>
