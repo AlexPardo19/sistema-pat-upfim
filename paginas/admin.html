@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración del Sistema - PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white transition-transform transform -translate-x-full lg:translate-x-0 lg:static flex flex-col">
+        <div class="p-6 border-b border-gray-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 bg-[#69B22E] rounded-md flex items-center justify-center">
+                    <i data-lucide="shield" class="h-5 w-5 text-white"></i>
+                </div>
+                <span class="font-semibold text-white tracking-wide">Admin PAT</span>
+            </div>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#69B22E] text-white transition-colors">
+                <i data-lucide="users" class="h-5 w-5"></i>
+                <span>Gestión de Credenciales</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+                <i data-lucide="log-out" class="h-5 w-5"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-[#7B5936]">Alta de Usuarios del Sistema</h1>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-700">Super Administrador</span>
+                <div class="h-10 w-10 rounded-full bg-gray-900 text-[#69B22E] flex items-center justify-center">
+                    <i data-lucide="shield-check" class="h-5 w-5"></i>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-auto p-6">
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="md:col-span-1 bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-fit">
+                    <h3 class="text-lg font-medium text-[#7B5936] mb-4">Nueva Credencial</h3>
+                    <form id="form-admin" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Nombre(s)</label>
+                            <input type="text" id="nombre" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Apellidos</label>
+                            <input type="text" id="apellidos" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Correo Electrónico (@upfim.edu.mx)</label>
+                            <input type="email" id="email" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Rol del Sistema</label>
+                            <select id="rol" required onchange="toggleGrupoInput()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                                <option value="" disabled selected>Selecciona un rol...</option>
+                                <option value="director-tutorias">Director de Tutorías</option>
+                                <option value="director-carrera">Director de Carrera</option>
+                                <option value="docente-tutor">Docente Tutor</option>
+                                <option value="jefe-grupo">Jefe de Grupo (Estudiante)</option>
+                            </select>
+                        </div>
+                        <div id="campo-grupo" class="hidden bg-blue-50 p-3 rounded-md border border-blue-100">
+                            <label class="block text-xs font-medium text-blue-800 mb-1">Grupo Asignado (Solo Jefes)</label>
+                            <input type="text" id="grupo" placeholder="Ej: 1TIG3" class="w-full border border-blue-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-opacity text-sm font-medium mt-2">
+                            Crear Cuenta
+                        </button>
+                    </form>
+                </div>
+
+                <div class="md:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden h-fit">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h3 class="font-medium text-[#7B5936]">Usuarios Registrados</h3>
+                    </div>
+                    <div class="overflow-x-auto p-4">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-4 py-3">Usuario</th>
+                                    <th class="px-4 py-3">Rol</th>
+                                    <th class="px-4 py-3">Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-tbody" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        function toggleGrupoInput() {
+            const rol = document.getElementById('rol').value;
+            const campoGrupo = document.getElementById('campo-grupo');
+            const inputGrupo = document.getElementById('grupo');
+            
+            if (rol === 'jefe-grupo') {
+                campoGrupo.classList.remove('hidden');
+                inputGrupo.setAttribute('required', 'true');
+            } else {
+                campoGrupo.classList.add('hidden');
+                inputGrupo.removeAttribute('required');
+                inputGrupo.value = '';
+            }
+        }
+
+        // --- MOCK LOGIC PARA LA VISTA ---
+        let usuarios = [
+            { nombre: 'Alicia León', email: 'tutor@upfim.edu.mx', rol: 'docente-tutor', extra: 'ITII' },
+            { nombre: 'Alyzonn Reyes', email: 'jefe.grupo@upfim.edu.mx', rol: 'jefe-grupo', extra: 'Grupo: 1TIG3' }
+        ];
+
+        function renderUsuarios() {
+            const tbody = document.getElementById('usuarios-tbody');
+            tbody.innerHTML = '';
+            
+            usuarios.forEach(u => {
+                let badge = '';
+                if(u.rol === 'docente-tutor') badge = 'bg-blue-100 text-blue-800';
+                else if(u.rol === 'jefe-grupo') badge = 'bg-purple-100 text-purple-800';
+                else badge = 'bg-gray-100 text-gray-800';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <p class="font-medium text-gray-900">${u.nombre}</p>
+                            <p class="text-xs text-gray-500">${u.email}</p>
+                        </td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${badge}">${u.rol.replace('-', ' ')}</span></td>
+                        <td class="px-4 py-3 text-xs text-gray-600">${u.extra || '-'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('form-admin').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const rol = document.getElementById('rol').value;
+            const grupo = document.getElementById('grupo').value;
+            
+            usuarios.unshift({ nombre: nombre, email: email, rol: rol, extra: grupo ? `Grupo: ${grupo}` : '' });
+            renderUsuarios();
+            this.reset();
+            toggleGrupoInput();
+            alert(`Cuenta de ${rol} creada. La contraseña temporal es: admin123`);
+        });
+
+        renderUsuarios();
+    </script>
+</body>
+</html>

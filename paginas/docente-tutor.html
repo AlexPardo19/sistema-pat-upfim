@@ -5,382 +5,573 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docente Tutor - Sistema PAT</title>
     <link rel="stylesheet" href="../css/styles.css">
+    
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-<body class="min-h-screen bg-gray-50">
+<body class="min-h-screen bg-gray-50 relative overflow-x-hidden">
 
     <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
-                    <div class="border-l border-gray-300 pl-4">
-                        <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
-                        <p class="text-sm text-gray-600">Portal del Docente Tutor</p>
-                    </div>
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
+                <div class="border-l border-gray-300 pl-4">
+                    <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
+                    <p class="text-sm text-gray-600">Portal del Docente Tutor</p>
                 </div>
-
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Docente Tutor</p>
-                        <p id="user-email-display" class="text-xs text-gray-500">tutor@upfim.edu.mx</p>
-                    </div>
-                    <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
-                        <i data-lucide="user" class="h-6 w-6"></i>
-                    </div>
-                    <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
-                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
-                    </button>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                    <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
                 </div>
+                <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                    <i data-lucide="user-circle" class="h-6 w-6"></i>
+                </div>
+                <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
+                    <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
+                </button>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-8">
-        <div class="space-y-6">
+        <div class="max-w-6xl mx-auto space-y-6">
             
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-2xl text-[#7B5936]">Dashboard del Docente Tutor</h2>
-                    <p class="text-sm text-gray-500 mt-1">Ciclo Escolar 2025–2026 — Grupo: ISC-5A</p>
+                    <h1 class="text-3xl text-[#7B5936]">Mi Espacio Tutorial</h1>
+                    <p class="text-sm text-gray-500 mt-1">Gestiona tu grupo actual y consulta tu historial de PATs</p>
                 </div>
-                <div class="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200 self-start">
-                    <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span class="text-sm text-green-700">Sesión activa</span>
-                </div>
+                <button onclick="reiniciarPrueba()" class="text-xs text-red-500 border border-red-500 px-2 py-1 rounded hover:bg-red-50">Reiniciar Simulación PAT</button>
             </div>
 
             <div class="bg-gray-100 border border-gray-200 p-1 rounded-xl w-full sm:w-max flex">
-                <button onclick="switchTab('agenda')" id="tab-btn-agenda" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all">
-                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i> Agenda y PAT
+                <button onclick="switchTab('actual')" id="tab-btn-actual" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all">
+                    <i data-lucide="book-open" class="h-4 w-4"></i> Asignación Actual
                 </button>
                 <button onclick="switchTab('historial')" id="tab-btn-historial" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
-                    <i data-lucide="history" class="h-4 w-4"></i> Historial de PATs
+                    <i data-lucide="history" class="h-4 w-4"></i> Mi Historial PAT
                 </button>
             </div>
 
-            <div id="tab-agenda" class="mt-5 block">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <div class="lg:col-span-1 space-y-6">
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i data-lucide="book-open" class="h-5 w-5 text-[#7B5936]"></i>
-                                <h3 class="font-medium text-[#7B5936]">Mi Documento PAT</h3>
-                            </div>
-                            <div class="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200 mb-4">
-                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
-                                <span class="text-sm text-yellow-800">Borrador Local</span>
-                            </div>
-                            <div class="space-y-2.5">
-                                <button class="w-full flex items-center justify-center px-4 py-2 border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white transition-colors">
-                                    <i data-lucide="file-text" class="h-4 w-4 mr-2"></i> Continuar Edición
-                                </button>
-                                <button class="w-full flex items-center justify-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">
-                                    <i data-lucide="send" class="h-4 w-4 mr-2"></i> Enviar a Revisión
-                                </button>
-                            </div>
+            <div id="tab-actual" class="mt-5 block space-y-6">
+                
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-blue-50 text-blue-700 border-blue-200 mb-2 inline-block">Cuatrimestre en Curso</span>
+                            <h2 class="text-2xl font-bold text-gray-900">Grupo Asignado: <span id="info-grupo" class="text-[#69B22E]">Cargando...</span></h2>
+                            <p class="text-gray-600 mt-1" id="info-carrera">Cargando programa...</p>
                         </div>
-
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i data-lucide="download" class="h-5 w-5 text-[#7B5936]"></i>
-                                <h3 class="font-medium text-[#7B5936]">Generar Evidencias</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-4">Descarga un reporte PDF con todas las sesiones realizadas y validadas.</p>
-                            <button onclick="alert('Descargando reporte PDF...')" class="w-full flex items-center justify-center px-4 py-2 bg-[#7B5936] text-white rounded-md hover:opacity-90">
-                                <i data-lucide="download" class="h-4 w-4 mr-2"></i> Descargar Reporte
-                            </button>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">Periodo</p>
+                            <p class="font-medium text-[#7B5936]" id="info-periodo">Cargando...</p>
                         </div>
                     </div>
 
-                    <div class="lg:col-span-2">
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm h-full">
-                            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                                <h3 class="font-medium text-[#7B5936]">Agenda de Sesiones</h3>
-                                <button onclick="abrirModal('modal-programar')" class="flex items-center px-3 py-1.5 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm">
-                                    <i data-lucide="calendar-plus" class="h-4 w-4 mr-2"></i> Programar Sesión
-                                </button>
+                    <div id="estado-pat-container" class="border-t border-gray-100 pt-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                        </div>
+                </div>
+
+                <div id="contenedor-pat" class="hidden space-y-6">
+                    
+                    <div id="panel-datos-base" class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                        <h3 class="font-medium text-[#7B5936] mb-4">1. Datos del Grupo</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total Hombres (H)</label>
+                                <input type="number" id="input-h" min="0" value="16" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#69B22E] outline-none">
                             </div>
-                            <div class="overflow-x-auto p-6">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
-                                        <tr>
-                                            <th class="px-4 py-3">Fecha y Hora</th>
-                                            <th class="px-4 py-3">Descripción</th>
-                                            <th class="px-4 py-3">Estado</th>
-                                            <th class="px-4 py-3">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="sesiones-tbody" class="divide-y divide-gray-100">
-                                        </tbody>
-                                </table>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total Mujeres (M)</label>
+                                <input type="number" id="input-m" min="0" value="10" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#69B22E] outline-none">
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cargar Plantilla Oficial</label>
+                                <div class="flex gap-2">
+                                    <button onclick="cargarPlantilla('oficial')" class="flex-1 px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm hover:bg-blue-100 transition-colors font-medium shadow-sm"><i data-lucide="download-cloud" class="h-4 w-4 inline mr-1"></i> Obtener de Dirección</button>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios Iniciales</label>
+                                <textarea id="input-comentarios" rows="2" placeholder="Ej: Se detecta división en el grupo..." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#69B22E] outline-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row justify-between md:items-center bg-gray-50 gap-4">
+                            <h3 class="font-medium text-[#7B5936]" id="titulo-tabla">2. Planificación de las 15 Sesiones</h3>
+                            <button id="btn-agregar-sesion" onclick="prepararModalSesion()" class="flex items-center px-4 py-2 border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white transition-colors text-sm">
+                                <i data-lucide="plus" class="h-4 w-4 mr-2"></i> Añadir Sesión Manualmente
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-[#7B5936] uppercase bg-white border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-4 py-3 w-16 text-center">No.</th>
+                                        <th class="px-4 py-3 min-w-[200px]">Temática a Abordar</th>
+                                        <th class="px-4 py-3 min-w-[200px]" id="th-dinamico-objetivo">Objetivo y Resultados Esperados</th>
+                                        <th id="th-dinamico-1" class="px-4 py-3">...</th>
+                                        <th id="th-dinamico-2" class="px-4 py-3 w-32 text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sesiones-tbody" class="divide-y divide-gray-100">
+                                    </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="tab-historial" class="mt-5 hidden space-y-6">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 border border-gray-200 rounded-xl shadow-sm">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i data-lucide="history" class="h-4 w-4 text-[#7B5936]"></i>
-                            <span class="text-xs text-gray-500">Total PATs</span>
-                        </div>
-                        <p class="text-2xl text-[#7B5936]">5</p>
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Filtrar por Año</label>
+                        <select id="filtro-anio" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] min-w-[120px]">
+                            <option value="Todos">Todos</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                        </select>
                     </div>
-                    <div class="bg-white p-5 border border-gray-200 rounded-xl shadow-sm">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i data-lucide="check-circle-2" class="h-4 w-4 text-green-600"></i>
-                            <span class="text-xs text-gray-500">Aprobados</span>
-                        </div>
-                        <p class="text-2xl text-green-700">3</p>
-                    </div>
+                    <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium border border-gray-300">
+                        <i data-lucide="search" class="h-4 w-4 inline mr-1"></i> Buscar
+                    </button>
                 </div>
-                <div id="historial-container"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="historial-container"></div>
             </div>
         </div>
     </main>
 
-    <div id="modal-programar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg font-medium text-[#7B5936] mb-4">Programar Nueva Sesión</h3>
-            <form id="form-programar">
-                <div class="space-y-4">
+    <div id="modal-sesion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h3 id="modal-sesion-titulo" class="text-lg font-medium text-[#7B5936] mb-4">Gestionar Sesión</h3>
+            <form id="form-sesion" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                        <input type="date" id="input-fecha" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Número de Sesión</label>
+                        <input type="number" id="input-num" readonly class="w-full border border-gray-300 bg-gray-100 text-gray-500 font-bold rounded-md px-3 py-2 focus:outline-none cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
-                        <input type="time" id="input-hora" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                        <input type="text" id="input-desc" required placeholder="Ej: Revisión de calificaciones" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Corte Parcial</label>
+                        <select id="input-corte" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                        </select>
                     </div>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Temática a Abordar</label>
+                    <textarea id="input-tematica" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Objetivo</label>
+                    <textarea id="input-objetivo" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Resultados Esperados</label>
+                    <textarea id="input-resultados" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
                 <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" onclick="cerrarModal('modal-programar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">Guardar Sesión</button>
+                    <button type="button" onclick="cerrarModal('modal-sesion')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 font-medium">Guardar Sesión en PAT</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modal-cancelar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg font-medium text-red-600 mb-2">Cancelar Sesión</h3>
-            <p class="text-sm text-gray-600 mb-4">¿Estás seguro de que deseas cancelar esta sesión? Deberás proporcionar un motivo.</p>
-            <form id="form-cancelar">
+    <div id="modal-programar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-lg font-medium text-[#7B5936] mb-4">Programar Sesión <span id="prog-num" class="font-bold"></span></h3>
+            <form id="form-programar" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de cancelación</label>
-                    <textarea id="input-motivo" required rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-red-500"></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de impartición</label>
+                    <input type="date" id="input-fecha" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
                 </div>
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" onclick="cerrarModal('modal-cancelar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Volver</button>
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar Cancelación</button>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                    <input type="time" id="input-hora" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                </div>
+                <div class="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="cerrarModal('modal-programar')" class="px-4 py-2 border rounded-md text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 shadow-sm"><i data-lucide="calendar-plus" class="h-4 w-4 inline mr-1"></i> Agendar Clase</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-finalizar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h3 class="text-xl font-medium text-[#7B5936] mb-1">Registrar Anotaciones - Sesión <span id="fin-num-sesion"></span></h3>
+            <p class="text-sm text-gray-500 mb-4 pb-3 border-b border-gray-200" id="fin-tematica"></p>
+            <form id="form-finalizar" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Resultados Obtenidos y Observaciones <span class="text-red-500">*</span></label>
+                    <textarea id="input-resultados-obtenidos" rows="4" required placeholder="Describe los avances, asistencia, o situaciones del grupo..." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Canalizaciones Requeridas</label>
+                    <div class="flex flex-wrap gap-2" id="contenedor-pildoras">
+                        <button type="button" onclick="togglePildora(this, 'B')" class="pildora px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-600 transition-colors">Becas (B)</button>
+                        <button type="button" onclick="togglePildora(this, 'M')" class="pildora px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-600 transition-colors">Médico (M)</button>
+                        <button type="button" onclick="togglePildora(this, 'PS')" class="pildora px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-600 transition-colors">Psicología (PS)</button>
+                        <button type="button" onclick="togglePildora(this, 'TS')" class="pildora px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-600 transition-colors">Trabajo Social (TS)</button>
+                        <button type="button" onclick="togglePildora(this, 'JD')" class="pildora px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-600 transition-colors">Jefe de División (JD)</button>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-2 text-xs text-yellow-800 mt-2">
+                    <i data-lucide="alert-triangle" class="h-4 w-4 flex-shrink-0 mt-0.5"></i>
+                    <p>Al guardar, esta sesión pasará a la validación de tu Jefe de Grupo y podrá ser auditada por las Direcciones.</p>
+                </div>
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="cerrarModal('modal-finalizar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-[#69B22E] text-white rounded-md font-medium shadow-sm">Registrar Ejecución</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script src="../js/auth.js"></script>
-    <script src="../js/layout.js"></script>
     <script>
-        // --- TABS LOGIC ---
         function switchTab(tabId) {
-            document.getElementById('tab-agenda').classList.add('hidden');
+            document.getElementById('tab-actual').classList.add('hidden');
             document.getElementById('tab-historial').classList.add('hidden');
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-            const btnAgenda = document.getElementById('tab-btn-agenda');
-            const btnHistorial = document.getElementById('tab-btn-historial');
-
-            if (tabId === 'agenda') {
-                btnAgenda.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
-                btnHistorial.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
-            } else {
-                btnAgenda.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
-                btnHistorial.className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
-            }
+            document.getElementById('tab-btn-actual').className = tabId === 'actual' ? "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all" : "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
+            document.getElementById('tab-btn-historial').className = tabId === 'historial' ? "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all" : "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
         }
 
-        // --- MODALS LOGIC ---
-        let sesionAfectadaId = null;
+        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        function abrirModal(id, sesionId = null) {
-            document.getElementById(id).classList.remove('hidden');
-            if(sesionId) sesionAfectadaId = sesionId;
-        }
+        // --- SISTEMA DE SINCRONIZACIÓN Y VARIABLES GLOBALES ---
+        let estadoPat = localStorage.getItem('estadoPat') || 'No Creado'; 
+        let sesionesGrupo = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+        let modoEdicionSesion = null; 
+        let canalizacionesSeleccionadas = [];
 
-        function cerrarModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            sesionAfectadaId = null;
-        }
+        let asignacion = JSON.parse(localStorage.getItem('asignacionActiva')) || {
+            programa: "Ingeniería en Tecnologías de la Información", tutor: "Alicia León Martínez", periodo: "SEPT-DIC 2026", grupo: "1G1"
+        };
 
-       // --- SESIONES LOGIC ---
-        let sesiones = [];
-
-        async function cargarSesiones() {
-            try {
-                const res = await fetch('http://localhost:5000/api/sesiones');
-                const data = await res.json();
-                if (data.success) {
-                    sesiones = data.sesiones;
-                    renderSesiones();
-                }
-            } catch (error) {
-                console.error("Error cargando sesiones:", error);
-            }
-        }
-
-        function renderSesiones() {
-            const tbody = document.getElementById('sesiones-tbody');
-            tbody.innerHTML = '';
-            
-            sesiones.forEach(sesion => {
-                let badge = '', actions = '';
-                
-                if (sesion.estado === 'Programada') {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-blue-100 text-blue-800 border-blue-300">Programada</span>`;
-                    actions = `
-                        <button onclick="cambiarEstado(${sesion.id}, 'En Curso')" class="text-white h-7 w-7 rounded bg-[#69B22E] hover:opacity-90 inline-flex items-center justify-center mr-2" title="Iniciar"><i data-lucide="play" class="h-3 w-3"></i></button>
-                        <button onclick="abrirModal('modal-cancelar', ${sesion.id})" class="text-white h-7 w-7 rounded bg-red-500 hover:bg-red-600 inline-flex items-center justify-center" title="Cancelar"><i data-lucide="x" class="h-3 w-3"></i></button>
-                    `;
-                } else if (sesion.estado === 'En Curso') {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-yellow-100 text-yellow-800 border-yellow-300">En Curso</span>`;
-                    // OJO AQUÍ: Ahora el tutor la pasa a 'Finalizada', no a 'Validada'
-                    actions = `<button onclick="cambiarEstado(${sesion.id}, 'Finalizada')" class="text-xs px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Finalizar</button>`;
-                } else if (sesion.estado === 'Finalizada') {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-indigo-100 text-indigo-800 border-indigo-300">Finalizada</span>`;
-                    actions = `<span class="text-xs text-indigo-700 flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> Esperando al Jefe</span>`;
-                } else if (sesion.estado === 'Validada') {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-green-100 text-green-800 border-green-300">Validada</span>`;
-                    actions = `<span class="text-xs text-green-700 flex items-center gap-1"><i data-lucide="check-double" class="h-4 w-4"></i> Aprobada por Jefe</span>`;
-                } else if (sesion.estado === 'Cancelada' || sesion.estado === 'Cancelacion Validada') {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs border bg-red-100 text-red-800 border-red-300">Cancelada</span>`;
-                    actions = `<span class="text-xs text-red-700 flex items-center gap-1"><i data-lucide="info" class="h-3 w-3"></i> ${sesion.estado === 'Cancelacion Validada' ? 'Revisada por Jefe' : 'Pendiente revisión'}</span>`;
-                }
-
-                let descHtml = `<p class="text-gray-700 font-medium">${sesion.descripcion}</p>`;
-                if (sesion.motivo_cancelacion) {
-                    descHtml += `<p class="text-xs text-red-600 mt-1"><strong>Motivo:</strong> ${sesion.motivo_cancelacion}</p>`;
-                }
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 ${sesion.estado.includes('Cancelada') ? 'bg-red-50/30' : ''}">
-                        <td class="px-4 py-3 whitespace-nowrap"><p class="text-sm">${sesion.fecha}</p><p class="text-xs text-gray-500">${sesion.hora} hrs</p></td>
-                        <td class="px-4 py-3">${descHtml}</td>
-                        <td class="px-4 py-3">${badge}</td>
-                        <td class="px-4 py-3 flex items-center h-full">${actions}</td>
-                    </tr>
-                `;
-            });
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-        }
-
-        // Eventos de los formularios (Conectados al Backend)
-        document.getElementById('form-programar').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const data = {
-                fecha: document.getElementById('input-fecha').value,
-                hora: document.getElementById('input-hora').value,
-                descripcion: document.getElementById('input-desc').value
-            };
-            
-            await fetch('http://localhost:5000/api/sesiones', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            
-            cargarSesiones();
-            cerrarModal('modal-programar');
-            this.reset();
-        });
-
-        document.getElementById('form-cancelar').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const motivo = document.getElementById('input-motivo').value;
-            
-            await fetch(`http://localhost:5000/api/sesiones/${sesionAfectadaId}/estado`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: 'Cancelada', motivo: motivo })
-            });
-            
-            cargarSesiones();
-            cerrarModal('modal-cancelar');
-            this.reset();
-        });
-
-        async function cambiarEstado(id, nuevoEstado) {
-            await fetch(`http://localhost:5000/api/sesiones/${id}/estado`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-            cargarSesiones();
-        }
-        // Bloquear fechas pasadas en el input de programar sesión
-        const fechaInput = document.getElementById('input-fecha');
-        if (fechaInput) {
-            // Obtenemos la fecha de hoy en formato YYYY-MM-DD
-            const hoy = new Date().toISOString().split('T')[0];
-            fechaInput.setAttribute('min', hoy);
-        }
-
-        // Cargamos los datos reales al abrir la página
-        cargarSesiones();
-        // --- HISTORIAL LOGIC ---
-        const historialData = [
-            { año: 2026, cuatrimestre: '1° Cuatrimestre', grupo: 'ISC-5A', version: 'v0.2', estado: 'Borrador' },
-            { año: 2025, cuatrimestre: '3° Cuatrimestre', grupo: 'ISC-5A', version: 'v1.2', estado: 'Aprobado' }
+        // LA PLANTILLA OFICIAL COMPLETA (15 SESIONES DE LEY)
+        const plantillaOficial = [
+            { num: 1, corte: "I", tematica: "Bienvenida y Reglamento Escolar", objetivo: "Presentarse y dar normas", resultados_esperados: "Conocer el plan de trabajo", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 2, corte: "I", tematica: "Aplicación de Diagnóstico", objetivo: "Conocer al grupo", resultados_esperados: "Alumnos evaluados", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 3, corte: "I", tematica: "Identificar estudiantes en riesgo", objetivo: "Detectar rezago", resultados_esperados: "Listado de alumnos", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 4, corte: "I", tematica: "Reforzamiento de valores", objetivo: "Fomentar respeto", resultados_esperados: "Mejor convivencia", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 5, corte: "I", tematica: "Resultados del 1er Parcial", objetivo: "Analizar calificaciones", resultados_esperados: "Estrategias de mejora", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 6, corte: "II", tematica: "Técnicas para el manejo del estrés", objetivo: "Brindar herramientas", resultados_esperados: "Reducción de ansiedad", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 7, corte: "II", tematica: "Hábitos de estudio efectivos", objetivo: "Mejorar aprendizaje", resultados_esperados: "Aumento de retención", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 8, corte: "II", tematica: "Trabajo en equipo", objetivo: "Fomentar colaboración", resultados_esperados: "Grupos integrados", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 9, corte: "II", tematica: "Prevención del acoso escolar", objetivo: "Sensibilizar al grupo", resultados_esperados: "Cero incidencias", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 10, corte: "II", tematica: "Resultados del 2do Parcial", objetivo: "Revisar avance", resultados_esperados: "Aumentar aprobación", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 11, corte: "III", tematica: "Orientación Profesional", objetivo: "Enfocar al alumno", resultados_esperados: "Claridad vocacional", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 12, corte: "III", tematica: "Importancia del Servicio Social", objetivo: "Informar requisitos", resultados_esperados: "Trámites a tiempo", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 13, corte: "III", tematica: "Salud Mental y Autocuidado", objetivo: "Promover bienestar", resultados_esperados: "Alumnos sanos", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 14, corte: "III", tematica: "Cierre de Cuatrimestre", objetivo: "Retroalimentación final", resultados_esperados: "Conclusiones claras", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" },
+            { num: 15, corte: "III", tematica: "Resultados Finales", objetivo: "Entrega de calificaciones", resultados_esperados: "Aprobación general", resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" }
         ];
 
-        function renderHistorial() {
-            const container = document.getElementById('historial-container');
-            const anios = [2026, 2025]; 
-            
-            anios.forEach(anio => {
-                const patsAnio = historialData.filter(p => p.año === anio);
-                let cardsHtml = patsAnio.map(pat => {
-                    let colorBadge = pat.estado === 'Aprobado' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                    return `
-                        <div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm mb-3 ml-2">
-                            <div class="flex items-center justify-between px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-9 w-9 rounded-lg flex items-center justify-center bg-[#7B593615]">
-                                        <i data-lucide="file-text" class="h-4 w-4 text-[#7B5936]"></i>
-                                    </div>
-                                    <div><p class="text-sm text-[#7B5936]">${pat.cuatrimestre} — ${pat.año}</p></div>
-                                </div>
-                                <span class="px-2 py-0.5 rounded-full text-xs border ${colorBadge}">${pat.estado}</span>
-                            </div>
-                        </div>`;
-                }).join('');
+        function guardarDatos() {
+            localStorage.setItem('patSincronizado', JSON.stringify(sesionesGrupo));
+            localStorage.setItem('estadoPat', estadoPat);
+        }
 
-                container.innerHTML += `
-                    <div class="mb-4">
-                        <button onclick="toggleAccordion('year-${anio}')" class="flex items-center gap-3 w-full text-left mb-3">
-                            <div class="h-8 w-8 rounded-lg flex items-center justify-center bg-[#69B22E]"><i data-lucide="chevron-down" class="h-4 w-4 text-white"></i></div>
-                            <h3 class="text-base text-[#7B5936]">${anio}</h3>
-                        </button>
-                        <div id="year-${anio}" class="space-y-3 block">${cardsHtml}</div>
-                    </div>`;
+        function reiniciarPrueba() {
+            if(confirm("¿Borrar todo y regresar el PAT a su estado 'No Creado'?")) {
+                localStorage.removeItem('patSincronizado');
+                localStorage.removeItem('estadoPat');
+                location.reload();
+            }
+        }
+
+        function renderAsignacion() {
+            document.getElementById('info-grupo').innerText = asignacion.grupo;
+            document.getElementById('info-carrera').innerText = asignacion.programa;
+            document.getElementById('info-periodo').innerText = asignacion.periodo;
+
+            const containerEstado = document.getElementById('estado-pat-container');
+            const contenedorPat = document.getElementById('contenedor-pat');
+            const panelDatos = document.getElementById('panel-datos-base');
+            const btnAgregar = document.getElementById('btn-agregar-sesion');
+            const tituloTabla = document.getElementById('titulo-tabla');
+            const thObj = document.getElementById('th-dinamico-objetivo');
+            const th1 = document.getElementById('th-dinamico-1');
+            const th2 = document.getElementById('th-dinamico-2');
+
+            if (estadoPat === 'No Creado') {
+                containerEstado.innerHTML = `<div class="flex items-center gap-3"><div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center"><i data-lucide="alert-circle" class="h-5 w-5 text-yellow-600"></i></div><div><p class="text-sm font-medium text-gray-900">Documento PAT no iniciado</p><p class="text-xs text-gray-500">Debes construir y enviar tu propuesta de 15 sesiones para iniciar.</p></div></div><button onclick="iniciarConstructor()" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm font-medium flex items-center shadow-sm"><i data-lucide="hammer" class="h-4 w-4 mr-2"></i> Iniciar Constructor PAT</button>`;
+                contenedorPat.classList.add('hidden');
+            } else if (estadoPat === 'Borrador') {
+                
+                // LÓGICA DE BOTÓN DE ENVÍO (SOLO SI TIENE 15)
+                let btnEnviarDisabled = sesionesGrupo.length === 15 ? '' : 'disabled class="px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm flex items-center"';
+                let btnEnviarActivo = sesionesGrupo.length === 15 ? 'class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium shadow-sm flex items-center"' : '';
+                
+                containerEstado.innerHTML = `<div class="flex items-center gap-3"><div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center"><i data-lucide="edit-3" class="h-5 w-5 text-blue-600"></i></div><div><p class="text-sm font-medium text-gray-900">Modo Constructor de Propuesta</p><p class="text-xs text-gray-500">Completa las 15 sesiones y envíalo para aprobación. Progreso: <strong class="text-[#7B5936]">${sesionesGrupo.length}/15</strong></p></div></div><button onclick="enviarPropuestaPAT()" ${btnEnviarDisabled} ${btnEnviarActivo}><i data-lucide="send" class="h-4 w-4 mr-2"></i> Enviar a Dirección</button>`;
+                contenedorPat.classList.remove('hidden'); panelDatos.classList.remove('hidden'); btnAgregar.classList.remove('hidden');
+                tituloTabla.innerText = "2. Planificación de las 15 Sesiones"; thObj.innerText = "Objetivo y Resultados Esperados"; th1.innerText = "Edición"; th2.innerText = "";
+                renderTablaSesiones();
+            } else if (estadoPat === 'Aprobado') {
+                containerEstado.innerHTML = `<div class="flex items-center gap-3"><div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center"><i data-lucide="check-circle" class="h-5 w-5 text-green-600"></i></div><div><p class="text-sm font-medium text-gray-900">PAT en Ejecución</p><p class="text-xs text-gray-500">Agenda tus clases, regístralas y espera la firma de tu Jefe de Grupo.</p></div></div>`;
+                contenedorPat.classList.remove('hidden'); panelDatos.classList.add('hidden'); btnAgregar.classList.add('hidden');
+                tituloTabla.innerText = "Registro y Anotaciones de las Sesiones"; thObj.innerText = "Objetivo y Resultados Esperados"; th1.innerText = "Resultados Obtenidos y Estado"; th2.innerText = "Acción Requerida";
+                renderTablaSesiones();
+            }
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function iniciarConstructor() { estadoPat = 'Borrador'; sesionesGrupo = []; guardarDatos(); renderAsignacion(); }
+        function cargarPlantilla(tipo) { sesionesGrupo = JSON.parse(JSON.stringify(plantillaOficial)); guardarDatos(); renderAsignacion(); }
+        
+        function prepararModalSesion() { 
+            if(sesionesGrupo.length >= 15) return alert("Límite máximo de 15 sesiones alcanzado."); 
+            modoEdicionSesion = null; 
+            document.getElementById('modal-sesion-titulo').innerText = "Añadir Nueva Sesión"; 
+            document.getElementById('form-sesion').reset(); 
+            document.getElementById('input-num').value = sesionesGrupo.length + 1; 
+            document.getElementById('input-corte').value = (sesionesGrupo.length + 1 > 10) ? "III" : (sesionesGrupo.length + 1 > 5) ? "II" : "I"; 
+            abrirModal('modal-sesion'); 
+        }
+
+        function prepararEdicionConstructor(num) { 
+            let sesion = sesionesGrupo.find(s => s.num === num); 
+            modoEdicionSesion = num; 
+            document.getElementById('modal-sesion-titulo').innerText = `Editar Sesión No. ${num}`; 
+            document.getElementById('input-num').value = sesion.num; 
+            document.getElementById('input-corte').value = sesion.corte; 
+            document.getElementById('input-tematica').value = sesion.tematica; 
+            document.getElementById('input-objetivo').value = sesion.objetivo; 
+            document.getElementById('input-resultados').value = sesion.resultados_esperados; 
+            abrirModal('modal-sesion'); 
+        }
+
+        document.getElementById('form-sesion').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            const data = { 
+                num: parseInt(document.getElementById('input-num').value), 
+                corte: document.getElementById('input-corte').value, 
+                tematica: document.getElementById('input-tematica').value, 
+                objetivo: document.getElementById('input-objetivo').value, 
+                resultados_esperados: document.getElementById('input-resultados').value, 
+                resultados_obtenidos: "", canalizaciones: [], estado: "Programada", fecha: "", hora: "", motivo: "" 
+            }; 
+            if (modoEdicionSesion) { 
+                const index = sesionesGrupo.findIndex(s => s.num === modoEdicionSesion); 
+                sesionesGrupo[index] = data; 
+            } else {
+                sesionesGrupo.push(data); 
+            }
+            guardarDatos(); cerrarModal('modal-sesion'); renderAsignacion(); 
+        });
+        
+        function enviarPropuestaPAT() {
+            // CANDADO DE SEGURIDAD ESTRICTO
+            if(sesionesGrupo.length !== 15) {
+                return alert("❌ No puedes enviar la propuesta. Por reglamento tu PAT debe contener exactamente las 15 sesiones del cuatrimestre.");
+            }
+
+            const h = document.getElementById('input-h').value; 
+            const m = document.getElementById('input-m').value; 
+            const obs = document.getElementById('input-comentarios').value;
+            if(!h || !m || !obs) return alert("Por favor, llena los Datos del Grupo (H/M y comentarios) antes de enviar.");
+            
+            asignacion.h = h; asignacion.m = m;
+            localStorage.setItem('asignacionActiva', JSON.stringify(asignacion));
+
+            if(confirm("¿Enviar propuesta a Dirección de Tutorías? Ya no podrás modificar las temáticas.")) {
+                alert("Propuesta enviada. (Simulación: Aprobada automáticamente). ¡Tu PAT ha pasado a Modo Ejecución!");
+                estadoPat = 'Aprobado'; guardarDatos(); renderAsignacion();
+            }
+        }
+
+        // --- FUNCIONES DE EJECUCIÓN (PROGRAMAR Y FINALIZAR) ---
+        function abrirProgramar(num) { 
+            modoEdicionSesion = num; 
+            document.getElementById('prog-num').innerText = num; 
+            document.getElementById('form-programar').reset();
+            abrirModal('modal-programar'); 
+        }
+
+        document.getElementById('form-programar').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            const sesion = sesionesGrupo.find(s => s.num === modoEdicionSesion); 
+            sesion.fecha = document.getElementById('input-fecha').value; 
+            sesion.hora = document.getElementById('input-hora').value; 
+            guardarDatos(); 
+            cerrarModal('modal-programar'); 
+            renderTablaSesiones(); 
+        });
+
+        function prepararFinalizar(num) { 
+            let sesion = sesionesGrupo.find(s => s.num === num); 
+            modoEdicionSesion = num; 
+            document.getElementById('fin-num-sesion').innerText = num; 
+            document.getElementById('fin-tematica').innerText = sesion.tematica; 
+            document.getElementById('form-finalizar').reset(); 
+            canalizacionesSeleccionadas = []; 
+            document.querySelectorAll('.pildora').forEach(p => { 
+                p.classList.remove('bg-blue-500', 'text-white', 'border-blue-500'); 
+                p.classList.add('text-gray-600', 'border-gray-300'); 
+            }); 
+            abrirModal('modal-finalizar'); 
+        }
+
+        function togglePildora(btn, codigo) { 
+            btn.classList.toggle('bg-blue-500'); btn.classList.toggle('text-white'); btn.classList.toggle('border-blue-500'); btn.classList.toggle('text-gray-600'); 
+            if (canalizacionesSeleccionadas.includes(codigo)) canalizacionesSeleccionadas = canalizacionesSeleccionadas.filter(c => c !== codigo); 
+            else canalizacionesSeleccionadas.push(codigo); 
+        }
+
+        document.getElementById('form-finalizar').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            let sesion = sesionesGrupo.find(s => s.num === modoEdicionSesion); 
+            sesion.resultados_obtenidos = document.getElementById('input-resultados-obtenidos').value; 
+            sesion.canalizaciones = [...canalizacionesSeleccionadas]; 
+            sesion.estado = 'Finalizada_Por_Tutor'; 
+            guardarDatos(); 
+            cerrarModal('modal-finalizar'); 
+            renderTablaSesiones(); 
+        });
+
+        function renderTablaSesiones() {
+            const tbody = document.getElementById('sesiones-tbody'); tbody.innerHTML = '';
+            if (sesionesGrupo.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No hay sesiones en tu propuesta. Carga una plantilla o añádelas manualmente.</td></tr>`;
+            
+            sesionesGrupo.forEach(s => {
+                let celdaDinamica1 = '', celdaDinamica2 = '';
+                
+                if (estadoPat === 'Borrador') {
+                    celdaDinamica1 = `<td class="px-4 py-3 text-center"><button onclick="prepararEdicionConstructor(${s.num})" class="text-[#7B5936] hover:text-[#69B22E] border border-gray-300 p-1.5 rounded bg-white shadow-sm"><i data-lucide="edit" class="h-4 w-4"></i></button></td>`;
+                    celdaDinamica2 = ``;
+                } else if (estadoPat === 'Aprobado') {
+                    let pills = s.canalizaciones && s.canalizaciones.length > 0 ? `<br><div class="mt-2 flex gap-1 flex-wrap">` + s.canalizaciones.map(c => `<span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded font-bold border border-blue-200">${c}</span>`).join('') + `</div>` : '';
+                    let infoFecha = s.fecha ? `<div class="mt-2 text-xs text-blue-600 font-bold bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100"><i data-lucide="calendar" class="h-3 w-3 inline mr-1"></i> ${s.fecha} - ${s.hora} hrs</div>` : '';
+                    let textObtenidos = s.resultados_obtenidos ? `<span class="italic text-gray-800">"${s.resultados_obtenidos}"</span>` : `<span class="text-xs text-gray-400">Sin registro aún</span>`;
+                    
+                    if (s.estado === 'Cancelada') {
+                        celdaDinamica1 = `<td class="px-4 py-3 border-l border-gray-100"><span class="text-xs text-red-600 font-bold">Cancelada por Jefe de Grupo:</span><br><span class="text-xs italic text-gray-600">"${s.motivo}"</span></td>`;
+                    } else {
+                        celdaDinamica1 = `<td class="px-4 py-3 border-l border-gray-100">${textObtenidos}${pills}${infoFecha}</td>`;
+                    }
+                    
+                    if (!s.fecha) {
+                        celdaDinamica2 = `<td class="px-4 py-3 text-center"><button onclick="abrirProgramar(${s.num})" class="text-xs w-full px-2 py-2 bg-blue-100 text-blue-700 font-medium rounded hover:bg-blue-200 transition-colors shadow-sm"><i data-lucide="calendar-plus" class="h-3 w-3 inline mr-1"></i> Agendar Clase</button></td>`;
+                    } else if (s.estado === 'Programada') {
+                        celdaDinamica2 = `<td class="px-4 py-3 text-center"><button onclick="prepararFinalizar(${s.num})" class="text-xs w-full px-2 py-2 bg-[#69B22E] text-white font-medium rounded hover:opacity-90 shadow-sm"><i data-lucide="pen-tool" class="h-3 w-3 inline mr-1"></i> Registrar Avance</button></td>`;
+                    } else if (s.estado === 'Finalizada_Por_Tutor') {
+                        celdaDinamica2 = `<td class="px-4 py-3 text-center"><div class="bg-yellow-50 p-2 rounded border border-yellow-200"><span class="text-[10px] text-yellow-700 font-bold block leading-tight"><i data-lucide="clock" class="h-4 w-4 mx-auto mb-1"></i> Esperando Firma<br>Jefe Grupo</span></div></td>`;
+                    } else if (s.estado === 'Validada') {
+                        celdaDinamica2 = `<td class="px-4 py-3 text-center"><div class="bg-green-50 p-2 rounded border border-green-200"><span class="text-[10px] text-green-700 font-bold block leading-tight"><i data-lucide="shield-check" class="h-4 w-4 mx-auto mb-1"></i> Firma Digital<br>Validada</span></div></td>`;
+                    } else if (s.estado === 'Cancelada') {
+                        celdaDinamica2 = `<td class="px-4 py-3 text-center"><div class="bg-red-50 p-2 rounded border border-red-200"><span class="text-[10px] text-red-700 font-bold block leading-tight"><i data-lucide="x-circle" class="h-4 w-4 mx-auto mb-1"></i> Sesión<br>Anulada</span></div></td>`;
+                    }
+                }
+                
+                tbody.innerHTML += `<tr class="hover:bg-gray-50 border-b border-gray-100"><td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td><td class="px-4 py-3"><p class="text-sm font-medium text-gray-900">${s.tematica}</p></td><td class="px-4 py-3"><p class="text-xs text-gray-600">${s.objetivo}<br><strong class="mt-1 block text-gray-700">R. Esperado: ${s.resultados_esperados}</strong></p></td>${celdaDinamica1}${celdaDinamica2}</tr>`;
             });
             if(typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        function toggleAccordion(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('hidden');
+        // --- HISTORIAL Y PDF EN MEMORIA ---
+        const historialPats = [{ id: 101, grupo: asignacion.grupo, anio: '2026', cuatrimestre: '1' }];
+        
+        function renderHistorial() {
+            const container = document.getElementById('historial-container'); container.innerHTML = '';
+            historialPats.forEach(pat => {
+                container.innerHTML += `<div class="bg-white border border-gray-200 rounded-lg p-5 flex flex-col h-full"><div class="flex justify-between items-start mb-3"><span class="px-2.5 py-1 rounded text-xs font-bold bg-gray-100">${pat.grupo}</span></div><h3 class="font-medium text-[#7B5936] text-lg mb-1">Cuatrimestre ${pat.cuatrimestre}</h3><p class="text-sm text-gray-500 mb-4">Ciclo Escolar ${pat.anio}</p><div class="mt-auto border-t border-gray-100 pt-4 flex gap-2"><button onclick="descargarPDFReparado(${pat.id}, event)" class="flex-1 px-3 py-2 bg-gray-900 text-white rounded-md text-sm shadow-sm hover:bg-black transition-colors"><i data-lucide="file-down" class="h-4 w-4 inline mr-2"></i>Descargar PDF Oficial</button></div></div>`;
+            });
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        renderSesiones();
+        function descargarPDFReparado(id, event) {
+            const btnElement = event.currentTarget; const btnOriginal = btnElement.innerHTML;
+            btnElement.innerHTML = `<i data-lucide="loader-2" class="h-4 w-4 inline mr-2 animate-spin"></i> Generando...`;
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+
+            const datosPDF = sesionesGrupo.length > 0 ? sesionesGrupo : plantillaOficial;
+            let filasTabla = '';
+            
+            datosPDF.forEach(s => {
+                let canalizacionesTexto = s.canalizaciones && s.canalizaciones.length > 0 ? s.canalizaciones.join(', ') : '-';
+                let firma = s.estado === 'Validada' ? 'FIRMADO DIGITALMENTE' : (s.estado === 'Cancelada' ? 'CANCELADA' : 'PENDIENTE');
+                let colorFirma = s.estado === 'Validada' ? '#166534' : (s.estado === 'Cancelada' ? 'red' : 'gray');
+                let resultadoReal = s.estado === 'Cancelada' ? `Motivo: ${s.motivo}` : (s.resultados_obtenidos || '');
+
+                filasTabla += `<tr style="text-align: center; border: 1px solid black; background-color: white;"><td style="padding: 6px; border: 1px solid black; font-weight: bold;">${s.num}</td><td style="padding: 6px; border: 1px solid black; text-align: left;">${s.tematica}</td><td style="padding: 6px; border: 1px solid black; text-align: left;">${s.objetivo}</td><td style="padding: 6px; border: 1px solid black; text-align: left;">${s.resultados_esperados}</td><td style="padding: 6px; border: 1px solid black; font-weight: bold; color: #1e3a8a;">${canalizacionesTexto}</td><td style="padding: 6px; border: 1px solid black; font-size: 8px; font-weight: bold; color: ${colorFirma};">${firma}</td><td style="padding: 6px; border: 1px solid black; text-align: left; font-style: italic;">${resultadoReal}</td></tr>`;
+            });
+
+            const htmlEnMemoria = `
+                <div style="width: 1050px; padding: 40px; font-family: sans-serif; background-color: white; color: black;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="font-size: 18px; font-weight: bold; margin: 0;">UNIVERSIDAD POLITÉCNICA DE FRANCISCO I. MADERO</h1>
+                        <h2 style="font-size: 16px; font-weight: 600; margin: 5px 0;">DEPARTAMENTO DE ASESORÍAS Y TUTORÍAS</h2>
+                        <h3 style="font-size: 14px; font-weight: bold; margin: 0;">PLAN DE ACCIÓN TUTORIAL (PAT)</h3>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px;" border="1">
+                        <tr style="background-color: #e5e7eb; font-weight: bold; text-align: center;">
+                            <td style="padding: 5px; width: 25%;">PROGRAMA EDUCATIVO</td>
+                            <td style="padding: 5px; width: 25%;">NOMBRE DEL TUTOR</td>
+                            <td style="padding: 5px; width: 20%;">PERIODO CUATRIMESTRAL</td>
+                            <td style="padding: 5px; width: 10%;">GRUPO</td>
+                            <td style="padding: 5px; width: 10%;" colspan="2">ALUMNOS</td>
+                        </tr>
+                        <tr style="text-align: center;">
+                            <td style="padding: 8px;">${asignacion.programa}</td>
+                            <td style="padding: 8px;">${asignacion.tutor}</td>
+                            <td style="padding: 8px;">${asignacion.periodo}</td>
+                            <td style="padding: 8px; font-weight: bold;">${asignacion.grupo}</td>
+                            <td style="padding: 5px; font-weight: bold;">H<br><span style="font-weight: normal;">${asignacion.h || 16}</span></td>
+                            <td style="padding: 5px; font-weight: bold;">M<br><span style="font-weight: normal;">${asignacion.m || 10}</span></td>
+                        </tr>
+                    </table>
+                    <div style="text-align: left; font-size: 11px; margin-bottom: 20px; border: 1px solid black; padding: 8px;">
+                        <strong>COMENTARIOS DEL TUTOR:</strong> <span style="font-style: italic;">Se anexa evidencia del desarrollo del grupo a lo largo del cuatrimestre.</span>
+                    </div>
+                    <div style="text-align: center; font-size: 12px; font-weight: bold; background-color: #e5e7eb; border: 1px solid black; padding: 5px;">SEGUIMIENTO DEL PROGRAMA DE TUTORÍAS</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px;" border="1">
+                        <thead>
+                            <tr style="background-color: #f3f4f6; text-align: center;">
+                                <th style="padding: 5px; width: 5%;">No.</th>
+                                <th style="padding: 5px; width: 18%;">TEMÁTICA A ABORDAR</th>
+                                <th style="padding: 5px; width: 18%;">OBJETIVO</th>
+                                <th style="padding: 5px; width: 18%;">RESULTADOS ESPERADOS</th>
+                                <th style="padding: 5px; width: 10%; font-size: 8px;">CANALIZACIONES</th>
+                                <th style="padding: 5px; width: 11%; font-size: 8px;">JEFE DE GRUPO</th>
+                                <th style="padding: 5px; width: 20%;">RESULTADOS OBTENIDOS</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filasTabla}</tbody>
+                    </table>
+                </div>`;
+
+            const elementoVirtual = document.createElement('div'); 
+            elementoVirtual.innerHTML = htmlEnMemoria;
+            
+            const opt = { 
+                margin: 0.2, 
+                filename: `Evidencia_PAT_${asignacion.grupo}_${asignacion.periodo.split(' ')[1]}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2 }, 
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } 
+            };
+            
+            html2pdf().set(opt).from(elementoVirtual).save().then(() => { 
+                btnElement.innerHTML = btnOriginal; 
+                if(typeof lucide !== 'undefined') lucide.createIcons(); 
+            }).catch(error => { 
+                alert("Error al compilar el PDF."); 
+                btnElement.innerHTML = btnOriginal; 
+            });
+        }
+
+        renderAsignacion(); 
         renderHistorial();
     </script>
 </body>

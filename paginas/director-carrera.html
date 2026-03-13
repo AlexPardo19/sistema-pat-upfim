@@ -11,179 +11,230 @@
 <body class="min-h-screen bg-gray-50">
 
     <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
-                    <div class="border-l border-gray-300 pl-4">
-                        <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
-                        <p class="text-sm text-gray-600">Director de Carrera</p>
-                    </div>
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
+                <div class="border-l border-gray-300 pl-4">
+                    <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
+                    <p class="text-sm text-gray-600">Director de Carrera</p>
                 </div>
-
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
-                        <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
-                    </div>
-                    <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
-                        <i data-lucide="user-circle" class="h-6 w-6"></i>
-                    </div>
-                    <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
-                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
-                    </button>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
+                    <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
                 </div>
+                <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
+                    <i data-lucide="user-circle" class="h-6 w-6"></i>
+                </div>
+                <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
+                    <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
+                </button>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-8">
         <div class="max-w-6xl mx-auto space-y-6">
-            <div>
-                <h1 class="text-3xl text-[#7B5936]">Aprobación Final de PATs</h1>
-                <p class="text-gray-600 mt-2">Revisa y aprueba los planes de acción tutorial completados</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600 mb-3">PATs para Revisión</p>
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="file-check" class="h-8 w-8 text-[#69B22E]"></i>
-                        <div id="stat-revision" class="text-3xl text-[#69B22E]">0</div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600 mb-3">Completados Este Mes</p>
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="check-circle-2" class="h-8 w-8 text-green-500"></i>
-                        <div class="text-3xl text-green-600">12</div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600 mb-3">Total Aprobados</p>
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="file-text" class="h-8 w-8 text-blue-500"></i>
-                        <div class="text-3xl text-blue-600">45</div>
-                    </div>
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h1 class="text-3xl text-[#7B5936]">Administración de Grupos</h1>
+                    <p class="text-sm text-gray-500 mt-1">Asigna tutores y supervisa que las sesiones de tutoría se lleven a cabo.</p>
                 </div>
             </div>
 
-            <div class="space-y-4">
-                <h2 class="text-xl text-[#7B5936]">PATs Listos para Aprobación Final</h2>
-                <div id="pats-container" class="space-y-4"></div>
+            <div class="bg-gray-100 border border-gray-200 p-1 rounded-xl w-full sm:w-max flex flex-wrap">
+                <button onclick="switchTab('asignacion')" id="tab-btn-asignacion" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all">
+                    <i data-lucide="users" class="h-4 w-4"></i> Asignación de Grupos
+                </button>
+                <button onclick="switchTab('seguimiento')" id="tab-btn-seguimiento" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
+                    <i data-lucide="activity" class="h-4 w-4"></i> Seguimiento de Sesiones
+                </button>
+                <button onclick="switchTab('cierre')" id="tab-btn-cierre" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
+                    <i data-lucide="archive" class="h-4 w-4"></i> Cierre Institucional
+                </button>
             </div>
 
-            <div class="bg-blue-50 rounded-lg border border-blue-200 p-6">
-                <div class="flex items-start gap-3">
-                    <div class="h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#69B22E20]">
-                        <i data-lucide="file-check" class="h-5 w-5 text-[#69B22E]"></i>
+            <div id="tab-asignacion" class="mt-5 block space-y-6">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                    <h3 class="font-medium text-[#7B5936] mb-4 border-b pb-2">Vincular Docente a Grupo</h3>
+                    
+                    <form id="form-asignacion" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Programa Educativo</label>
+                                <input type="text" id="input-programa" value="Ingeniería en Tecnologías de la Información" readonly class="w-full border border-gray-300 bg-gray-50 text-gray-600 rounded-md px-3 py-2 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Tutor</label>
+                                <select id="input-tutor" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                                    <option value="">Selecciona un docente...</option>
+                                    <option value="Alicia León Martínez">Alicia León Martínez</option>
+                                    <option value="Carlos Ramírez Soto">Carlos Ramírez Soto</option>
+                                    <option value="María Fernanda López">María Fernanda López</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Periodo Cuatrimestral</label>
+                                <input type="text" id="input-periodo" value="SEPT-DIC 2025" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
+                                <input type="text" id="input-grupo" placeholder="Ej: 1TIG3" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E] uppercase">
+                            </div>
+                        </div>
+                        <div class="flex justify-end pt-2">
+                            <button type="submit" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-colors font-medium shadow-sm">
+                                Guardar Asignación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h3 class="font-medium text-[#7B5936]">Asignaciones Activas del Cuatrimestre</h3>
                     </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-[#7B5936] uppercase bg-white border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3">Grupo</th>
+                                    <th class="px-4 py-3">Tutor Asignado</th>
+                                    <th class="px-4 py-3">Periodo</th>
+                                    <th class="px-4 py-3 text-center">Estado de Sincronización</th>
+                                </tr>
+                            </thead>
+                            <tbody id="asignaciones-tbody" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-seguimiento" class="mt-5 hidden space-y-6">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
                     <div>
-                        <h3 class="font-medium text-blue-900 mb-1">Proceso de Aprobación</h3>
-                        <p class="text-sm text-blue-700">
-                            Los PATs mostrados han sido validados por el Jefe de Grupo y están listos para tu 
-                            aprobación final. Puedes descargar el documento en PDF para revisión antes de aprobar.
-                        </p>
+                        <h3 class="font-medium text-gray-900">Monitor de la Carrera</h3>
+                        <p class="text-xs text-gray-500 mt-1">Avance de los grupos asignados.</p>
+                    </div>
+                    <button onclick="renderSeguimiento()" class="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 inline mr-1"></i> Recargar Monitor
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 w-16 text-center">No.</th>
+                                    <th class="px-4 py-3">Temática Programada</th>
+                                    <th class="px-4 py-3">Fecha Declarada</th>
+                                    <th class="px-4 py-3 text-center">Validación Oficial J.G.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="seguimiento-tbody" class="divide-y divide-gray-100"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
+            <div id="tab-cierre" class="mt-5 hidden space-y-6">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
+                    <i data-lucide="folder-open" class="h-12 w-12 text-gray-300 mx-auto mb-4"></i>
+                    <p class="text-gray-500">Los documentos de cierre aparecerán aquí al finalizar el cuatrimestre para tu aprobación.</p>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 mt-12">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <p class="text-center text-sm text-gray-500">
-                © 2026 UPFIM - Sistema de Gestión PAT - Todos los derechos reservados
-            </p>
-        </div>
-    </footer>
-
     <script src="../js/auth.js"></script>
-    <script src="../js/layout.js"></script>
     <script>
-        let patsAprobados = [
-            { id: 1, titulo: 'Plan de Acción Tutorial - Ingeniería', tutor: 'Dr. María González', grupo: 'ING-2024-A', cuatrimestre: '2024-1', fechaAprobacion: '2026-02-10', sesionesValidadas: 8, totalSesiones: 10 },
-            { id: 2, titulo: 'Plan de Acción Tutorial - Administración', tutor: 'Mtro. Carlos Ramírez', grupo: 'ADM-2024-B', cuatrimestre: '2024-1', fechaAprobacion: '2026-02-12', sesionesValidadas: 10, totalSesiones: 10 },
-            { id: 3, titulo: 'Plan de Acción Tutorial - Derecho', tutor: 'Dra. Ana Martínez', grupo: 'DER-2024-C', cuatrimestre: '2024-1', fechaAprobacion: '2026-02-15', sesionesValidadas: 9, totalSesiones: 10 },
-        ];
-
-        function formatearFecha(fechaStr) {
-            return new Date(fechaStr + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+        function switchTab(tabId) {
+            ['asignacion', 'seguimiento', 'cierre'].forEach(id => {
+                document.getElementById(`tab-${id}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${id}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabId}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
         }
 
-        function handleDownloadPDF(id) {
-            alert(`Descargando PAT ${id} en formato PDF...`);
-        }
+        // --- LÓGICA DE ASIGNACIÓN (Sincronizada) ---
+        let asignacionActual = JSON.parse(localStorage.getItem('asignacionActiva'));
 
-        function handleApprovePAT(id) {
-            patsAprobados = patsAprobados.filter(p => p.id !== id);
-            alert(`PAT ${id} aprobado exitosamente`);
-            renderizarUI();
-        }
-
-        function renderizarUI() {
-            document.getElementById('stat-revision').innerText = patsAprobados.length;
-            const container = document.getElementById('pats-container');
-            container.innerHTML = '';
-
-            if (patsAprobados.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center shadow-sm">
-                        <i data-lucide="file-check" class="h-12 w-12 text-gray-300 mx-auto mb-4"></i>
-                        <p class="text-gray-500">No hay PATs pendientes de aprobación en este momento</p>
-                    </div>`;
-            } else {
-                patsAprobados.forEach(pat => {
-                    const porcentaje = (pat.sesionesValidadas / pat.totalSesiones) * 100;
-                    container.innerHTML += `
-                        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
-                            <div class="flex flex-col md:flex-row items-start justify-between gap-6">
-                                <div class="flex-1 space-y-3 w-full">
-                                    <div class="flex items-start gap-3">
-                                        <div class="h-12 w-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#69B22E20]">
-                                            <i data-lucide="file-text" class="h-6 w-6 text-[#69B22E]"></i>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-lg font-medium text-[#7B5936]">${pat.titulo}</h3>
-                                            <p class="text-sm text-gray-500 mt-1">${pat.tutor} • ${pat.grupo}</p>
-                                        </div>
-                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-blue-100 text-blue-800 border-blue-300">${pat.cuatrimestre}</span>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:pl-15">
-                                        <div>
-                                            <p class="text-sm text-gray-500">Fecha de Aprobación</p>
-                                            <p class="font-medium text-gray-900">${formatearFecha(pat.fechaAprobacion)}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500">Progreso de Sesiones</p>
-                                            <div class="flex items-center gap-2">
-                                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full rounded-full bg-[#69B22E]" style="width: ${porcentaje}%"></div>
-                                                </div>
-                                                <span class="text-sm font-medium text-gray-700">${pat.sesionesValidadas}/${pat.totalSesiones}</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500">Estado</p>
-                                            <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium border bg-green-100 text-green-800 border-green-300">Listo para Aprobar</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
-                                    <button onclick="handleDownloadPDF(${pat.id})" class="flex items-center justify-center px-4 py-2 border border-[#7B5936] text-[#7B5936] rounded-md hover:bg-[#7B5936] hover:text-white transition-colors">
-                                        <i data-lucide="download" class="h-4 w-4 mr-2"></i> Descargar PDF
-                                    </button>
-                                    <button onclick="handleApprovePAT(${pat.id})" class="flex items-center justify-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-opacity">
-                                        <i data-lucide="check-circle-2" class="h-4 w-4 mr-2"></i> Aprobar PAT
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`;
-                });
+        function renderAsignaciones() {
+            const tbody = document.getElementById('asignaciones-tbody');
+            tbody.innerHTML = '';
+            
+            if (!asignacionActual) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No hay grupos asignados aún. Llena el formulario de arriba.</td></tr>`;
+                return;
             }
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            tbody.innerHTML = `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-bold text-gray-900">${asignacionActual.grupo}</td>
+                    <td class="px-4 py-3 text-gray-700">${asignacionActual.tutor}</td>
+                    <td class="px-4 py-3 text-gray-600">${asignacionActual.periodo}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200">
+                            <i data-lucide="link" class="h-3 w-3 inline mr-1"></i> Vinculado al PAT
+                        </span>
+                    </td>
+                </tr>
+            `;
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         }
-        renderizarUI();
+
+        document.getElementById('form-asignacion').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nuevaAsignacion = {
+                programa: document.getElementById('input-programa').value,
+                tutor: document.getElementById('input-tutor').value,
+                periodo: document.getElementById('input-periodo').value,
+                grupo: document.getElementById('input-grupo').value.toUpperCase()
+            };
+
+            // Guarda en la memoria compartida
+            localStorage.setItem('asignacionActiva', JSON.stringify(nuevaAsignacion));
+            asignacionActual = nuevaAsignacion;
+            
+            alert(`El grupo ${nuevaAsignacion.grupo} ha sido asignado a ${nuevaAsignacion.tutor} exitosamente.`);
+            document.getElementById('form-asignacion').reset();
+            document.getElementById('input-periodo').value = "SEPT-DIC 2025"; // Resetear default
+            renderAsignaciones();
+        });
+
+        // --- LÓGICA DE SEGUIMIENTO (Igual que antes) ---
+        function renderSeguimiento() {
+            let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+            const tbody = document.getElementById('seguimiento-tbody');
+            tbody.innerHTML = '';
+
+            if (sesionesSincronizadas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Aún no hay avance registrado para los grupos de esta carrera.</td></tr>`;
+                return;
+            }
+
+            sesionesSincronizadas.forEach(s => {
+                let badge = '';
+                let fechaTexto = s.fecha ? `<span class="font-medium text-gray-800">${s.fecha}</span>` : '<span class="text-xs text-gray-400">No reportada</span>';
+
+                if(s.estado === 'Validada') badge = `<span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold border border-green-200"><i data-lucide="check" class="h-3 w-3 inline mr-1"></i> Aprobada</span>`;
+                else if(s.estado === 'Cancelada') badge = `<span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold border border-red-200"><i data-lucide="alert-triangle" class="h-3 w-3 inline mr-1"></i> Cancelada (Atención)</span>`;
+                else if (s.estado === 'Finalizada_Por_Tutor') badge = `<span class="text-xs text-yellow-600 italic">Esperando firma...</span>`;
+                else badge = `<span class="text-xs text-gray-400">Sin progreso</span>`;
+
+                tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td><td class="px-4 py-3"><p class="text-sm font-medium text-gray-900">${s.tematica}</p></td><td class="px-4 py-3">${fechaTexto}</td><td class="px-4 py-3 text-center align-middle">${badge}</td></tr>`;
+            });
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        renderAsignaciones();
+        renderSeguimiento();
+        switchTab('asignacion'); // Empezar en la pestaña nueva
     </script>
 </body>
 </html>

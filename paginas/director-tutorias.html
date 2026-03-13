@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Estilo para que el modal grande pueda hacer scroll si el PAT es muy largo */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
 </head>
 <body class="min-h-screen bg-gray-50">
 
@@ -39,124 +46,658 @@
 
     <main class="max-w-7xl mx-auto px-6 py-8">
         <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h1 class="text-3xl text-[#7B5936]">Gestión de Propuestas PAT</h1>
-                    <p class="text-gray-600 mt-2">Administra y controla las propuestas de planes de acción tutorial</p>
+                    <h1 class="text-3xl text-[#7B5936]">Gestión de Programa Tutorial</h1>
+                    <p class="text-sm text-gray-500 mt-1">Administra plantillas, revisa propuestas y audita las sesiones en curso.</p>
                 </div>
-                <button onclick="alert('Abriendo formulario de creación...')" class="flex items-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">
-                    <i data-lucide="plus" class="h-5 w-5 mr-2"></i> Crear Nuevo PAT
+            </div>
+
+            <div class="bg-gray-100 border border-gray-200 p-1 rounded-xl w-full sm:w-max flex flex-wrap">
+                <button onclick="switchTab('plantillas')" id="tab-btn-plantillas" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all">
+                    <i data-lucide="file-spreadsheet" class="h-4 w-4"></i> Plantillas Sugeridas
+                </button>
+                <button onclick="switchTab('revision')" id="tab-btn-revision" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
+                    <i data-lucide="file-check-2" class="h-4 w-4"></i> Revisión de Propuestas
+                </button>
+                <button onclick="switchTab('auditoria')" id="tab-btn-auditoria" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
+                    <i data-lucide="search" class="h-4 w-4"></i> Auditoría de Sesiones (En Vivo)
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600 mb-3">Total Propuestas</p>
-                    <div id="stat-total" class="text-3xl text-[#69B22E]">0</div>
+            <div id="tab-plantillas" class="mt-5 block space-y-6">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <label class="text-sm font-medium text-gray-700">Editar Cuatrimestre:</label>
+                        <select id="select-cuatrimestre" onchange="renderPlantilla()" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] bg-gray-50">
+                            <option value="1" selected>1er Cuatrimestre</option>
+                            <option value="2">2do Cuatrimestre</option>
+                            <option value="3">3er Cuatrimestre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex-1 w-full max-w-md">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600 font-medium">Progreso del Borrador</span>
+                            <span id="progreso-texto" class="font-bold text-[#7B5936]">0/15 Sesiones</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progreso-barra" class="bg-[#69B22E] h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <button id="btn-agregar-sesion" onclick="prepararModalSesion()" class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white transition-colors text-sm">
+                            <i data-lucide="plus" class="h-4 w-4 mr-2"></i> Añadir Sesión
+                        </button>
+                        <button id="btn-publicar" onclick="publicarPlantilla()" disabled class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm transition-colors">
+                            <i data-lucide="send" class="h-4 w-4 mr-2"></i> Enviar a Tutores
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600 mb-3">Activas</p>
-                    <div id="stat-activas" class="text-3xl text-[#69B22E]">0</div>
+
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-blue-50 px-6 py-3 border-b border-blue-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="edit-3" class="h-5 w-5 text-blue-600"></i>
+                            <p class="text-sm text-blue-800" id="estado-plantilla-texto">Área de trabajo en <strong>Borrador</strong>. Completa 15 sesiones para crear una nueva versión.</p>
+                        </div>
+                        <button onclick="limpiarBorrador()" class="text-xs text-red-600 hover:text-red-800 font-medium flex items-center"><i data-lucide="trash-2" class="h-3 w-3 mr-1"></i> Limpiar Editor</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-4 py-3 w-16 text-center">No.</th>
+                                    <th class="px-4 py-3 w-24">Corte</th>
+                                    <th class="px-4 py-3 min-w-[200px]">Temática a Abordar</th>
+                                    <th class="px-4 py-3 min-w-[200px]">Objetivo</th>
+                                    <th class="px-4 py-3 min-w-[200px]">Resultados Esperados</th>
+                                    <th class="px-4 py-3 w-20 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plantilla-tbody" class="divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600 mb-3">Inactivas</p>
-                    <div id="stat-inactivas" class="text-3xl text-gray-400">0</div>
+
+                <div class="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="history" class="h-5 w-5 text-[#7B5936]"></i>
+                            <h3 class="font-medium text-[#7B5936]">Historial de Versiones Publicadas</h3>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm text-gray-600">Filtrar por año:</label>
+                            <select id="filtro-anio-historial" onchange="renderPlantilla()" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E]">
+                                <option value="Todos">Todos</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-white border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 w-32">Fecha / Año</th>
+                                    <th class="px-4 py-3">Nombre de la Versión</th>
+                                    <th class="px-4 py-3 text-center w-24">Sesiones</th>
+                                    <th class="px-4 py-3 text-center w-48">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-tbody" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <h3 class="text-lg font-medium text-[#7B5936]">Propuestas por Cuatrimestre</h3>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-600">Filtrar:</span>
-                        <select id="filtro-cuatrimestre" onchange="renderizarUI()" class="px-3 py-2 border border-gray-300 rounded-lg focus:border-[#69B22E] focus:ring-[#69B22E] focus:outline-none text-sm">
-                            <option value="all">Todos los Cuatrimestres</option>
-                        </select>
+            <div id="tab-revision" class="mt-5 hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"><p class="text-sm font-medium text-gray-600 mb-3">Pendientes de Revisión</p><div class="flex items-center gap-3"><i data-lucide="clock" class="h-8 w-8 text-yellow-500"></i><div id="stat-pendientes" class="text-3xl text-yellow-600">0</div></div></div>
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"><p class="text-sm font-medium text-gray-600 mb-3">Aprobados</p><div class="flex items-center gap-3"><i data-lucide="check-circle" class="h-8 w-8 text-green-500"></i><div id="stat-aprobados" class="text-3xl text-green-600">0</div></div></div>
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"><p class="text-sm font-medium text-gray-600 mb-3">Rechazados</p><div class="flex items-center gap-3"><i data-lucide="x-circle" class="h-8 w-8 text-red-500"></i><div id="stat-rechazados" class="text-3xl text-red-600">0</div></div></div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50"><h3 class="text-lg font-medium text-[#7B5936]">Propuestas PAT enviadas por Tutores</h3></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left"><thead class="text-xs text-[#7B5936] uppercase bg-white border-b border-gray-200"><tr><th class="px-4 py-3">Carrera / Grupo</th><th class="px-4 py-3">Tutor</th><th class="px-4 py-3 text-center">Alumnos (H/M)</th><th class="px-4 py-3 text-center">Estado</th><th class="px-4 py-3 text-center">Acciones</th></tr></thead><tbody id="revision-tbody" class="divide-y divide-gray-200"></tbody></table>
                     </div>
                 </div>
-                <div class="overflow-x-auto p-6">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
-                            <tr>
-                                <th class="px-4 py-3"><div class="flex items-center gap-2"><i data-lucide="book-open" class="h-4 w-4"></i>Cuatrimestre</div></th>
-                                <th class="px-4 py-3">Tutor</th>
-                                <th class="px-4 py-3">Grupo</th>
-                                <th class="px-4 py-3">Fecha Creación</th>
-                                <th class="px-4 py-3">Estado</th>
-                                <th class="px-4 py-3">Habilitar/Deshabilitar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="propuestas-tbody" class="divide-y divide-gray-200"></tbody>
-                    </table>
+            </div>
+
+            <div id="tab-auditoria" class="mt-5 hidden space-y-6">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Grupo / Carrera</label>
+                        <select id="audit-grupo" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] min-w-[200px]">
+                            <option value="1G1">1G1 - TI (Grupo de Prueba)</option>
+                        </select>
+                    </div>
+                    <button onclick="renderAuditoria()" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-colors text-sm font-medium">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 inline mr-1"></i> Actualizar Monitor
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                        <h3 class="font-medium text-[#7B5936]">Monitor de Estatus en Tiempo Real</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-[#7B5936] uppercase bg-white border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3">No. Sesión y Temática</th>
+                                    <th class="px-4 py-3">Fecha y Hora</th>
+                                    <th class="px-4 py-3 min-w-[250px]">Resultados Obtenidos y Canalizaciones</th>
+                                    <th class="px-4 py-3 text-center">Estado Oficial (Firma J.G.)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditoria-tbody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </div>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 mt-12">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <p class="text-center text-sm text-gray-500">
-                © 2026 UPFIM - Sistema de Gestión PAT - Todos los derechos reservados
-            </p>
+    <div id="modal-sesion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h3 id="modal-sesion-titulo" class="text-lg font-medium text-[#7B5936] mb-4">Agregar Sesión al Borrador</h3>
+            <form id="form-plantilla" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Número de Sesión</label>
+                        <input type="number" id="input-num" readonly class="w-full border border-gray-300 bg-gray-100 text-gray-500 font-bold rounded-md px-3 py-2 focus:outline-none cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Corte Parcial</label>
+                        <select id="input-corte" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Temática a Abordar</label>
+                    <textarea id="input-tematica" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Objetivo</label>
+                    <textarea id="input-objetivo" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Resultados Esperados</label>
+                    <textarea id="input-resultados" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" onclick="cerrarModal('modal-sesion')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" id="btn-guardar-sesion" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">Guardar en Borrador</button>
+                </div>
+            </form>
         </div>
-    </footer>
+    </div>
+
+    <div id="modal-revisar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-medium text-[#7B5936]">Revisión de Propuesta PAT</h3>
+                <button onclick="cerrarModal('modal-revisar')" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="h-6 w-6"></i></button>
+            </div>
+
+            <div class="overflow-y-auto pr-2 custom-scrollbar">
+                
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="mb-1"><span class="font-bold text-gray-700">Tutor Asignado:</span> <span id="rev-tutor" class="text-gray-900"></span></p>
+                        <p><span class="font-bold text-gray-700">Programa y Grupo:</span> <span id="rev-grupo" class="text-gray-900"></span></p>
+                    </div>
+                    <div>
+                        <p class="mb-1"><span class="font-bold text-gray-700">Total de Alumnos:</span> <span id="rev-alumnos" class="text-gray-900"></span> (<span id="rev-h"></span> H, <span id="rev-m"></span> M)</p>
+                        <p><span class="font-bold text-gray-700">Comentarios del Grupo:</span> <span id="rev-comentarios" class="text-gray-600 italic"></span></p>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden mb-6 shadow-sm">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-[#7B5936] uppercase bg-gray-100 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 w-12 text-center">No.</th>
+                                <th class="px-4 py-3 w-1/3 border-l border-gray-200">Temática a Abordar</th>
+                                <th class="px-4 py-3 w-1/3 border-l border-gray-200">Objetivo</th>
+                                <th class="px-4 py-3 w-1/3 border-l border-gray-200">Resultados Esperados</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rev-sesiones-tbody" class="divide-y divide-gray-200 bg-white">
+                            </tbody>
+                    </table>
+                </div>
+
+                <form id="form-revision" class="mt-auto border-t border-gray-200 pt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones de la Dirección (Obligatorio si se rechaza)</label>
+                        <textarea id="input-observaciones" rows="3" placeholder="Escribe tus observaciones para que el tutor corrija su propuesta..." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
+                    </div>
+                    <div class="mt-4 flex justify-end gap-3">
+                        <button type="button" onclick="cerrarModal('modal-revisar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium text-sm">Cancelar Revisión</button>
+                        <button type="button" onclick="procesarRevision('Rechazado')" class="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 font-medium text-sm transition-colors">Rechazar con Observaciones</button>
+                        <button type="button" onclick="procesarRevision('Aprobado')" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 font-medium text-sm shadow-sm transition-colors"><i data-lucide="check-check" class="h-4 w-4 inline mr-1"></i> Aprobar Propuesta PAT</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/auth.js"></script>
-    <script src="../js/layout.js"></script>
     <script>
-        let propuestas = [
-            { id: 1, cuatrimestre: '2024-1', tutor: 'Dr. María González', grupo: 'ING-2024-A', fecha: '2024-01-15', status: 'Activo', enabled: true },
-            { id: 2, cuatrimestre: '2024-1', tutor: 'Mtro. Carlos Ramírez', grupo: 'ADM-2024-B', fecha: '2024-01-18', status: 'Activo', enabled: true },
-            { id: 3, cuatrimestre: '2024-1', tutor: 'Dra. Ana Martínez', grupo: 'DER-2024-C', fecha: '2024-01-20', status: 'Inactivo', enabled: false },
-            { id: 4, cuatrimestre: '2024-2', tutor: 'Mtro. José Luis Hernández', grupo: 'MED-2024-A', fecha: '2024-05-10', status: 'Activo', enabled: true },
-            { id: 5, cuatrimestre: '2024-2', tutor: 'Dra. Laura Sánchez', grupo: 'PSI-2024-D', fecha: '2024-05-15', status: 'Activo', enabled: true },
-        ];
-
-        const cuatrimestres = [...new Set(propuestas.map(p => p.cuatrimestre))];
-        const selectFiltro = document.getElementById('filtro-cuatrimestre');
-        cuatrimestres.forEach(c => selectFiltro.innerHTML += `<option value="${c}">${c}</option>`);
-
-        function formatearFecha(fechaStr) {
-            return new Date(fechaStr + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+        // --- NAVEGACIÓN DE TABS ---
+        function switchTab(tabId) {
+            ['plantillas', 'revision', 'auditoria'].forEach(id => {
+                document.getElementById(`tab-${id}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${id}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabId}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
         }
 
-        function handleToggle(id) {
-            propuestas = propuestas.map(p => p.id === id ? { ...p, enabled: !p.enabled, status: !p.enabled ? 'Activo' : 'Inactivo' } : p);
-            renderizarUI();
-        }
+        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); modoEdicion = null; }
 
-        function renderizarUI() {
-            const selectedVal = document.getElementById('filtro-cuatrimestre').value;
-            const filtradas = selectedVal === 'all' ? propuestas : propuestas.filter(p => p.cuatrimestre === selectedVal);
+        // ==========================================
+        // MÓDULO 1: GESTIÓN DE PLANTILLAS Y VERSIONADO
+        // ==========================================
+        let plantillasActivas = { "1": [], "2": [], "3": [] };
 
-            document.getElementById('stat-total').innerText = propuestas.length;
-            document.getElementById('stat-activas').innerText = propuestas.filter(p => p.enabled).length;
-            document.getElementById('stat-inactivas').innerText = propuestas.filter(p => !p.enabled).length;
+        let historialPlantillas = {
+            "1": [
+                {
+                    id: 1709841000000,
+                    fecha: "15/02/2026",
+                    anio: "2026",
+                    nombre: "Plantilla Oficial 2026",
+                    sesiones: [
+                        { num: 1, corte: "I", tematica: "Bienvenida al cuatrimestre 26", objetivo: "Presentarse ante el grupo", resultados: "Conocer el plan" },
+                        { num: 2, corte: "I", tematica: "Reglamento Escolar", objetivo: "Dar a conocer normativa", resultados: "Cero incidencias" }
+                    ]
+                },
+                {
+                    id: 1678281000000,
+                    fecha: "10/01/2025",
+                    anio: "2025",
+                    nombre: "Plantilla de Respaldo 2025",
+                    sesiones: [
+                        { num: 1, corte: "I", tematica: "Bienvenida Antigua", objetivo: "Antiguo", resultados: "Antiguo" }
+                    ]
+                }
+            ],
+            "2": [], "3": []
+        };
+        let modoEdicion = null;
 
-            const tbody = document.getElementById('propuestas-tbody');
+        function renderPlantilla() {
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            const sesiones = plantillasActivas[cuatri];
+            const historial = historialPlantillas[cuatri];
+            const cant = sesiones.length;
+            
+            // --- 1. RENDERIZAR BORRADOR ---
+            document.getElementById('progreso-barra').style.width = `${(cant / 15) * 100}%`;
+            document.getElementById('progreso-texto').innerText = `${cant}/15 Sesiones`;
+
+            const btnPublicar = document.getElementById('btn-publicar');
+            const textoEstado = document.getElementById('estado-plantilla-texto');
+
+            if (cant === 15) {
+                btnPublicar.disabled = false;
+                btnPublicar.className = "flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm shadow-md transition-colors";
+                btnPublicar.innerHTML = `<i data-lucide="send" class="h-4 w-4 mr-2"></i> Crear y Publicar Versión`;
+                textoEstado.innerHTML = `¡Tienes las <strong>15 sesiones completas</strong>! Listo para publicar.`;
+            } else {
+                btnPublicar.disabled = true;
+                btnPublicar.className = "flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm transition-colors";
+                btnPublicar.innerHTML = `<i data-lucide="send" class="h-4 w-4 mr-2"></i> Crear y Publicar Versión`;
+                textoEstado.innerHTML = `Área de trabajo en <strong>Borrador</strong>. Faltan ${15 - cant} sesiones para poder crear una versión.`;
+            }
+
+            const tbody = document.getElementById('plantilla-tbody');
             tbody.innerHTML = '';
+            if (sesiones.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">El editor está vacío. Añade sesiones o carga una versión del historial.</td></tr>`;
+            } else {
+                sesiones.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-center font-bold text-gray-700">${p.num}</td>
+                            <td class="px-4 py-3 text-center"><span class="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs">${p.corte}</span></td>
+                            <td class="px-4 py-3 text-gray-800">${p.tematica}</td>
+                            <td class="px-4 py-3 text-gray-600 text-sm">${p.objetivo}</td>
+                            <td class="px-4 py-3 text-gray-600 text-sm">${p.resultados}</td>
+                            <td class="px-4 py-3 text-center">
+                                <button onclick="prepararEdicion(${p.num})" class="text-[#7B5936] hover:text-[#69B22E] border border-gray-200 p-1.5 rounded-md bg-white shadow-sm" title="Editar"><i data-lucide="edit" class="h-4 w-4"></i></button>
+                            </td>
+                        </tr>`;
+                });
+            }
 
-            filtradas.forEach(prop => {
-                const badgeClass = prop.enabled ? 'bg-green-100 text-green-800 border-green-300' : 'bg-gray-100 text-gray-800 border-gray-300';
-                const switchHtml = `
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" class="sr-only peer" ${prop.enabled ? 'checked' : ''} onchange="handleToggle(${prop.id})">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${prop.enabled ? 'bg-[#69B22E]' : ''}"></div>
-                    </label>`;
+            // --- 2. RENDERIZAR HISTORIAL CON FILTRO ---
+            const tbodyHist = document.getElementById('historial-tbody');
+            const anioFiltro = document.getElementById('filtro-anio-historial').value;
+            tbodyHist.innerHTML = '';
+            
+            let versionesFiltradas = historial;
+            if(anioFiltro !== 'Todos') {
+                versionesFiltradas = historial.filter(v => v.anio === anioFiltro);
+            }
 
+            if (versionesFiltradas.length === 0) {
+                tbodyHist.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">No hay versiones publicadas para este año.</td></tr>`;
+            } else {
+                versionesFiltradas.forEach((v) => {
+                    let isActiva = (historial[0] && historial[0].id === v.id);
+                    let badgeActiva = isActiva ? `<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full border border-green-200">Activa Oficial</span>` : '';
+                    
+                    tbodyHist.innerHTML += `
+                        <tr class="hover:bg-gray-50 border-b border-gray-100">
+                            <td class="px-4 py-3 text-gray-600 font-medium">${v.fecha} <br><span class="text-xs text-gray-400">Año: ${v.anio}</span></td>
+                            <td class="px-4 py-3 font-bold text-[#7B5936]">${v.nombre} ${badgeActiva}</td>
+                            <td class="px-4 py-3 text-center font-bold text-gray-500">15</td>
+                            <td class="px-4 py-3 text-center">
+                                <button onclick="cargarDelHistorial(${v.id})" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors font-medium shadow-sm">
+                                    <i data-lucide="copy" class="h-3 w-3 inline mr-1"></i> Cargar al Editor
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            }
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // --- FUNCIONES DEL EDITOR ---
+        function prepararModalSesion() {
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            const cantidad = plantillasActivas[cuatri].length;
+            if(cantidad >= 15) return alert("Límite de 15 sesiones alcanzado.");
+            modoEdicion = null;
+            document.getElementById('modal-sesion-titulo').innerText = "Agregar Sesión";
+            document.getElementById('form-plantilla').reset();
+            document.getElementById('input-num').value = cantidad + 1;
+            document.getElementById('input-corte').value = (cantidad + 1 > 10) ? "III" : (cantidad + 1 > 5) ? "II" : "I";
+            abrirModal('modal-sesion');
+        }
+
+        function prepararEdicion(numSesion) {
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            const sesion = plantillasActivas[cuatri].find(s => s.num === numSesion);
+            modoEdicion = numSesion;
+            document.getElementById('modal-sesion-titulo').innerText = `Editar Sesión ${numSesion}`;
+            document.getElementById('input-num').value = sesion.num;
+            document.getElementById('input-corte').value = sesion.corte;
+            document.getElementById('input-tematica').value = sesion.tematica;
+            document.getElementById('input-objetivo').value = sesion.objetivo;
+            document.getElementById('input-resultados').value = sesion.resultados;
+            abrirModal('modal-sesion');
+        }
+
+        document.getElementById('form-plantilla').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            const nuevaSesion = {
+                num: parseInt(document.getElementById('input-num').value),
+                corte: document.getElementById('input-corte').value,
+                tematica: document.getElementById('input-tematica').value,
+                objetivo: document.getElementById('input-objetivo').value,
+                resultados: document.getElementById('input-resultados').value
+            };
+
+            if (modoEdicion) {
+                const index = plantillasActivas[cuatri].findIndex(s => s.num === modoEdicion);
+                plantillasActivas[cuatri][index] = nuevaSesion;
+            } else plantillasActivas[cuatri].push(nuevaSesion);
+            
+            renderPlantilla();
+            cerrarModal('modal-sesion');
+        });
+
+        function limpiarBorrador() {
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            if(plantillasActivas[cuatri].length > 0) {
+                if(confirm("¿Estás seguro de vaciar el editor? Se perderán las sesiones que no hayas publicado.")) {
+                    plantillasActivas[cuatri] = [];
+                    renderPlantilla();
+                }
+            }
+        }
+
+        function publicarPlantilla() {
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            if (plantillasActivas[cuatri].length < 15) return; 
+            
+            let nombreVersion = prompt("Asigna un nombre a esta versión para identificarla (Ej: Plantilla Oficial 2026-B):", "Nueva Versión PAT");
+            if (!nombreVersion) return; 
+
+            let currentDate = new Date();
+            let nuevaVersion = {
+                id: Date.now(),
+                fecha: currentDate.toLocaleDateString('es-MX'),
+                anio: currentDate.getFullYear().toString(),
+                nombre: nombreVersion,
+                sesiones: JSON.parse(JSON.stringify(plantillasActivas[cuatri])) 
+            };
+
+            historialPlantillas[cuatri].unshift(nuevaVersion);
+            plantillasActivas[cuatri] = [];
+            
+            alert("¡Éxito! La plantilla ha sido guardada en el historial y ya está disponible para los Docentes Tutores.");
+            document.getElementById('filtro-anio-historial').value = "Todos";
+            renderPlantilla();
+        }
+
+        function cargarDelHistorial(idVersion) {
+            const cuatri = document.getElementById('select-cuatrimestre').value;
+            if (plantillasActivas[cuatri].length > 0) {
+                if (!confirm("Tienes un borrador activo en el editor. Si cargas una versión del historial, se borrará tu trabajo actual. ¿Deseas continuar?")) return;
+            }
+
+            const version = historialPlantillas[cuatri].find(v => v.id === idVersion);
+            plantillasActivas[cuatri] = JSON.parse(JSON.stringify(version.sesiones));
+            
+            if(plantillasActivas[cuatri].length < 15) {
+                for(let i=plantillasActivas[cuatri].length + 1; i<=15; i++) {
+                     plantillasActivas[cuatri].push({ num: i, corte: "II", tematica: "Sesión " + i, objetivo: "Objetivo", resultados: "Resultados" });
+                }
+            }
+            renderPlantilla();
+            alert(`Versión "${version.nombre}" cargada al editor.`);
+        }
+
+
+        // ==========================================
+        // MÓDULO 2: REVISIÓN DE PATs (Con Formato Completo)
+        // ==========================================
+        
+        // Data Mocks (Incluyendo un falso para rellenar, más el real de LocalStorage)
+        // Dejamos la lista vacía para que solo lea los PATs reales enviados por los tutores
+        let patsEntregados = [];
+        
+        let patSeleccionadoId = null;
+
+        // Inyectar el PAT real del Tutor si existe y está en estado de revisión/aprobado
+        function cargarPatsReales() {
+            let patSincronizado = JSON.parse(localStorage.getItem('patSincronizado'));
+            let asignacionActiva = JSON.parse(localStorage.getItem('asignacionActiva'));
+            let estadoActualPat = localStorage.getItem('estadoPat');
+
+            if(patSincronizado && patSincronizado.length > 0 && asignacionActiva && (estadoActualPat === 'Aprobado' || estadoActualPat === 'En Revision')) {
+                // Verificamos si ya está en la lista para no duplicar
+                let exists = patsEntregados.find(p => p.grupo === asignacionActiva.grupo);
+                if(!exists) {
+                    patsEntregados.unshift({
+                        id: 99, // ID dinámico
+                        carrera: asignacionActiva.programa,
+                        grupo: asignacionActiva.grupo,
+                        tutor: asignacionActiva.tutor,
+                        h: asignacionActiva.h || 16,
+                        m: asignacionActiva.m || 10,
+                        comentarios: 'Propuesta enviada desde el portal del tutor.',
+                        estado: estadoActualPat === 'Aprobado' ? 'Aprobado' : 'Pendiente Revision',
+                        sesiones: patSincronizado
+                    });
+                }
+            }
+        }
+
+        function renderRevisiones() {
+            cargarPatsReales(); // Asegura que el PAT del test esté en la lista
+
+            document.getElementById('stat-pendientes').innerText = patsEntregados.filter(p => p.estado === 'Pendiente Revision').length;
+            document.getElementById('stat-aprobados').innerText = patsEntregados.filter(p => p.estado === 'Aprobado').length;
+            document.getElementById('stat-rechazados').innerText = patsEntregados.filter(p => p.estado === 'Rechazado').length;
+            
+            const tbody = document.getElementById('revision-tbody');
+            tbody.innerHTML = '';
+            
+            if(patsEntregados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No hay propuestas pendientes de revisión.</td></tr>`;
+                return;
+            }
+
+            patsEntregados.forEach(pat => {
+                let badge = pat.estado === 'Pendiente Revision' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : pat.estado === 'Aprobado' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200';
+                let btn = pat.estado === 'Pendiente Revision' ? `<button onclick="abrirModalRevision(${pat.id})" class="text-sm px-3 py-1.5 bg-[#69B22E] text-white rounded hover:opacity-90 shadow-sm transition-colors"><i data-lucide="eye" class="h-3 w-3 inline mr-1"></i> Revisar PAT</button>` : `<button onclick="abrirModalRevision(${pat.id})" class="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded hover:bg-gray-50 transition-colors">Ver Detalles</button>`;
+                
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium">${prop.cuatrimestre}</td>
-                        <td class="px-4 py-3">${prop.tutor}</td>
-                        <td class="px-4 py-3">${prop.grupo}</td>
-                        <td class="px-4 py-3">${formatearFecha(prop.fecha)}</td>
-                        <td class="px-4 py-3"><span class="px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">${prop.status}</span></td>
-                        <td class="px-4 py-3"><div class="flex items-center gap-2">${switchHtml}<span class="text-sm text-gray-600">${prop.enabled ? 'Activo' : 'Inactivo'}</span></div></td>
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td class="px-4 py-3"><p class="font-bold text-gray-900">${pat.grupo}</p><p class="text-xs text-gray-500 line-clamp-1">${pat.carrera}</p></td>
+                        <td class="px-4 py-3 text-gray-800 font-medium">${pat.tutor}</td>
+                        <td class="px-4 py-3 text-center"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-600">${pat.h + pat.m} Alumnos</span></td>
+                        <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold border ${badge}">${pat.estado}</span></td>
+                        <td class="px-4 py-3 text-center">${btn}</td>
                     </tr>`;
             });
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         }
-        renderizarUI();
+
+        // Esta función abre el nuevo Modal Gigante y dibuja la tabla del PAT
+        function abrirModalRevision(id) {
+            const pat = patsEntregados.find(p => p.id === id);
+            patSeleccionadoId = id;
+            
+            // Llenar Cabecera del Modal
+            document.getElementById('rev-tutor').innerText = pat.tutor; 
+            document.getElementById('rev-grupo').innerText = pat.grupo;
+            document.getElementById('rev-alumnos').innerText = pat.h + pat.m;
+            document.getElementById('rev-h').innerText = pat.h;
+            document.getElementById('rev-m').innerText = pat.m;
+            document.getElementById('rev-comentarios').innerText = `"${pat.comentarios}"`;
+            
+            // Llenar la Tabla de Sesiones del Tutor
+            const tbodySesiones = document.getElementById('rev-sesiones-tbody');
+            tbodySesiones.innerHTML = '';
+            
+            if(pat.sesiones && pat.sesiones.length > 0) {
+                pat.sesiones.forEach(s => {
+                    tbodySesiones.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 text-center font-bold text-gray-700">${s.num}</td>
+                            <td class="px-4 py-2 text-gray-900 font-medium border-l border-gray-200">${s.tematica}</td>
+                            <td class="px-4 py-2 text-gray-600 border-l border-gray-200">${s.objetivo}</td>
+                            <td class="px-4 py-2 text-[#7B5936] font-medium border-l border-gray-200">${s.resultados_esperados}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                 tbodySesiones.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500 italic">No hay sesiones detalladas en este PAT.</td></tr>`;
+            }
+
+            // Resetear el textarea
+            document.getElementById('input-observaciones').value = '';
+
+            // Ocultar botones si ya está revisado
+            const formRevision = document.getElementById('form-revision');
+            if(pat.estado !== 'Pendiente Revision') {
+                formRevision.classList.add('hidden');
+            } else {
+                formRevision.classList.remove('hidden');
+            }
+
+            abrirModal('modal-revisar');
+        }
+
+        function procesarRevision(estado) {
+            const obs = document.getElementById('input-observaciones').value;
+            if (estado === 'Rechazado' && obs.trim() === '') return alert('Es obligatorio escribir observaciones para rechazar la propuesta.');
+            
+            patsEntregados = patsEntregados.map(p => p.id === patSeleccionadoId ? { ...p, estado } : p);
+            
+            // Si aprobó el PAT del test, lo marcamos en LocalStorage
+            if(patSeleccionadoId === 99 && estado === 'Aprobado') {
+                 localStorage.setItem('estadoPat', 'Aprobado');
+            }
+
+            renderRevisiones(); 
+            cerrarModal('modal-revisar');
+        }
+
+        // ==========================================
+        // MÓDULO 3: AUDITORÍA DE SESIONES (EN VIVO CON TUTOR/JEFE)
+        // ==========================================
+        function renderAuditoria() {
+            let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+            let asignacionActiva = JSON.parse(localStorage.getItem('asignacionActiva'));
+            let nombreGrupo = asignacionActiva ? asignacionActiva.grupo : '1G1';
+
+            // Actualizar nombre del grupo en el selector
+            document.getElementById('audit-grupo').innerHTML = `<option value="${nombreGrupo}">${nombreGrupo} (En Vivo)</option>`;
+
+            const tbody = document.getElementById('auditoria-tbody');
+            tbody.innerHTML = '';
+
+            if (sesionesSincronizadas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">El Tutor aún no ha enviado su propuesta PAT o no ha agendado clases.</td></tr>`;
+                return;
+            }
+
+            sesionesSincronizadas.forEach(s => {
+                let badge = '', textoResultados = '';
+                let fechaHora = s.fecha ? `<span class="font-medium text-gray-800">${s.fecha}</span><br><span class="text-xs text-gray-500">${s.hora} hrs</span>` : '<span class="text-xs text-gray-400">Sin agendar</span>';
+
+                if(s.estado === 'Programada') {
+                    badge = `<span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200"><i data-lucide="calendar" class="h-3 w-3 inline mr-1"></i> Programada</span>`;
+                    textoResultados = `<span class="text-xs text-gray-400 italic">Esperando que el tutor imparta la clase...</span>`;
+                } else if(s.estado === 'Finalizada_Por_Tutor') {
+                    badge = `<span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700 text-xs font-bold border border-yellow-200"><i data-lucide="clock" class="h-3 w-3 inline mr-1"></i> Esperando Jefe</span>`;
+                    textoResultados = `<span class="italic text-gray-800">"${s.resultados_obtenidos}"</span>`;
+                } else if(s.estado === 'Validada') {
+                    badge = `<span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold border border-green-200"><i data-lucide="shield-check" class="h-3 w-3 inline mr-1"></i> Validada</span>`;
+                    textoResultados = `<span class="italic text-gray-800">"${s.resultados_obtenidos}"</span>`;
+                } else if(s.estado === 'Cancelada') {
+                    badge = `<span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold border border-red-200"><i data-lucide="x-circle" class="h-3 w-3 inline mr-1"></i> Cancelada</span>`;
+                    textoResultados = `<span class="text-xs text-red-600 font-bold">Motivo reportado:</span> <span class="text-sm italic text-gray-700">"${s.motivo}"</span>`;
+                } else badge = `<span class="text-xs text-gray-400">Pendiente</span>`;
+
+                let pills = s.canalizaciones && s.canalizaciones.length > 0 ? `<div class="mt-2">` + s.canalizaciones.map(c => `<span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded font-bold border border-blue-200 mr-1">${c}</span>`).join('') + `</div>` : '';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td class="px-4 py-3"><p class="text-xs font-bold text-gray-400">Sesión ${s.num}</p><p class="text-sm font-medium text-gray-900">${s.tematica}</p></td>
+                        <td class="px-4 py-3">${fechaHora}</td>
+                        <td class="px-4 py-3 border-l border-gray-100">${textoResultados}${pills}</td>
+                        <td class="px-4 py-3 text-center align-middle">${badge}</td>
+                    </tr>`;
+            });
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Iniciar
+        renderPlantilla();
+        renderRevisiones();
+        renderAuditoria();
+        switchTab('plantillas'); // Empieza en la pestaña de plantillas
     </script>
 </body>
 </html>

@@ -1,69 +1,97 @@
-  // js/auth.js
+// js/auth.js
 
+const loginForm = document.getElementById('loginForm');
 
-// 1. Proteger rutas: Verifica si el usuario tiene permiso de estar en la página actual
-function checkAuth() {
-    const isAuth = localStorage.getItem('isAuthenticated');
-    const currentPath = window.location.pathname;
-    
-    const isLoginPage = currentPath.includes('login.html') || currentPath.endsWith('/');
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // El .trim() elimina los espacios en blanco accidentales que el usuario ponga al inicio o al final
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        
+        const errorMessage = document.getElementById('error-message');
+        const loginBtn = document.getElementById('login-btn');
+        const originalBtnText = loginBtn.innerHTML;
 
-    // Si NO está logueado y NO está en el login -> Lo mandamos al login
-    if (!isAuth && !isLoginPage) {
-        window.location.href = 'login.html';
-    }
-    
-    // Si SÍ está logueado y trata de ver el login -> Lo regresamos a su dashboard correspondiente
-    if (isAuth && isLoginPage) {
-        redirectByRole(localStorage.getItem('userRole'));
-    }
-}
+        try {
+            loginBtn.innerHTML = '<span class="flex items-center justify-center"><i data-lucide="loader-2" class="h-5 w-5 mr-2 animate-spin"></i> Iniciando...</span>';
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+            loginBtn.disabled = true;
+            errorMessage.classList.add('hidden');
 
+            const response = await fetch('http://localhost:5000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-// 2. Función para iniciar sesión (Conectada a la API en Python)
-async function login(email, password) {
-    try {
-        const response = await fetch('http://localhost:5000/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: email, password: password })
-        });
+            const data = await response.json();
 
-        const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('userEmail', data.email);
 
-        if (response.ok && data.success) {
-            // Guardamos los datos reales que vienen de la BD
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userRole', data.role);
-            localStorage.setItem('userEmail', data.email);
-            
-            redirectByRole(data.role);
-            return { success: true };
-        } else {
-            return { success: false, message: data.message || 'Error en la autenticación' };
+                // Como estamos en paginas/login.html, redirigimos directamente a los archivos HTML en la misma carpeta
+                if (data.role === 'admin') window.location.href = 'admin.html';
+                else if (data.role === 'director-tutorias') window.location.href = 'director-tutorias.html';
+                else if (data.role === 'director-carrera') window.location.href = 'director-carrera.html';
+                else if (data.role === 'docente-tutor') window.location.href = 'docente-tutor.html';
+                else if (data.role === 'jefe-grupo') window.location.href = 'jefe-grupo.html';
+            } else {
+                errorMessage.textContent = data.message || 'Error al iniciar sesión';
+                errorMessage.classList.remove('hidden');
+                loginBtn.innerHTML = originalBtnText;
+                loginBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorMessage.textContent = 'Error de conexión. Verifica que el servidor Flask esté encendido.';
+            errorMessage.classList.remove('hidden');
+            loginBtn.innerHTML = originalBtnText;
+            loginBtn.disabled = false;
         }
-    } catch (error) {
-        console.error('Error al conectar con el servidor:', error);
-        return { success: false, message: 'No se pudo conectar con el servidor. Verifica que Flask esté corriendo.' };
+    });
+}
+
+// Validación de seguridad para que nadie entre a los paneles sin iniciar sesión
+function checkAuth() {
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath.endsWith('login.html');
+    
+    const userRole = localStorage.getItem('userRole');
+    const userEmail = localStorage.getItem('userEmail');
+
+    if (!userRole && !isLoginPage) {
+        window.location.href = 'login.html';
+    } 
+    else if (userRole && isLoginPage) {
+        if (userRole === 'admin') window.location.href = 'admin.html';
+        else if (userRole === 'director-tutorias') window.location.href = 'director-tutorias.html';
+        else if (userRole === 'director-carrera') window.location.href = 'director-carrera.html';
+        else if (userRole === 'docente-tutor') window.location.href = 'docente-tutor.html';
+        else if (userRole === 'jefe-grupo') window.location.href = 'jefe-grupo.html';
+    }
+
+    if (!isLoginPage) {
+        const roleDisplay = document.getElementById('user-role-display');
+        const emailDisplay = document.getElementById('user-email-display');
+        
+        if (roleDisplay && userRole) {
+            const formattedRole = userRole.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            roleDisplay.textContent = formattedRole;
+        }
+        if (emailDisplay && userEmail) {
+            emailDisplay.textContent = userEmail;
+        }
     }
 }
 
-// 3. Función para cerrar sesión
-function logout() {
-    localStorage.clear();
-    window.location.href = 'login.html';
-}
+// Función global para Cerrar Sesión
+window.logout = function() {
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    window.location.href = 'login.html'; // Lo devuelve a paginas/login.html
+};
 
-// 4. Redirección basada en roles
-function redirectByRole(role) {
-    if (role === 'director-tutorias') window.location.href = 'director-tutorias.html';
-    else if (role === 'jefe-grupo') window.location.href = 'jefe-grupo.html';
-    else if (role === 'director-carrera') window.location.href = 'director-carrera.html';
-    else if (role === 'docente-tutor') window.location.href = 'docente-tutor.html'; 
-    else window.location.href = 'asignacion-tutores.html'; // Default (Administrador/Control Escolar)
-}
-
-// Ejecutamos la validación inmediatamente al cargar el script en cualquier página
-checkAuth();
+document.addEventListener('DOMContentLoaded', checkAuth);
