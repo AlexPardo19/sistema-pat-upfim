@@ -11,7 +11,7 @@
 <body class="bg-gray-50">
 
     <div class="flex h-screen overflow-hidden">
-        
+
         <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 flex flex-col">
             <div class="p-6 border-b border-gray-200 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -23,20 +23,24 @@
                 </button>
             </div>
 
-            <nav class="flex-1 p-4 space-y-2">
-                <a href="asignacion-tutores.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+            <nav class="flex-1 p-4 space-y-1">
+                <a href="asignacion-tutores.html"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                     <i data-lucide="user-plus" class="h-5 w-5"></i>
                     <span>Asignación de Tutores</span>
                 </a>
-                <a href="alta-docentes.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                <a href="alta-docentes.html"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                     <i data-lucide="users" class="h-5 w-5"></i>
                     <span>Alta de Docentes</span>
                 </a>
-                <a href="consultar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                <a href="consultar-pats.html"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                     <i data-lucide="file-check-2" class="h-5 w-5"></i>
                     <span>Consultar PATs</span>
                 </a>
-                <a href="descargar-pats.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                <a href="descargar-pats.html"
+                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                     <i data-lucide="download" class="h-5 w-5"></i>
                     <span>Descargar PATs</span>
                 </a>
@@ -53,7 +57,7 @@
         <div id="mobile-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
 
         <div class="flex-1 flex flex-col h-screen overflow-hidden">
-            
+
             <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
@@ -62,7 +66,7 @@
                         </button>
                         <div>
                             <h1 class="text-2xl text-[#7B5936]">Alta de Docentes</h1>
-                            <p class="text-sm text-gray-500 mt-1">Registra nuevos docentes en el sistema</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Registra nuevos docentes en el sistema</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -70,118 +74,189 @@
                             <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
                             <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
                         </div>
-                        <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
-                            <span id="user-avatar-letter">U</span>
+                        <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E] text-sm font-bold">
+                            <span id="user-avatar-letter">D</span>
                         </div>
                     </div>
                 </div>
             </header>
 
             <main class="flex-1 overflow-auto p-6">
-                <div class="max-w-4xl mx-auto bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                    <form id="alta-docente-form" class="space-y-6 max-w-2xl">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label for="nombre" class="text-sm font-medium text-[#7B5936]">Nombre(s)</label>
-                                <input id="nombre" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]" />
+                <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-6">
+
+                    <!-- Formulario -->
+                    <div class="md:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-fit">
+                        <h3 class="text-base font-medium text-[#7B5936] mb-4">Nuevo Docente</h3>
+                        <form id="alta-docente-form" class="space-y-4">
+                            <div>
+                                <label for="nombre" class="block text-xs font-medium text-gray-500 mb-1">Nombre(s)</label>
+                                <input id="nombre" required
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]" />
                             </div>
-                            <div class="space-y-2">
-                                <label for="apellidos" class="text-sm font-medium text-[#7B5936]">Apellidos</label>
-                                <input id="apellidos" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]" />
+                            <div>
+                                <label for="apellidos" class="block text-xs font-medium text-gray-500 mb-1">Apellidos</label>
+                                <input id="apellidos" required
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]" />
                             </div>
-                            <div class="space-y-2">
-                                <label for="email" class="text-sm font-medium text-[#7B5936]">Correo Institucional</label>
-                                <input id="email" type="email" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]" />
+                            <div>
+                                <label for="email" class="block text-xs font-medium text-gray-500 mb-1">Correo Institucional</label>
+                                <input id="email" type="email" required placeholder="nombre@upfim.edu.mx"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]" />
                             </div>
-                            <div class="space-y-2">
-                                <label for="departamento" class="text-sm font-medium text-[#7B5936]">Departamento</label>
-                                <select id="departamento" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]">
-                                    <option value="" disabled selected>Selecciona departamento</option>
-                                    <option value="Ingeniería">Ingeniería</option>
-                                    <option value="Administración">Administración</option>
-                                </select>
+                            <div>
+                                <label for="departamento" class="block text-xs font-medium text-gray-500 mb-1">Carrera / Programa Educativo</label>
+                                <input id="departamento" type="text" readonly
+                                    class="w-full border border-gray-300 bg-gray-50 text-gray-600 rounded-md px-3 py-2 text-sm cursor-not-allowed" />
                             </div>
+
+                            <!-- Mensaje de feedback inline -->
+                            <div id="form-msg" class="hidden text-sm rounded-md px-3 py-2"></div>
+
+                            <button type="submit" id="btn-submit"
+                                class="w-full py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-opacity text-sm font-medium">
+                                Registrar Docente
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de docentes registrados -->
+                    <div class="md:col-span-3 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden h-fit">
+                        <div class="px-5 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                            <h3 class="font-medium text-[#7B5936] text-sm">Docentes Registrados</h3>
+                            <span id="contador" class="text-xs text-gray-500"></span>
                         </div>
-                        <button type="submit" class="h-10 px-4 py-2 rounded-md text-white hover:opacity-90 bg-[#69B22E] transition-all">
-                            Registrar Docente
-                        </button>
-                    </form>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                                    <tr>
+                                        <th class="px-4 py-3">Docente</th>
+                                        <th class="px-4 py-3">Carrera</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="docentes-tbody" class="divide-y divide-gray-100">
+                                    <tr>
+                                        <td colspan="2" class="px-4 py-6 text-center text-gray-400 text-xs">
+                                            <i data-lucide="loader-2" class="h-4 w-4 animate-spin inline mr-1"></i>Cargando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
             </main>
         </div>
     </div>
 
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script src="../js/auth.js"></script>
     <script src="../js/layout.js"></script>
     <script>
-        // Función para mostrar notificaciones modernas (Toast)
+        const API = 'http://localhost:5000/api';
+        const session = typeof window.getSessionData === 'function' ? window.getSessionData() : null;
+        const miCarrera = (session && session.departamento) || '';
+
+        // Auto-rellenar carrera del director en el formulario
+        document.addEventListener('DOMContentLoaded', () => {
+            const deptoInput = document.getElementById('departamento');
+            if (deptoInput && miCarrera) {
+                deptoInput.value = miCarrera;
+            }
+        });
+
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
-            // Colores dependiendo de si es éxito o error
-            const bgColor = type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-
-            toast.className = `flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg transition-opacity duration-300 ${bgColor}`;
-            toast.innerHTML = `
-                <i data-lucide="${icon}" class="h-5 w-5"></i>
-                <span class="text-sm font-medium">${message}</span>
-            `;
-
+            const config = {
+                success: { bg: 'bg-green-50 border-green-200 text-green-800', icon: 'check-circle' },
+                error:   { bg: 'bg-red-50 border-red-200 text-red-800',       icon: 'alert-circle' },
+            };
+            const { bg, icon } = config[type] || config.success;
+            toast.className = `flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto ${bg}`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="h-4 w-4 flex-shrink-0"></i><span class="text-sm font-medium">${message}</span>`;
             container.appendChild(toast);
             if (typeof lucide !== 'undefined') lucide.createIcons({ root: toast });
-
-            // Desaparece automáticamente después de 3.5 segundos
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 300); // Espera la animación de CSS
-            }, 3500);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
-        // Manejador del formulario
-        document.getElementById('alta-docente-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const btnSubmit = this.querySelector('button[type="submit"]');
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = 'Registrando...';
+        // Cargar lista de docentes FILTRADA por carrera del director
+        async function cargarDocentes() {
+            try {
+                const url = miCarrera ? `${API}/docentes?carrera=${encodeURIComponent(miCarrera)}` : `${API}/docentes`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const tbody = document.getElementById('docentes-tbody');
+                if (data.success) {
+                    document.getElementById('contador').textContent = `${data.docentes.length} docente(s)`;
+                    if (data.docentes.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="2" class="px-4 py-6 text-center text-gray-400 italic text-xs">Sin docentes registrados en tu carrera.</td></tr>`;
+                        return;
+                    }
+                    tbody.innerHTML = data.docentes.map(d => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <p class="font-medium text-gray-900 text-sm">${d.nombre} ${d.apellidos}</p>
+                                <p class="text-xs text-gray-500">${d.email}</p>
+                            </td>
+                            <td class="px-4 py-3 text-xs text-gray-600">${d.departamento_o_carrera || '—'}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                document.getElementById('docentes-tbody').innerHTML = `
+                    <tr><td colspan="2" class="px-4 py-6 text-center text-red-400 text-xs">
+                        Sin conexión con el servidor
+                    </td></tr>`;
+            }
+        }
 
-            // Recolectamos los datos de los inputs
-            const data = {
-                nombre: document.getElementById('nombre').value,
-                apellidos: document.getElementById('apellidos').value,
-                email: document.getElementById('email').value,
-                departamento: document.getElementById('departamento').value
+        // Enviar formulario
+        document.getElementById('alta-docente-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const msgEl = document.getElementById('form-msg');
+            btn.disabled = true;
+            btn.textContent = 'Registrando...';
+            msgEl.classList.add('hidden');
+
+            const payload = {
+                nombre:      document.getElementById('nombre').value.trim(),
+                apellidos:   document.getElementById('apellidos').value.trim(),
+                email:       document.getElementById('email').value.trim().toLowerCase(),
+                departamento: document.getElementById('departamento').value,
             };
 
             try {
-                // Enviamos los datos al servidor Python
-                const response = await fetch('http://localhost:5000/api/docentes', {
-                    method: 'POST',
+                const res  = await fetch(`${API}/docentes`, {
+                    method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body:    JSON.stringify(payload),
                 });
-                
-                const result = await response.json();
+                const data = await res.json();
 
-                if (response.ok && result.success) {
-                    showToast(result.message, 'success');
-                    this.reset(); // Limpia el formulario
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    this.reset();
+                    await cargarDocentes();
                 } else {
-                    showToast(result.message || 'Ocurrió un error al registrar', 'error');
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';
+                    msgEl.classList.remove('hidden');
                 }
-            } catch (error) {
-                console.error('Error de conexión:', error);
-                showToast('Error de conexión con el servidor local.', 'error');
+            } catch (err) {
+                msgEl.textContent = 'Error de conexión con el servidor.';
+                msgEl.className = 'text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';
+                msgEl.classList.remove('hidden');
             } finally {
-                // Restauramos el botón
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = 'Registrar Docente';
+                btn.disabled = false;
+                btn.textContent = 'Registrar Docente';
             }
         });
+
+        cargarDocentes();
     </script>
 </body>
 </html>

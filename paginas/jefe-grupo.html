@@ -54,23 +54,20 @@
             </div>
 
             <div id="tab-resumen" class="mt-5 block space-y-6">
-                
                 <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div>
                             <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-purple-50 text-purple-700 border-purple-200 mb-2 inline-block">Tu Grupo</span>
-                            <h2 class="text-2xl font-bold text-gray-900">1G1 - Tecnologías de la Información</h2>
+                            <h2 class="text-2xl font-bold text-gray-900" id="info-jg-grupo">Cargando...</h2>
                         </div>
                         <div class="text-left md:text-right bg-gray-50 p-3 rounded-lg border border-gray-100">
                             <p class="text-sm text-gray-500">Docente Tutor Asignado</p>
-                            <p class="font-medium text-[#7B5936] flex items-center justify-end gap-2">
-                                <i data-lucide="graduation-cap" class="h-4 w-4"></i> Alicia León Martínez
+                            <p class="font-medium text-[#7B5936] flex items-center md:justify-end gap-2">
+                                <i data-lucide="graduation-cap" class="h-4 w-4"></i> <span id="info-jg-tutor">Cargando...</span>
                             </p>
                         </div>
                     </div>
-
-                    <div id="mensaje-estado-pat" class="mb-4">
-                        </div>
+                    <div id="mensaje-estado-pat" class="mb-4"></div>
                 </div>
 
                 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" id="contenedor-tabla-resumen">
@@ -87,21 +84,19 @@
                                     <th class="px-4 py-3 min-w-[200px]">Objetivo de la Sesión</th>
                                 </tr>
                             </thead>
-                            <tbody id="resumen-tbody" class="divide-y divide-gray-100">
-                                </tbody>
+                            <tbody id="resumen-tbody" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <div id="tab-validacion" class="mt-5 hidden space-y-6">
-                
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 flex items-start gap-4 shadow-sm">
                     <i data-lucide="info" class="h-6 w-6 text-blue-500 flex-shrink-0 mt-0.5"></i>
                     <div>
                         <h2 class="text-lg font-bold text-blue-900 mb-1">Tu responsabilidad como Jefe de Grupo</h2>
                         <p class="text-sm text-blue-800">
-                            Cuando tu tutor finalice una clase en el sistema, aparecerá aquí. Es tu deber oficial <strong>Firmar (Validar)</strong> que la sesión se impartió con el grupo, o <strong>Cancelar</strong> indicando el motivo por el cual no se llevó a cabo.
+                            Cuando tu tutor finalice o cancele una clase, aparecerá aquí. Es tu deber oficial <strong>Firmar y Confirmar</strong> la situación para la Dirección de Tutorías.
                         </p>
                     </div>
                 </div>
@@ -121,36 +116,25 @@
                                     <th class="px-4 py-3 text-center w-64">Acción Requerida</th>
                                 </tr>
                             </thead>
-                            <tbody id="validacion-tbody" class="divide-y divide-gray-100">
-                                </tbody>
+                            <tbody id="validacion-tbody" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
     <div id="modal-cancelar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-md border-t-4 border-red-500 shadow-xl">
             <div class="flex items-center gap-3 mb-4">
-                <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                    <i data-lucide="alert-triangle" class="h-5 w-5"></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900">Reportar Cancelación</h3>
-                    <p class="text-xs text-gray-500">Sesión <span id="cancel-num" class="font-bold"></span></p>
-                </div>
+                <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-600"><i data-lucide="alert-triangle" class="h-5 w-5"></i></div>
+                <div><h3 class="text-lg font-bold text-gray-900">Reportar Cancelación</h3><p class="text-xs text-gray-500">Sesión <span id="cancel-num" class="font-bold"></span></p></div>
             </div>
-            
-            <p class="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded border border-gray-200">
-                La Dirección de Tutorías auditará este reporte. Por favor, sé específico sobre por qué no se impartió la hora de tutoría.
-            </p>
-            
+            <p class="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded border border-gray-200">La Dirección de Tutorías auditará este reporte. Por favor, sé específico sobre por qué no se impartió la hora de tutoría.</p>
             <form id="form-cancelar" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de Cancelación <span class="text-red-500">*</span></label>
-                    <textarea id="input-motivo" rows="3" required placeholder="Ej: El docente no asistió, acudimos a una conferencia, etc." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"></textarea>
+                    <textarea id="input-motivo" rows="3" required placeholder="Ej: El docente no asistió, acudimos a una conferencia, etc." class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
                 </div>
                 <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
                     <button type="button" onclick="cerrarModal('modal-cancelar')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium text-sm">Regresar</button>
@@ -160,14 +144,34 @@
         </div>
     </div>
 
+    <div id="modal-validar-cancelacion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md border-t-4 border-orange-500 shadow-xl">
+            <h3 class="text-lg font-bold text-orange-700 mb-2">Validar Cancelación de Sesión</h3>
+            <p class="text-sm text-gray-600 mb-4">Tu tutor ha reportado que esta clase no se impartió y la Dirección requiere tu firma para confirmarlo.</p>
+            
+            <div class="bg-gray-50 p-3 rounded border border-gray-200 mb-4">
+                <p class="text-xs font-bold text-gray-700 mb-1">Motivo escrito por el Docente:</p>
+                <p id="motivo-docente-display" class="text-sm text-gray-600 italic"></p>
+            </div>
+
+            <form id="form-validar-cancelacion" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tus observaciones como grupo (Opcional)</label>
+                    <textarea id="input-obs-jefe" rows="2" placeholder="Ej: Confirmo que nos avisó con tiempo..." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-orange-500"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="cerrarModal('modal-validar-cancelacion')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm">Regresar</button>
+                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 text-sm shadow-sm font-medium">Confirmar Cancelación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="../js/auth.js"></script>
     <script>
-        // --- NAVEGACIÓN DE TABS ---
         function switchTab(tabId) {
-            document.getElementById('tab-resumen').classList.add('hidden');
-            document.getElementById('tab-validacion').classList.add('hidden');
+            document.getElementById('tab-resumen').classList.add('hidden'); document.getElementById('tab-validacion').classList.add('hidden');
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            
             document.getElementById('tab-btn-resumen').className = tabId === 'resumen' ? "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all" : "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
             document.getElementById('tab-btn-validacion').className = tabId === 'validacion' ? "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all" : "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
         }
@@ -175,65 +179,40 @@
         function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // --- SINCRONIZACIÓN CON EL DOCENTE TUTOR (VÍA LOCALSTORAGE) ---
         let estadoPat = localStorage.getItem('estadoPat') || 'No Creado';
         let datosCompartidos = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+        let asignacionActiva = JSON.parse(localStorage.getItem('asignacionActiva')) || { grupo: '1G1', tutor: 'Alicia León Martínez' };
         let sesionActual = null;
 
         function renderDashboard() {
+            document.getElementById('info-jg-grupo').innerText = asignacionActiva.grupo;
+            document.getElementById('info-jg-tutor').innerText = asignacionActiva.tutor;
+
             const mensajeEstado = document.getElementById('mensaje-estado-pat');
             const tablaResumen = document.getElementById('contenedor-tabla-resumen');
             const tbodyResumen = document.getElementById('resumen-tbody');
             const tbodyValidacion = document.getElementById('validacion-tbody');
             
-            tbodyResumen.innerHTML = '';
-            tbodyValidacion.innerHTML = '';
+            tbodyResumen.innerHTML = ''; tbodyValidacion.innerHTML = '';
 
-            // Si el tutor no ha generado y enviado el PAT
             if (estadoPat !== 'Aprobado') {
-                mensajeEstado.innerHTML = `
-                    <div class="bg-yellow-50 border border-yellow-200 rounded p-4 flex items-center gap-3">
-                        <i data-lucide="clock" class="h-6 w-6 text-yellow-600"></i>
-                        <div>
-                            <p class="text-sm font-bold text-yellow-800">El Plan de Acción Tutorial aún no está disponible.</p>
-                            <p class="text-xs text-yellow-700">Tu Docente Tutor se encuentra configurando las 15 sesiones o están en revisión por parte de la Dirección de Tutorías.</p>
-                        </div>
-                    </div>
-                `;
+                mensajeEstado.innerHTML = `<div class="bg-yellow-50 border border-yellow-200 rounded p-4 flex items-center gap-3"><i data-lucide="clock" class="h-6 w-6 text-yellow-600"></i><div><p class="text-sm font-bold text-yellow-800">El Plan de Acción Tutorial aún no está disponible.</p><p class="text-xs text-yellow-700">Tu Docente Tutor se encuentra configurando las 15 sesiones.</p></div></div>`;
                 tablaResumen.classList.add('hidden');
                 tbodyValidacion.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Esperando publicación del PAT...</td></tr>`;
                 if(typeof lucide !== 'undefined') lucide.createIcons();
                 return;
             }
 
-            // Si el PAT ya está activo
             tablaResumen.classList.remove('hidden');
-            mensajeEstado.innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded p-4 flex items-center gap-3">
-                    <i data-lucide="check-circle" class="h-6 w-6 text-green-600"></i>
-                    <div>
-                        <p class="text-sm font-bold text-green-800">Plan de Acción Tutorial Activo</p>
-                        <p class="text-xs text-green-700">El cuatrimestre ha iniciado. Revisa los temas de abajo y valida en la pestaña contigua cuando se impartan.</p>
-                    </div>
-                </div>
-            `;
+            mensajeEstado.innerHTML = `<div class="bg-green-50 border border-green-200 rounded p-4 flex items-center gap-3"><i data-lucide="check-circle" class="h-6 w-6 text-green-600"></i><div><p class="text-sm font-bold text-green-800">Plan de Acción Tutorial Activo</p><p class="text-xs text-green-700">El cuatrimestre ha iniciado. Revisa los temas de abajo y valida en la pestaña contigua cuando se impartan.</p></div></div>`;
 
             datosCompartidos.forEach(s => {
-                // 1. Llenar Tabla de Resumen (Solo Lectura)
-                tbodyResumen.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td>
-                        <td class="px-4 py-3 text-center"><span class="px-2 py-1 bg-gray-200 rounded text-xs font-bold text-gray-700">${s.corte || 'I'}</span></td>
-                        <td class="px-4 py-3 font-medium text-gray-900">${s.tematica}</td>
-                        <td class="px-4 py-3 text-gray-600 italic">"${s.objetivo}"</td>
-                    </tr>
-                `;
+                // Tabla Resumen
+                tbodyResumen.innerHTML += `<tr class="hover:bg-gray-50"><td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td><td class="px-4 py-3 text-center"><span class="px-2 py-1 bg-gray-200 rounded text-xs font-bold text-gray-700">${s.corte || 'I'}</span></td><td class="px-4 py-3 font-medium text-gray-900">${s.tematica}</td><td class="px-4 py-3 text-gray-600 italic">"${s.objetivo}"</td></tr>`;
 
-                // 2. Llenar Tabla de Validación (Operativa)
-                let estadoTutor = '';
-                let accionJefe = '';
+                // Tabla Validación
+                let estadoTutor = ''; let accionJefe = '';
 
-                // Lógica de semáforos y botones
                 if (!s.fecha) {
                     estadoTutor = `<span class="text-xs text-gray-400"><i data-lucide="calendar" class="h-3 w-3 inline"></i> Sin agendar</span>`;
                     accionJefe = `<span class="text-[10px] text-gray-400 italic">En espera del docente</span>`;
@@ -241,52 +220,36 @@
                     estadoTutor = `<span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"><i data-lucide="clock" class="h-3 w-3 inline"></i> ${s.fecha} - ${s.hora} hrs</span>`;
                     accionJefe = `<span class="text-[10px] text-gray-500 italic">Clase pendiente de impartirse</span>`;
                 } else if (s.estado === 'Finalizada_Por_Tutor') {
-                    estadoTutor = `<span class="text-xs font-bold text-green-700"><i data-lucide="check" class="h-3 w-3 inline"></i> Clase reportada el ${s.fecha}</span>`;
-                    accionJefe = `
-                        <div class="flex gap-2 justify-center">
-                            <button onclick="validarSesion(${s.num})" class="px-3 py-1.5 bg-[#69B22E] text-white rounded text-xs font-bold hover:opacity-90 shadow-sm transition-transform hover:scale-105"><i data-lucide="check-check" class="h-3 w-3 inline mr-1"></i> Firmar</button>
-                            <button onclick="abrirCancelar(${s.num})" class="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-bold hover:bg-red-100 transition-colors">Cancelar</button>
-                        </div>
-                    `;
+                    estadoTutor = `<span class="text-xs font-bold text-green-700"><i data-lucide="check" class="h-3 w-3 inline"></i> Impartida el ${s.fecha}</span>`;
+                    accionJefe = `<div class="flex gap-2 justify-center"><button onclick="validarSesion(${s.num})" class="px-3 py-1.5 bg-[#69B22E] text-white rounded text-xs font-bold hover:opacity-90 shadow-sm transition-transform hover:scale-105"><i data-lucide="check-check" class="h-3 w-3 inline mr-1"></i> Firmar</button><button onclick="abrirCancelar(${s.num})" class="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-bold hover:bg-red-100 transition-colors">Cancelar</button></div>`;
+                } else if (s.estado === 'Cancelada_Por_Tutor') {
+                    estadoTutor = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100"><i data-lucide="x-circle" class="h-3 w-3 inline mr-1"></i> Solicitó Cancelación</span>`;
+                    accionJefe = `<div class="flex gap-2 justify-center"><button onclick="abrirValidarCancelacion(${s.num})" class="px-3 py-1.5 bg-orange-100 text-orange-700 border border-orange-300 rounded text-xs font-bold hover:bg-orange-200 shadow-sm"><i data-lucide="check-square" class="h-3 w-3 inline mr-1"></i> Revisar y Validar</button></div>`;
                 } else if (s.estado === 'Validada') {
                     estadoTutor = `<span class="text-xs font-bold text-gray-500">Impartida el ${s.fecha}</span>`;
                     accionJefe = `<span class="px-3 py-1 bg-green-100 border border-green-200 text-green-700 rounded-full text-[10px] font-bold inline-flex items-center shadow-sm"><i data-lucide="shield-check" class="h-3 w-3 mr-1"></i> Firma Guardada</span>`;
                 } else if (s.estado === 'Cancelada') {
                     estadoTutor = `<span class="text-xs font-bold text-gray-400 line-through">Programada ${s.fecha}</span>`;
-                    accionJefe = `<div class="bg-red-50 p-2 rounded border border-red-100"><span class="text-[10px] text-red-600 font-bold block mb-1">Cancelada por ti:</span><span class="text-[10px] italic text-red-800">"${s.motivo}"</span></div>`;
+                    accionJefe = `<div class="bg-red-50 p-2 rounded border border-red-100"><span class="text-[10px] text-red-600 font-bold block mb-1">Cancelada oficialmente:</span><span class="text-[10px] italic text-red-800">"${s.motivo}"</span></div>`;
                 }
 
-                tbodyValidacion.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td>
-                        <td class="px-4 py-3">
-                            <p class="font-medium text-gray-900">${s.tematica}</p>
-                            <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-1">${s.objetivo}</p>
-                        </td>
-                        <td class="px-4 py-3">${estadoTutor}</td>
-                        <td class="px-4 py-3 text-center align-middle">${accionJefe}</td>
-                    </tr>
-                `;
+                tbodyValidacion.innerHTML += `<tr class="hover:bg-gray-50 border-b border-gray-100"><td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td><td class="px-4 py-3"><p class="font-medium text-gray-900">${s.tematica}</p><p class="text-[10px] text-gray-500 mt-0.5 line-clamp-1">${s.objetivo}</p></td><td class="px-4 py-3">${estadoTutor}</td><td class="px-4 py-3 text-center align-middle">${accionJefe}</td></tr>`;
             });
-
             if(typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        // --- ACCIONES DE VALIDACIÓN ---
+        // 1. EL JEFE FIRMA UNA CLASE QUE SÍ SE DIO
         function validarSesion(num) {
             if(confirm(`Al firmar, confirmas oficialmente a la universidad que la Sesión ${num} se impartió de manera correcta en tu grupo. ¿Deseas firmar digitalmente?`)) {
                 const sesion = datosCompartidos.find(s => s.num === num);
                 sesion.estado = 'Validada';
-                
-                // Guardamos en la "BD" (LocalStorage)
                 localStorage.setItem('patSincronizado', JSON.stringify(datosCompartidos));
-                
-                // Notificación visual de éxito
-                alert("¡Firma digital guardada exitosamente! Tu tutor y la Dirección de Tutorías ya pueden ver la validación.");
+                alert("¡Firma digital guardada exitosamente!");
                 renderDashboard();
             }
         }
 
+        // 2. EL JEFE REPORTA QUE LA CLASE NO SE DIO
         function abrirCancelar(num) {
             sesionActual = num;
             document.getElementById('cancel-num').innerText = num;
@@ -299,15 +262,39 @@
             const sesion = datosCompartidos.find(s => s.num === sesionActual);
             sesion.estado = 'Cancelada';
             sesion.motivo = document.getElementById('input-motivo').value;
-            
-            // Sincroniza la cancelación
             localStorage.setItem('patSincronizado', JSON.stringify(datosCompartidos));
-            
             cerrarModal('modal-cancelar');
             renderDashboard();
         });
 
-        // Iniciar vistas
+        // =========================================================
+        // 3. NUEVA FUNCIÓN: EL JEFE VALIDA LA CANCELACIÓN DEL TUTOR
+        // =========================================================
+        function abrirValidarCancelacion(num) {
+            sesionActual = num;
+            const sesion = datosCompartidos.find(s => s.num === num);
+            document.getElementById('motivo-docente-display').innerText = `"${sesion.motivo}"`;
+            document.getElementById('input-obs-jefe').value = '';
+            abrirModal('modal-validar-cancelacion');
+        }
+
+        document.getElementById('form-validar-cancelacion').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const sesion = datosCompartidos.find(s => s.num === sesionActual);
+            const obsJefe = document.getElementById('input-obs-jefe').value;
+            
+            sesion.estado = 'Cancelada';
+            
+            // Combinar motivos si el jefe escribió algo para que los Directores vean ambos
+            if(obsJefe.trim() !== '') {
+                sesion.motivo = `Docente: ${sesion.motivo} | Observación Jefe: ${obsJefe}`;
+            }
+            
+            localStorage.setItem('patSincronizado', JSON.stringify(datosCompartidos));
+            cerrarModal('modal-validar-cancelacion');
+            renderDashboard();
+        });
+
         renderDashboard();
     </script>
 </body>

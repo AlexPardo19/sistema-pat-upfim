@@ -113,28 +113,97 @@
     <script src="../js/auth.js"></script>
     <script src="../js/layout.js"></script>
     <script>
-        // Lógica específica de esta pantalla
-        const tutores = [
-            { id: 1, name: 'Dr. María González' },
-            { id: 2, name: 'Mtro. Carlos Ramírez' },
-            { id: 3, name: 'Dra. Ana Martínez' }
-        ];
-        const grupos = [
-            { id: 1, code: 'ING-2024-A', name: 'Ingeniería 2024-A' },
-            { id: 2, code: 'ADM-2024-B', name: 'Administración 2024-B' }
-        ];
+        const API = 'http://localhost:5000/api';
+        const session = typeof window.getSessionData === 'function' ? window.getSessionData() : null;
+        const miCarrera = (session && session.departamento) || '';
 
-        const tutorSelect = document.getElementById('tutor-select');
-        tutores.forEach(t => tutorSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`);
+        // Cargar tutores de mi carrera desde la API
+        async function cargarTutores() {
+            const tutorSelect = document.getElementById('tutor-select');
+            try {
+                const url = miCarrera ? `${API}/docentes?carrera=${encodeURIComponent(miCarrera)}` : `${API}/docentes`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    tutorSelect.innerHTML = '<option value="" disabled selected>Selecciona un tutor</option>';
+                    data.docentes.forEach(d => {
+                        tutorSelect.innerHTML += `<option value="${d.id}">${d.nombre} ${d.apellidos}</option>`;
+                    });
+                }
+            } catch (err) {
+                tutorSelect.innerHTML = '<option value="">Error al cargar tutores</option>';
+            }
+        }
 
+        // Cargar asignaciones existentes
+        async function cargarAsignaciones() {
+            try {
+                const cRes = await fetch(`${API}/carreras`);
+                const cData = await cRes.json();
+                let carreraId = null;
+                if (cData.success) {
+                    const found = cData.carreras.find(c => c.nombre === miCarrera);
+                    if (found) carreraId = found.id;
+                }
+                if (!carreraId) return;
+                const res = await fetch(`${API}/asignaciones?carrera_id=${carreraId}`);
+                const data = await res.json();
+                if (data.success && data.asignaciones.length > 0) {
+                    const groupSelect = document.getElementById('group-select');
+                    // Mostrar asignaciones existentes como referencia en el select de grupo
+                    groupSelect.innerHTML = '<option value="" disabled selected>Selecciona un grupo</option>';
+                    // Agregar grupos comunes
+                    for (let i = 1; i <= 10; i++) {
+                        groupSelect.innerHTML += `<option value="${i}G${i}">${i}G${i}</option>`;
+                    }
+                }
+            } catch (err) { console.error('Error cargando asignaciones:', err); }
+        }
+
+        // Populate group select with common groups
         const groupSelect = document.getElementById('group-select');
-        grupos.forEach(g => groupSelect.innerHTML += `<option value="${g.id}">${g.code} - ${g.name}</option>`);
+        groupSelect.innerHTML = '<option value="" disabled selected>Selecciona un grupo</option>';
+        for (let i = 1; i <= 10; i++) {
+            for (let j = 1; j <= 3; j++) {
+                groupSelect.innerHTML += `<option value="${i}G${j}">${i}G${j}</option>`;
+            }
+        }
 
-        document.getElementById('asignacion-form').addEventListener('submit', function(e) {
+        document.getElementById('asignacion-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            alert('Tutor asignado exitosamente');
-            this.reset();
+            const tutorId = document.getElementById('tutor-select').value;
+            const grupo = document.getElementById('group-select').value;
+            const periodo = document.getElementById('periodo').value;
+            const anio = new Date().getFullYear();
+
+            try {
+                const cRes = await fetch(`${API}/carreras`);
+                const cData = await cRes.json();
+                let carreraId = null;
+                if (cData.success) {
+                    const found = cData.carreras.find(c => c.nombre === miCarrera);
+                    if (found) carreraId = found.id;
+                }
+                if (!carreraId) { alert('No se encontró la carrera asignada.'); return; }
+
+                const res = await fetch(`${API}/asignaciones`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ carrera_id: carreraId, tutor_id: parseInt(tutorId), grupo, periodo, anio })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    this.reset();
+                } else {
+                    alert(data.message || 'Error al asignar tutor.');
+                }
+            } catch (err) {
+                alert('Error de conexión con el servidor.');
+            }
         });
+
+        cargarTutores();
     </script>
 </body>
 </html>

@@ -6,53 +6,61 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
-    // 2. Cargar los datos del usuario en la interfaz (Header Superior)
-    const userEmail = localStorage.getItem('userEmail') || 'usuario@upfim.edu.mx';
-    const userRole = localStorage.getItem('userRole') || 'Usuario';
-    
-    const emailDisplay = document.getElementById('user-email-display');
-    const roleDisplay = document.getElementById('user-role-display');
-    const avatarLetter = document.getElementById('user-avatar-letter');
-    
-    if (emailDisplay) emailDisplay.textContent = userEmail;
-    
-    if (roleDisplay) {
-        let roleTitle = 'Usuario';
-        if (userRole === 'director-tutorias') roleTitle = 'Director de Tutorías';
-        else if (userRole === 'jefe-grupo') roleTitle = 'Jefe de Grupo';
-        else if (userRole === 'director-carrera') roleTitle = 'Director de Carrera';
-        else if (userRole === 'docente-tutor') roleTitle = 'Docente Tutor';
-        
-        roleDisplay.textContent = roleTitle;
-        // Pone la primera letra del rol en el circulito del avatar (si existe)
-        if(avatarLetter) avatarLetter.textContent = roleTitle.charAt(0); 
+    // 2. Cargar datos del usuario desde la sesión (auth.js)
+    const session = typeof window.getSessionData === 'function' ? window.getSessionData() : null;
+
+    // Fallback a claves antiguas por compatibilidad
+    const userEmail = (session && session.email) || localStorage.getItem('userEmail') || '';
+    const userRole  = (session && session.role)  || localStorage.getItem('userRole')  || '';
+    const userName  = (session && session.nombre) || '';
+
+    const ROLE_LABELS = {
+        'admin':             'Administrador',
+        'director-tutorias': 'Director de Tutorías',
+        'director-carrera':  'Director de Carrera',
+        'docente-tutor':     'Docente Tutor',
+        'jefe-grupo':        'Jefe de Grupo',
+    };
+
+    const emailDisplay  = document.getElementById('user-email-display');
+    const roleDisplay   = document.getElementById('user-role-display');
+    const avatarLetter  = document.getElementById('user-avatar-letter');
+
+    if (emailDisplay) emailDisplay.textContent  = userEmail;
+    if (roleDisplay)  roleDisplay.textContent   = ROLE_LABELS[userRole] || userRole;
+
+    if (avatarLetter) {
+        // Usar la inicial del nombre si está disponible; si no, la del rol
+        const inicial = userName
+            ? userName.charAt(0).toUpperCase()
+            : (ROLE_LABELS[userRole] || 'U').charAt(0).toUpperCase();
+        avatarLetter.textContent = inicial;
     }
 
-    // 3. Resaltar en verde el menú activo en el Sidebar (Menú Lateral)
-    const currentPath = window.location.pathname.split('/').pop() || 'asignacion-tutores.html';
-    const navLinks = document.querySelectorAll('aside nav a');
-    
+    // 3. Resaltar enlace activo en el sidebar
+    const currentPage = window.location.pathname.split('/').pop() || '';
+    const navLinks    = document.querySelectorAll('aside nav a.nav-link, aside nav a');
+
     navLinks.forEach(link => {
-        const linkPath = link.getAttribute('href');
-        
-        // Si el enlace coincide con la página actual, le ponemos los colores de la UPFIM
-        if (linkPath === currentPath) {
+        const linkFile = (link.getAttribute('href') || '').split('/').pop();
+
+        if (linkFile === currentPage) {
             link.classList.remove('text-gray-700', 'hover:bg-gray-100');
             link.classList.add('text-white', 'bg-[#69B22E]');
+            // Quitar hover que sobreescribe el color activo
+            link.classList.remove('hover:bg-gray-100');
         } else {
-            // Asegurarnos de que los inactivos tengan el estilo gris correcto
             link.classList.remove('text-white', 'bg-[#69B22E]');
             link.classList.add('text-gray-700', 'hover:bg-gray-100');
         }
     });
 });
 
-// 4. Lógica para abrir/cerrar el menú en vista de Celular
+// 4. Toggle del menú móvil
 function toggleMenu() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobile-overlay');
-    
-    if(sidebar && overlay) {
+    if (sidebar && overlay) {
         sidebar.classList.toggle('-translate-x-full');
         overlay.classList.toggle('hidden');
     }

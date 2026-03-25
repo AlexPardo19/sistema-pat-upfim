@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         /* Estilo para que el modal grande pueda hacer scroll si el PAT es muy largo */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -108,6 +110,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+                    
                                 <tr>
                                     <th class="px-4 py-3 w-16 text-center">No.</th>
                                     <th class="px-4 py-3 w-24">Corte</th>
@@ -245,9 +248,14 @@
 
     <div id="modal-revisar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-medium text-[#7B5936]">Revisión de Propuesta PAT</h3>
-                <button onclick="cerrarModal('modal-revisar')" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="h-6 w-6"></i></button>
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl font-medium text-[#7B5936]">Revisión de Propuesta PAT</h3>
+                    <button onclick="descargarPDFDesdeDirector(event)" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center font-medium">
+                        <i data-lucide="file-down" class="h-4 w-4 mr-1"></i> Descargar PDF
+                    </button>
+                </div>
+                <button onclick="cerrarModal('modal-revisar')" class="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full"><i data-lucide="x" class="h-5 w-5"></i></button>
             </div>
 
             <div class="overflow-y-auto pr-2 custom-scrollbar">
@@ -294,6 +302,7 @@
     </div>
 
     <script src="../js/auth.js"></script>
+    <script src="../js/pdf-utils.js"></script>
     <script>
         // --- NAVEGACIÓN DE TABS ---
         function switchTab(tabId) {
@@ -517,7 +526,7 @@
 
 
         // ==========================================
-        // MÓDULO 2: REVISIÓN DE PATs (Con Formato Completo)
+        // MÓDULO 2: REVISIÓN DE PATs
         // ==========================================
         
         // Data Mocks (Incluyendo un falso para rellenar, más el real de LocalStorage)
@@ -692,7 +701,25 @@
             });
             if(typeof lucide !== 'undefined') lucide.createIcons();
         }
-
+        function descargarPDFDesdeDirector(event) {
+            const pat = patsEntregados.find(p => p.id === patSeleccionadoId);
+            if (!pat) return;
+            try {
+                generarPDFPat({
+                    carrera: pat.carrera || '',
+                    tutor: pat.tutor,
+                    grupo: pat.grupo,
+                    h: pat.h || 0,
+                    m: pat.m || 0,
+                    sesiones: pat.sesiones,
+                    tipo: 'propuesta',
+                    filename: `Propuesta_PAT_${pat.grupo}_${pat.tutor.replace(/ /g, '_')}.pdf`
+                });
+            } catch (err) {
+                console.error('Error PDF:', err);
+                alert('Error al generar el PDF.');
+            }
+        }
         // Iniciar
         renderPlantilla();
         renderRevisiones();

@@ -10,17 +10,15 @@
 </head>
 <body class="bg-gray-50 flex h-screen overflow-hidden">
 
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white transition-transform transform -translate-x-full lg:translate-x-0 lg:static flex flex-col">
-        <div class="p-6 border-b border-gray-800 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="h-8 w-8 bg-[#69B22E] rounded-md flex items-center justify-center">
-                    <i data-lucide="shield" class="h-5 w-5 text-white"></i>
-                </div>
-                <span class="font-semibold text-white tracking-wide">Admin PAT</span>
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white lg:static flex flex-col">
+        <div class="p-6 border-b border-gray-800 flex items-center gap-3">
+            <div class="h-8 w-8 bg-[#69B22E] rounded-md flex items-center justify-center">
+                <i data-lucide="shield" class="h-5 w-5 text-white"></i>
             </div>
+            <span class="font-semibold text-white tracking-wide">Admin PAT</span>
         </div>
         <nav class="flex-1 p-4 space-y-2">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#69B22E] text-white transition-colors">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#69B22E] text-white">
                 <i data-lucide="users" class="h-5 w-5"></i>
                 <span>Gestión de Credenciales</span>
             </a>
@@ -37,7 +35,7 @@
         <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 flex justify-between items-center">
             <h1 class="text-xl font-semibold text-[#7B5936]">Alta de Usuarios del Sistema</h1>
             <div class="flex items-center gap-3">
-                <span class="text-sm font-medium text-gray-700">Super Administrador</span>
+                <span id="user-email-display" class="text-sm font-medium text-gray-700">Cargando...</span>
                 <div class="h-10 w-10 rounded-full bg-gray-900 text-[#69B22E] flex items-center justify-center">
                     <i data-lucide="shield-check" class="h-5 w-5"></i>
                 </div>
@@ -45,26 +43,31 @@
         </header>
 
         <main class="flex-1 overflow-auto p-6">
-            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-                
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Formulario -->
                 <div class="md:col-span-1 bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-fit">
                     <h3 class="text-lg font-medium text-[#7B5936] mb-4">Nueva Credencial</h3>
                     <form id="form-admin" class="space-y-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Nombre(s)</label>
-                            <input type="text" id="nombre" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                            <input type="text" id="nombre" required
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Apellidos</label>
-                            <input type="text" id="apellidos" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                            <input type="text" id="apellidos" required
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Correo Electrónico (@upfim.edu.mx)</label>
-                            <input type="email" id="email" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Correo (@upfim.edu.mx)</label>
+                            <input type="email" id="email" required placeholder="usuario@upfim.edu.mx"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Rol del Sistema</label>
-                            <select id="rol" required onchange="toggleGrupoInput()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                            <select id="rol" required onchange="toggleGrupoInput()"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
                                 <option value="" disabled selected>Selecciona un rol...</option>
                                 <option value="director-tutorias">Director de Tutorías</option>
                                 <option value="director-carrera">Director de Carrera</option>
@@ -72,31 +75,75 @@
                                 <option value="jefe-grupo">Jefe de Grupo (Estudiante)</option>
                             </select>
                         </div>
-                        <div id="campo-grupo" class="hidden bg-blue-50 p-3 rounded-md border border-blue-100">
-                            <label class="block text-xs font-medium text-blue-800 mb-1">Grupo Asignado (Solo Jefes)</label>
-                            <input type="text" id="grupo" placeholder="Ej: 1TIG3" class="w-full border border-blue-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Carrera</label>
+                            <select id="carrera"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
+                                <option value="" selected>Selecciona una carrera...</option>
+                            </select>
+                            <p id="carrera-hint" class="text-[10px] text-gray-400 mt-1 hidden">Requerido para este rol</p>
                         </div>
-                        <button type="submit" class="w-full py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-opacity text-sm font-medium mt-2">
+                        <div id="campo-grupo" class="hidden">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Grupo Asignado</label>
+                            <input type="text" id="grupo" placeholder="Ej: 1G1"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] uppercase">
+                        </div>
+
+                        <!-- Mensaje de error/éxito del formulario -->
+                        <div id="form-msg" class="hidden text-sm rounded-md px-3 py-2"></div>
+
+                        <button type="submit" id="btn-crear"
+                            class="w-full py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-opacity text-sm font-medium mt-2">
                             Crear Cuenta
                         </button>
                     </form>
                 </div>
 
+                <!-- Tabla de usuarios -->
                 <div class="md:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden h-fit">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                         <h3 class="font-medium text-[#7B5936]">Usuarios Registrados</h3>
+                        <span id="contador-usuarios" class="text-xs text-gray-500"></span>
                     </div>
-                    <div class="overflow-x-auto p-4">
+
+                    <!-- Buscador -->
+                    <div class="px-4 py-3 border-b border-gray-100 flex flex-col sm:flex-row gap-3 bg-white">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
+                            <input type="text" id="buscador" placeholder="Buscar por nombre o correo..."
+                                oninput="filtrarUsuarios()"
+                                class="w-full pl-9 border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E]">
+                        </div>
+                        <select id="filtro-rol" onchange="filtrarUsuarios()" class="border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E] bg-gray-50 text-gray-700">
+                            <option value="">Todos los Roles</option>
+                            <option value="director-tutorias">Director de Tutorías</option>
+                            <option value="director-carrera">Director de Carrera</option>
+                            <option value="docente-tutor">Docente Tutor</option>
+                            <option value="jefe-grupo">Jefe de Grupo</option>
+                        </select>
+                        <select id="filtro-carrera" onchange="filtrarUsuarios()" class="border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E] bg-gray-50 text-gray-700 max-w-[200px]">
+                            <option value="">Todas las Carreras</option>
+                        </select>
+                    </div>
+
+                    <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
                                 <tr>
                                     <th class="px-4 py-3">Usuario</th>
                                     <th class="px-4 py-3">Rol</th>
                                     <th class="px-4 py-3">Detalle</th>
+                                    <th class="px-4 py-3 text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="usuarios-tbody" class="divide-y divide-gray-100">
-                                </tbody>
+                                <tr>
+                                    <td colspan="4" class="px-4 py-8 text-center text-gray-400">
+                                        <i data-lucide="loader-2" class="h-5 w-5 animate-spin inline mr-2"></i>
+                                        Cargando usuarios...
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -105,15 +152,52 @@
         </main>
     </div>
 
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
     <script src="../js/auth.js"></script>
     <script>
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
+        const API = 'http://localhost:5000/api';
+        let todosLosUsuarios = [];
+
+        // ────────────────────────────────────────────
+        // Toast notifications
+        // ────────────────────────────────────────────
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const config = {
+                success: { bg: 'bg-green-50 border-green-200 text-green-800', icon: 'check-circle' },
+                error:   { bg: 'bg-red-50 border-red-200 text-red-800',   icon: 'alert-circle' },
+                info:    { bg: 'bg-blue-50 border-blue-200 text-blue-800', icon: 'info' },
+            };
+            const { bg, icon } = config[type] || config.info;
+
+            toast.className = `flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto ${bg}`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="h-4 w-4 flex-shrink-0"></i><span class="text-sm font-medium">${message}</span>`;
+            container.appendChild(toast);
+            if (typeof lucide !== 'undefined') lucide.createIcons({ root: toast });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ────────────────────────────────────────────
+        // Mostrar/ocultar campo de grupo
+        // ────────────────────────────────────────────
         function toggleGrupoInput() {
             const rol = document.getElementById('rol').value;
             const campoGrupo = document.getElementById('campo-grupo');
             const inputGrupo = document.getElementById('grupo');
-            
+            const inputCarrera = document.getElementById('carrera');
+            const carreraHint = document.getElementById('carrera-hint');
+
+            // Grupo: solo para jefe-grupo
             if (rol === 'jefe-grupo') {
                 campoGrupo.classList.remove('hidden');
                 inputGrupo.setAttribute('required', 'true');
@@ -122,52 +206,203 @@
                 inputGrupo.removeAttribute('required');
                 inputGrupo.value = '';
             }
+
+            // Carrera: requerida para director-carrera, docente-tutor, jefe-grupo
+            const rolesConCarrera = ['director-carrera', 'docente-tutor', 'jefe-grupo'];
+            if (rolesConCarrera.includes(rol)) {
+                inputCarrera.setAttribute('required', 'true');
+                carreraHint.classList.remove('hidden');
+            } else {
+                inputCarrera.removeAttribute('required');
+                carreraHint.classList.add('hidden');
+            }
         }
 
-        // --- MOCK LOGIC PARA LA VISTA ---
-        let usuarios = [
-            { nombre: 'Alicia León', email: 'tutor@upfim.edu.mx', rol: 'docente-tutor', extra: 'ITII' },
-            { nombre: 'Alyzonn Reyes', email: 'jefe.grupo@upfim.edu.mx', rol: 'jefe-grupo', extra: 'Grupo: 1TIG3' }
-        ];
+        // ────────────────────────────────────────────
+        // Badges de rol
+        // ────────────────────────────────────────────
+        const ROLE_CONFIG = {
+            'admin':             { label: 'Admin',              color: 'bg-gray-800 text-white' },
+            'director-tutorias': { label: 'Dir. Tutorías',      color: 'bg-amber-100 text-amber-800' },
+            'director-carrera':  { label: 'Dir. Carrera',       color: 'bg-orange-100 text-orange-800' },
+            'docente-tutor':     { label: 'Docente Tutor',      color: 'bg-blue-100 text-blue-800' },
+            'jefe-grupo':        { label: 'Jefe de Grupo',      color: 'bg-purple-100 text-purple-800' },
+        };
 
-        function renderUsuarios() {
+        function rolBadge(rol) {
+            const cfg = ROLE_CONFIG[rol] || { label: rol, color: 'bg-gray-100 text-gray-800' };
+            return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${cfg.color}">${cfg.label}</span>`;
+        }
+
+        // ────────────────────────────────────────────
+        // Cargar usuarios desde la API
+        // ────────────────────────────────────────────
+        async function cargarUsuarios() {
+            try {
+                const res = await fetch(`${API}/usuarios`);
+                const data = await res.json();
+                if (data.success) {
+                    // Excluir admins de la vista (no se deben gestionar aquí)
+                    todosLosUsuarios = data.usuarios.filter(u => u.rol !== 'admin');
+                    renderUsuarios(todosLosUsuarios);
+                } else {
+                    showToast('Error al cargar usuarios', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('usuarios-tbody').innerHTML = `
+                    <tr><td colspan="4" class="px-4 py-8 text-center text-red-500 text-sm">
+                        <i data-lucide="wifi-off" class="h-5 w-5 inline mr-2"></i>
+                        Sin conexión con el servidor. Verifica que Flask esté activo.
+                    </td></tr>`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        // ────────────────────────────────────────────
+        // Renderizar tabla
+        // ────────────────────────────────────────────
+        function renderUsuarios(lista) {
             const tbody = document.getElementById('usuarios-tbody');
-            tbody.innerHTML = '';
-            
-            usuarios.forEach(u => {
-                let badge = '';
-                if(u.rol === 'docente-tutor') badge = 'bg-blue-100 text-blue-800';
-                else if(u.rol === 'jefe-grupo') badge = 'bg-purple-100 text-purple-800';
-                else badge = 'bg-gray-100 text-gray-800';
+            document.getElementById('contador-usuarios').textContent = `${lista.length} usuario(s)`;
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <p class="font-medium text-gray-900">${u.nombre}</p>
-                            <p class="text-xs text-gray-500">${u.email}</p>
-                        </td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${badge}">${u.rol.replace('-', ' ')}</span></td>
-                        <td class="px-4 py-3 text-xs text-gray-600">${u.extra || '-'}</td>
-                    </tr>
-                `;
-            });
+            if (lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 italic">No se encontraron usuarios.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = lista.map(u => `
+                <tr class="hover:bg-gray-50" id="row-${u.id}">
+                    <td class="px-4 py-3">
+                        <p class="font-medium text-gray-900">${u.nombre} ${u.apellidos}</p>
+                        <p class="text-xs text-gray-500">${u.email}</p>
+                    </td>
+                    <td class="px-4 py-3">${rolBadge(u.rol)}</td>
+                    <td class="px-4 py-3 text-xs text-gray-600">
+                        ${u.grupo_asignado ? `<span class="font-bold">Grupo:</span> ${u.grupo_asignado}` :
+                          (u.departamento_o_carrera ? u.departamento_o_carrera : '—')}
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="eliminarUsuario(${u.id}, '${u.nombre} ${u.apellidos}')"
+                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                            title="Eliminar usuario">
+                            <i data-lucide="trash-2" class="h-4 w-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        document.getElementById('form-admin').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
-            const rol = document.getElementById('rol').value;
-            const grupo = document.getElementById('grupo').value;
+        // ────────────────────────────────────────────
+        // Filtrar por buscador
+        // ────────────────────────────────────────────
+        function filtrarUsuarios() {
+            const q = document.getElementById('buscador').value.toLowerCase();
+            const fRol = document.getElementById('filtro-rol').value;
+            const fCarrera = document.getElementById('filtro-carrera').value;
             
-            usuarios.unshift({ nombre: nombre, email: email, rol: rol, extra: grupo ? `Grupo: ${grupo}` : '' });
-            renderUsuarios();
-            this.reset();
-            toggleGrupoInput();
-            alert(`Cuenta de ${rol} creada. La contraseña temporal es: admin123`);
+            const filtrados = todosLosUsuarios.filter(u => {
+                const matchTexto = `${u.nombre} ${u.apellidos}`.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+                const matchRol = fRol === '' || u.rol === fRol;
+                const matchCarrera = fCarrera === '' || (u.departamento_o_carrera && u.departamento_o_carrera === fCarrera);
+                
+                return matchTexto && matchRol && matchCarrera;
+            });
+            renderUsuarios(filtrados);
+        }
+        // ────────────────────────────────────────────
+        // Crear usuario
+        // ────────────────────────────────────────────
+        document.getElementById('form-admin').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-crear');
+            const msgEl = document.getElementById('form-msg');
+            btn.disabled = true;
+            btn.textContent = 'Creando...';
+            msgEl.classList.add('hidden');
+
+            const payload = {
+                nombre:   document.getElementById('nombre').value.trim(),
+                apellidos: document.getElementById('apellidos').value.trim(),
+                email:    document.getElementById('email').value.trim().toLowerCase(),
+                rol:      document.getElementById('rol').value,
+                carrera:  document.getElementById('carrera').value, // NUEVA LÍNEA
+                grupo:    document.getElementById('grupo').value.trim().toUpperCase() || null,
+            };
+            try {
+                const res  = await fetch(`${API}/usuarios`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(`✓ ${data.message}`, 'success');
+                    this.reset();
+                    toggleGrupoInput();
+                    await cargarUsuarios();
+                } else {
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';
+                    msgEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                msgEl.textContent = 'Sin conexión con el servidor.';
+                msgEl.className = 'text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';
+                msgEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Crear Cuenta';
+            }
         });
 
-        renderUsuarios();
+        // ────────────────────────────────────────────
+        // Eliminar usuario
+        // ────────────────────────────────────────────
+        async function eliminarUsuario(id, nombre) {
+            if (!confirm(`¿Eliminar al usuario "${nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
+
+            try {
+                const res  = await fetch(`${API}/usuarios/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(`Usuario eliminado`, 'info');
+                    // Eliminar fila sin recargar
+                    const row = document.getElementById(`row-${id}`);
+                    if (row) {
+                        row.style.opacity = '0';
+                        row.style.transition = 'opacity 0.3s';
+                        setTimeout(() => { row.remove(); todosLosUsuarios = todosLosUsuarios.filter(u => u.id !== id); }, 300);
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Error de conexión al eliminar', 'error');
+            }
+        }
+        async function cargarCarreras() {
+            try {
+                const res = await fetch(`${API}/carreras`);
+                const data = await res.json();
+                if (data.success) {
+                    const selForm = document.getElementById('carrera');
+                    const selFiltro = document.getElementById('filtro-carrera');
+                    data.carreras.forEach(c => {
+                        selForm.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
+                        selFiltro.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
+                    });
+                }
+            } catch (err) { console.error("Error cargando carreras"); }
+        }
+
+        // Cargar al iniciar
+        cargarCarreras();
+        cargarUsuarios();
     </script>
 </body>
 </html>

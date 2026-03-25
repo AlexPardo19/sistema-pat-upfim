@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* Scrollbar para la tabla detallada */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
 </head>
 <body class="min-h-screen bg-gray-50">
 
@@ -52,7 +61,7 @@
                     <i data-lucide="activity" class="h-4 w-4"></i> Seguimiento de Sesiones
                 </button>
                 <button onclick="switchTab('cierre')" id="tab-btn-cierre" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
-                    <i data-lucide="archive" class="h-4 w-4"></i> Cierre Institucional
+                    <i data-lucide="download" class="h-4 w-4"></i> Descargar PATs
                 </button>
             </div>
 
@@ -69,19 +78,16 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Tutor</label>
                                 <select id="input-tutor" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
-                                    <option value="">Selecciona un docente...</option>
-                                    <option value="Alicia León Martínez">Alicia León Martínez</option>
-                                    <option value="Carlos Ramírez Soto">Carlos Ramírez Soto</option>
-                                    <option value="María Fernanda López">María Fernanda López</option>
+                                    <option value="">Cargando docentes...</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Periodo Cuatrimestral</label>
-                                <input type="text" id="input-periodo" value="SEPT-DIC 2025" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
+                                <input type="text" id="input-periodo" value="SEPT-DIC 2026" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-                                <input type="text" id="input-grupo" placeholder="Ej: 1TIG3" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E] uppercase">
+                                <input type="text" id="input-grupo" placeholder="Ej: 1G1" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E] uppercase">
                             </div>
                         </div>
                         <div class="flex justify-end pt-2">
@@ -116,11 +122,40 @@
             <div id="tab-seguimiento" class="mt-5 hidden space-y-6">
                 <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
                     <div>
-                        <h3 class="font-medium text-gray-900">Monitor de la Carrera</h3>
-                        <p class="text-xs text-gray-500 mt-1">Avance de los grupos asignados.</p>
+                        <h3 class="font-medium text-gray-900">Monitor General de la Carrera</h3>
+                        <p class="text-xs text-gray-500 mt-1">Listado de grupos. Selecciona uno para ver sus evidencias y cancelaciones.</p>
                     </div>
-                    <button onclick="renderSeguimiento()" class="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium">
-                        <i data-lucide="refresh-cw" class="h-4 w-4 inline mr-1"></i> Recargar Monitor
+                    <button onclick="renderGruposSeguimiento()" class="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium shadow-sm">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 inline mr-1"></i> Actualizar
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3">Grupo</th>
+                                    <th class="px-4 py-3">Docente Tutor</th>
+                                    <th class="px-4 py-3 text-center">Sesiones Revisadas</th>
+                                    <th class="px-4 py-3 text-center w-48">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grupos-seguimiento-tbody" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-cierre" class="mt-5 hidden space-y-6">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-gray-900">PATs de mi Carrera</h3>
+                        <p class="text-xs text-gray-500 mt-1">Consulta y descarga los PATs aprobados de tu programa educativo.</p>
+                    </div>
+                    <button onclick="cargarPatsCarrera()" class="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium shadow-sm">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 inline mr-1"></i> Actualizar
                     </button>
                 </div>
                 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -128,30 +163,72 @@
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3 w-16 text-center">No.</th>
-                                    <th class="px-4 py-3">Temática Programada</th>
-                                    <th class="px-4 py-3">Fecha Declarada</th>
-                                    <th class="px-4 py-3 text-center">Validación Oficial J.G.</th>
+                                    <th class="px-4 py-3">Tutor</th>
+                                    <th class="px-4 py-3">Grupo</th>
+                                    <th class="px-4 py-3">Periodo</th>
+                                    <th class="px-4 py-3 text-center">Alumnos</th>
+                                    <th class="px-4 py-3 text-center">Estado</th>
+                                    <th class="px-4 py-3 text-center">Descargar</th>
                                 </tr>
                             </thead>
-                            <tbody id="seguimiento-tbody" class="divide-y divide-gray-100"></tbody>
+                            <tbody id="pats-carrera-tbody" class="divide-y divide-gray-100">
+                                <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Haz clic en "Actualizar" para cargar los PATs.</td></tr>
+                            </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
-
-            <div id="tab-cierre" class="mt-5 hidden space-y-6">
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
-                    <i data-lucide="folder-open" class="h-12 w-12 text-gray-300 mx-auto mb-4"></i>
-                    <p class="text-gray-500">Los documentos de cierre aparecerán aquí al finalizar el cuatrimestre para tu aprobación.</p>
                 </div>
             </div>
 
         </div>
     </main>
 
+    <div id="modal-detalles-grupo" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-3">
+                <div>
+                    <h3 class="text-xl font-bold text-[#7B5936]">Auditoría de Sesiones - Grupo <span id="det-grupo-nombre" class="text-blue-700"></span></h3>
+                    <p class="text-sm text-gray-500">Tutor: <span id="det-tutor-nombre" class="font-medium text-gray-800"></span></p>
+                </div>
+                <button onclick="cerrarModal('modal-detalles-grupo')" class="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full"><i data-lucide="x" class="h-5 w-5"></i></button>
+            </div>
+
+            <div class="overflow-y-auto pr-2 custom-scrollbar">
+                <table class="w-full text-sm text-left border border-gray-200 rounded-lg">
+                    <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-12 border-r border-gray-200">No.</th>
+                            <th class="px-4 py-3 w-1/4 border-r border-gray-200">Temática y Fecha</th>
+                            <th class="px-4 py-3 w-1/3 border-r border-gray-200">Resultados / Motivo Cancelación</th>
+                            <th class="px-4 py-3 w-1/3">Firma y Observación (Jefe Grupo)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalles-sesiones-tbody" class="divide-y divide-gray-200 bg-white">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 flex justify-between pt-3 border-t border-gray-200">
+                <button type="button" onclick="descargarPDFGrupo(event)" class="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-black font-medium text-sm transition-colors shadow-sm flex items-center gap-2">
+                    <i data-lucide="file-down" class="h-4 w-4"></i> Descargar PDF
+                </button>
+                <button type="button" onclick="cerrarModal('modal-detalles-grupo')" class="px-6 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 font-medium text-sm transition-colors shadow-sm">Cerrar Auditoría</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/auth.js"></script>
+    <script src="../js/pdf-utils.js"></script>
     <script>
+        const API = 'http://localhost:5000/api';
+        const session = typeof window.getSessionData === 'function' ? window.getSessionData() : null;
+        const miCarrera = (session && session.departamento) || '';
+        let docentesCarrera = [];
+        let asignacionesCarrera = [];
+
+        // --- Auto-fill programa educativo ---
+        document.getElementById('input-programa').value = miCarrera || 'Sin carrera asignada';
+
+        // --- NAVEGACIÓN DE TABS ---
         function switchTab(tabId) {
             ['asignacion', 'seguimiento', 'cierre'].forEach(id => {
                 document.getElementById(`tab-${id}`).classList.add('hidden');
@@ -161,80 +238,304 @@
             document.getElementById(`tab-btn-${tabId}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
         }
 
-        // --- LÓGICA DE ASIGNACIÓN (Sincronizada) ---
-        let asignacionActual = JSON.parse(localStorage.getItem('asignacionActiva'));
+        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+        // --- CARGAR DOCENTES DE MI CARRERA ---
+        async function cargarDocentes() {
+            try {
+                const url = miCarrera ? `${API}/docentes?carrera=${encodeURIComponent(miCarrera)}` : `${API}/docentes`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    docentesCarrera = data.docentes;
+                    const sel = document.getElementById('input-tutor');
+                    sel.innerHTML = '<option value="">Selecciona un docente...</option>';
+                    docentesCarrera.forEach(d => {
+                        sel.innerHTML += `<option value="${d.id}">${d.nombre} ${d.apellidos}</option>`;
+                    });
+                }
+            } catch (err) { console.error('Error cargando docentes:', err); }
+        }
+
+        // --- CARGAR ASIGNACIONES DE MI CARRERA ---
+        async function cargarAsignaciones() {
+            try {
+                // Obtener carrera_id
+                const cRes = await fetch(`${API}/carreras`);
+                const cData = await cRes.json();
+                let carreraId = null;
+                if (cData.success) {
+                    const found = cData.carreras.find(c => c.nombre === miCarrera);
+                    if (found) carreraId = found.id;
+                }
+                const url = carreraId ? `${API}/asignaciones?carrera_id=${carreraId}` : `${API}/asignaciones`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    asignacionesCarrera = data.asignaciones;
+                    renderAsignaciones();
+                }
+            } catch (err) { console.error('Error cargando asignaciones:', err); }
+        }
+
+        // --- RENDERIZAR ASIGNACIONES ---
         function renderAsignaciones() {
             const tbody = document.getElementById('asignaciones-tbody');
             tbody.innerHTML = '';
-            
-            if (!asignacionActual) {
+            if (asignacionesCarrera.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No hay grupos asignados aún. Llena el formulario de arriba.</td></tr>`;
                 return;
             }
-
-            tbody.innerHTML = `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-bold text-gray-900">${asignacionActual.grupo}</td>
-                    <td class="px-4 py-3 text-gray-700">${asignacionActual.tutor}</td>
-                    <td class="px-4 py-3 text-gray-600">${asignacionActual.periodo}</td>
-                    <td class="px-4 py-3 text-center">
-                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200">
-                            <i data-lucide="link" class="h-3 w-3 inline mr-1"></i> Vinculado al PAT
-                        </span>
-                    </td>
-                </tr>
-            `;
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+            asignacionesCarrera.forEach(a => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-gray-900">${a.grupo}</td>
+                        <td class="px-4 py-3 text-gray-700">${a.tutor}</td>
+                        <td class="px-4 py-3 text-gray-600">${a.periodo}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200">
+                                <i data-lucide="link" class="h-3 w-3 inline mr-1"></i> Vinculado
+                            </span>
+                        </td>
+                    </tr>`;
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        document.getElementById('form-asignacion').addEventListener('submit', function(e) {
+        // --- CREAR ASIGNACIÓN ---
+        document.getElementById('form-asignacion').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const nuevaAsignacion = {
-                programa: document.getElementById('input-programa').value,
-                tutor: document.getElementById('input-tutor').value,
-                periodo: document.getElementById('input-periodo').value,
-                grupo: document.getElementById('input-grupo').value.toUpperCase()
-            };
+            const tutorId = document.getElementById('input-tutor').value;
+            const grupo = document.getElementById('input-grupo').value.toUpperCase();
+            const periodo = document.getElementById('input-periodo').value;
+            const anio = new Date().getFullYear();
 
-            // Guarda en la memoria compartida
-            localStorage.setItem('asignacionActiva', JSON.stringify(nuevaAsignacion));
-            asignacionActual = nuevaAsignacion;
-            
-            alert(`El grupo ${nuevaAsignacion.grupo} ha sido asignado a ${nuevaAsignacion.tutor} exitosamente.`);
-            document.getElementById('form-asignacion').reset();
-            document.getElementById('input-periodo').value = "SEPT-DIC 2025"; // Resetear default
-            renderAsignaciones();
+            // Obtener carrera_id
+            try {
+                const cRes = await fetch(`${API}/carreras`);
+                const cData = await cRes.json();
+                let carreraId = null;
+                if (cData.success) {
+                    const found = cData.carreras.find(c => c.nombre === miCarrera);
+                    if (found) carreraId = found.id;
+                }
+                if (!carreraId) { alert('No se encontró la carrera.'); return; }
+
+                const res = await fetch(`${API}/asignaciones`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ carrera_id: carreraId, tutor_id: parseInt(tutorId), grupo, periodo, anio })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`El grupo ${grupo} ha sido asignado exitosamente.`);
+                    this.reset();
+                    document.getElementById('input-programa').value = miCarrera;
+                    document.getElementById('input-periodo').value = 'SEPT-DIC 2026';
+                    await cargarAsignaciones();
+                } else {
+                    alert(data.message || 'Error al crear asignación.');
+                }
+            } catch (err) { alert('Error de conexión con el servidor.'); }
         });
 
-        // --- LÓGICA DE SEGUIMIENTO (Igual que antes) ---
-        function renderSeguimiento() {
-            let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
-            const tbody = document.getElementById('seguimiento-tbody');
+        // --- SEGUIMIENTO DE SESIONES ---
+        function renderGruposSeguimiento() {
+            const tbody = document.getElementById('grupos-seguimiento-tbody');
             tbody.innerHTML = '';
+            if (asignacionesCarrera.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No hay grupos asignados para monitorear.</td></tr>`;
+                return;
+            }
+            // Read from localStorage (shared with docente-tutor and jefe-grupo)
+            let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+            let estadoPat = localStorage.getItem('estadoPat');
 
-            if (sesionesSincronizadas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Aún no hay avance registrado para los grupos de esta carrera.</td></tr>`;
+            asignacionesCarrera.forEach(a => {
+                let progresoTexto = "", progresoClase = "";
+                if (estadoPat !== 'Aprobado') {
+                    progresoTexto = "PAT No Publicado";
+                    progresoClase = "bg-gray-100 text-gray-600";
+                } else {
+                    let completadas = sesionesSincronizadas.filter(s => s.estado === 'Validada' || s.estado === 'Cancelada').length;
+                    progresoTexto = `${completadas} / 15 Sesiones`;
+                    progresoClase = completadas === 15 ? "bg-green-100 text-green-700 border border-green-200" : "bg-blue-100 text-blue-700 border border-blue-200";
+                }
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-4 font-bold text-gray-900 text-base">${a.grupo}</td>
+                        <td class="px-4 py-4 text-gray-700">${a.tutor}</td>
+                        <td class="px-4 py-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${progresoClase}">${progresoTexto}</span>
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            <button onclick="abrirDetallesGrupo('${a.grupo}', '${a.tutor}')" class="px-3 py-2 bg-[#69B22E] text-white rounded hover:opacity-90 transition-colors text-xs font-medium shadow-sm">
+                                <i data-lucide="eye" class="h-4 w-4 inline mr-1"></i> Ver Detalles PAT
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // --- MODAL DE DETALLES DEL GRUPO ---
+        let grupoActualDetalle = null;
+        function abrirDetallesGrupo(grupo, tutor) {
+            grupoActualDetalle = { grupo, tutor };
+            document.getElementById('det-grupo-nombre').innerText = grupo;
+            document.getElementById('det-tutor-nombre').innerText = tutor;
+
+            let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+            let estadoPat = localStorage.getItem('estadoPat');
+            const tbodyDetalles = document.getElementById('detalles-sesiones-tbody');
+            tbodyDetalles.innerHTML = '';
+
+            if (estadoPat !== 'Aprobado' || sesionesSincronizadas.length === 0) {
+                tbodyDetalles.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 italic">El tutor aún no ha configurado ni enviado su propuesta PAT.</td></tr>`;
+                abrirModal('modal-detalles-grupo');
                 return;
             }
 
             sesionesSincronizadas.forEach(s => {
-                let badge = '';
-                let fechaTexto = s.fecha ? `<span class="font-medium text-gray-800">${s.fecha}</span>` : '<span class="text-xs text-gray-400">No reportada</span>';
+                let fechaTexto = s.fecha ? `<br><span class="text-xs text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded mt-1 inline-block"><i data-lucide="calendar" class="h-3 w-3 inline"></i> ${s.fecha}</span>` : `<br><span class="text-xs text-gray-400 italic mt-1 inline-block">Sin agendar</span>`;
+                let tematicaHtml = `<p class="font-medium text-gray-900">${s.tematica}</p>${fechaTexto}`;
 
-                if(s.estado === 'Validada') badge = `<span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold border border-green-200"><i data-lucide="check" class="h-3 w-3 inline mr-1"></i> Aprobada</span>`;
-                else if(s.estado === 'Cancelada') badge = `<span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold border border-red-200"><i data-lucide="alert-triangle" class="h-3 w-3 inline mr-1"></i> Cancelada (Atención)</span>`;
-                else if (s.estado === 'Finalizada_Por_Tutor') badge = `<span class="text-xs text-yellow-600 italic">Esperando firma...</span>`;
-                else badge = `<span class="text-xs text-gray-400">Sin progreso</span>`;
+                let resultadosHtml = '';
+                if (s.estado === 'Cancelada_Por_Tutor' || s.estado === 'Cancelada') {
+                    let motivoTutor = s.motivo.includes('| Observación Jefe:') ? s.motivo.split('| Observación Jefe:')[0].replace('Docente: ', '') : s.motivo;
+                    resultadosHtml = `<div class="bg-red-50 p-2 rounded border border-red-100"><span class="text-xs text-red-600 font-bold block mb-1">Cancelación:</span><span class="text-sm italic text-gray-800">"${motivoTutor}"</span></div>`;
+                } else if (s.resultados_obtenidos) {
+                    resultadosHtml = `<p class="text-sm italic text-gray-800">"${s.resultados_obtenidos}"</p>`;
+                    if (s.canalizaciones && s.canalizaciones.length > 0) {
+                        resultadosHtml += `<div class="mt-2">` + s.canalizaciones.map(c => `<span class="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-[10px] rounded font-bold border border-gray-300 mr-1">${c}</span>`).join('') + `</div>`;
+                    }
+                } else {
+                    resultadosHtml = `<span class="text-xs text-gray-400">Sin registro del tutor.</span>`;
+                }
 
-                tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="px-4 py-3 text-center font-bold text-gray-700">${s.num}</td><td class="px-4 py-3"><p class="text-sm font-medium text-gray-900">${s.tematica}</p></td><td class="px-4 py-3">${fechaTexto}</td><td class="px-4 py-3 text-center align-middle">${badge}</td></tr>`;
+                let validacionHtml = '';
+                if (s.estado === 'Validada') {
+                    validacionHtml = `<div class="flex items-center gap-2 text-green-700"><i data-lucide="shield-check" class="h-5 w-5"></i><div><p class="text-xs font-bold">Clase Confirmada</p><p class="text-[10px]">Firma de Jefe de Grupo</p></div></div>`;
+                } else if (s.estado === 'Cancelada') {
+                    let obsJefe = s.motivo.includes('| Observación Jefe:') ? s.motivo.split('| Observación Jefe:')[1] : 'Confirmó la cancelación.';
+                    validacionHtml = `<div class="bg-orange-50 p-2 rounded border border-orange-200"><span class="text-xs text-orange-700 font-bold flex items-center gap-1 mb-1"><i data-lucide="check-square" class="h-3 w-3"></i> Validó Cancelación</span><span class="text-[11px] text-gray-700 italic">"${obsJefe.trim()}"</span></div>`;
+                } else if (s.estado === 'Finalizada_Por_Tutor' || s.estado === 'Cancelada_Por_Tutor') {
+                    validacionHtml = `<span class="text-xs text-yellow-600 italic"><i data-lucide="clock" class="h-3 w-3 inline mr-1"></i> Pendiente de validación del JG...</span>`;
+                } else {
+                    validacionHtml = `<span class="text-xs text-gray-300">-</span>`;
+                }
+
+                tbodyDetalles.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-center font-bold text-gray-500 border-r border-gray-200">${s.num}</td>
+                        <td class="px-4 py-3 border-r border-gray-200">${tematicaHtml}</td>
+                        <td class="px-4 py-3 border-r border-gray-200">${resultadosHtml}</td>
+                        <td class="px-4 py-3 align-middle">${validacionHtml}</td>
+                    </tr>`;
             });
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            abrirModal('modal-detalles-grupo');
         }
 
-        renderAsignaciones();
-        renderSeguimiento();
-        switchTab('asignacion'); // Empezar en la pestaña nueva
+        // --- DESCARGAR PDF DESDE MODAL DE GRUPO ---
+        function descargarPDFGrupo(event) {
+            try {
+                let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
+                const info = grupoActualDetalle || { grupo: 'N/A', tutor: 'N/A' };
+                generarPDFPat({
+                    carrera: miCarrera,
+                    tutor: info.tutor,
+                    grupo: info.grupo,
+                    periodo: 'Seguimiento',
+                    h: 0, m: 0,
+                    sesiones: sesionesSincronizadas,
+                    tipo: 'completo',
+                    filename: `PAT_${info.grupo}_${info.tutor.replace(/ /g, '_')}.pdf`
+                });
+            } catch (err) {
+                console.error('Error PDF:', err);
+                alert('Error al generar el PDF.');
+            }
+        }
+
+        // --- CARGAR PATs DE MI CARRERA (PESTAÑA CIERRE) ---
+        async function cargarPatsCarrera() {
+            const tbody = document.getElementById('pats-carrera-tbody');
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-gray-400"><i data-lucide="loader-2" class="h-4 w-4 animate-spin inline mr-1"></i> Cargando...</td></tr>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            try {
+                const url = miCarrera ? `${API}/pats?carrera=${encodeURIComponent(miCarrera)}` : `${API}/pats`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success && data.pats.length > 0) {
+                    tbody.innerHTML = data.pats.map(p => {
+                        const estadoBadge = p.estado === 'Aprobado'
+                            ? `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">${p.estado}</span>`
+                            : `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 border border-yellow-200">${p.estado}</span>`;
+                        return `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-900">${p.tutor}</td>
+                                <td class="px-4 py-3 font-bold">${p.grupo}</td>
+                                <td class="px-4 py-3 text-gray-600">${p.periodo}</td>
+                                <td class="px-4 py-3 text-center">${(p.alumnos_h || 0) + (p.alumnos_m || 0)}</td>
+                                <td class="px-4 py-3 text-center">${estadoBadge}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="descargarPATporId(${p.id}, event)" class="px-3 py-1.5 bg-gray-900 text-white rounded text-xs font-medium hover:bg-black transition-colors">
+                                        <i data-lucide="file-down" class="h-3 w-3 inline mr-1"></i> PDF
+                                    </button>
+                                </td>
+                            </tr>`;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400 italic">No se encontraron PATs para tu carrera.</td></tr>`;
+                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-red-400">Sin conexión con el servidor.</td></tr>`;
+            }
+        }
+
+        // --- DESCARGAR PDF POR ID DE PAT ---
+        async function descargarPATporId(patId, event) {
+            const btn = event.currentTarget;
+            const original = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="h-3 w-3 inline mr-1 animate-spin"></i> ...`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            try {
+                const res = await fetch(`${API}/pats/${patId}`);
+                const data = await res.json();
+                if (!data.success) { alert('No se pudo obtener el PAT.'); btn.innerHTML = original; return; }
+                const pat = data.pat;
+                generarPDFPat({
+                    carrera: pat.carrera || miCarrera,
+                    tutor: pat.tutor,
+                    grupo: pat.grupo,
+                    periodo: pat.periodo,
+                    h: pat.alumnos_h || 0,
+                    m: pat.alumnos_m || 0,
+                    sesiones: pat.sesiones,
+                    tipo: 'completo',
+                    filename: `PAT_${pat.grupo}_${pat.tutor.replace(/ /g, '_')}.pdf`
+                });
+                btn.innerHTML = original;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (err) {
+                alert('Error al descargar el PAT.');
+                btn.innerHTML = original;
+            }
+        }
+
+        // --- INICIALIZAR ---
+        async function init() {
+            await cargarDocentes();
+            await cargarAsignaciones();
+            renderGruposSeguimiento();
+            switchTab('asignacion');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        init();
     </script>
 </body>
 </html>
