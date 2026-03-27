@@ -168,6 +168,30 @@ async function cargarSeg(){
         ic();
     }catch(e){ct.innerHTML='<div class="text-center text-red-400 py-8">Sin conexion</div>';}
 }
+// === DESCARGAR PDF DIRECTOR DE CARRERA ===
+async function dlPDF(id) {
+    try {
+        var r = await fetch(API+'/pats/'+id);
+        var d = await r.json();
+        if(!d.success){ alert('Error al obtener el PAT'); return; }
+        
+        var p = d.pat;
+        generarPDFPat({
+            carrera: p.programa_educativo || p.carrera || miCarrera,
+            tutor: p.nombre_tutor || p.tutor_nombre_completo || '',
+            grupo: p.grupo,
+            periodo: p.periodo_cuatrimestral || p.periodo_nombre || '',
+            h: p.alumnos_h || 0,
+            m: p.alumnos_m || 0,
+            comentarios: p.comentarios_tutor || '',
+            sesiones: p.sesiones || [],
+            tipo: 'completo',
+            filename: `PAT_${p.grupo}_${(p.nombre_tutor||'').replace(/ /g,'_')}.pdf`
+        });
+    } catch(e) {
+        alert('Error descargando el PDF');
+    }
+}
 
 // === DESCARGAR ===
 async function cargarDesc(){

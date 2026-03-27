@@ -124,11 +124,35 @@
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 class="text-lg font-medium text-[#7B5936] mb-4">Finalizar Sesion <span id="mf-num"></span></h3>
         <form id="f-fin" class="space-y-4">
-            <div><label class="block text-xs text-gray-500 mb-1">Resultados Obtenidos</label><textarea id="mf-res" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
-            <div><label class="block text-xs text-gray-500 mb-1">Canalizaciones</label>
-            <div class="flex flex-wrap gap-3"><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="B">Becas</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="M">Medico</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="PS">Psicologia</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="TS">T.Social</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="JD">Juridico</label></div></div>
-            <div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-fin')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Registrar</button></div>
-        </form>
+    <div>
+        <label class="block text-xs text-gray-500 mb-1">Resultados Obtenidos</label>
+        <textarea id="mf-res" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea>
+    </div>
+    
+    <div>
+        <label class="block text-xs text-gray-500 mb-1">Tipo de Atención Impartida</label>
+        <div class="flex flex-wrap gap-4 bg-gray-50 p-2 rounded border">
+            <label class="text-xs flex items-center gap-1 font-medium"><input type="checkbox" class="ch-canal" value="AS">Asesoría</label>
+            <label class="text-xs flex items-center gap-1 font-medium"><input type="checkbox" class="ch-canal" value="TU" checked>Tutoría</label>
+        </div>
+    </div>
+
+    <div>
+        <label class="block text-xs text-gray-500 mb-1">Canalizaciones</label>
+        <div class="flex flex-wrap gap-3">
+            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="B">Becas</label>
+            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="M">Medico</label>
+            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="PS">Psicologia</label>
+            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="TS">T.Social</label>
+            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="JD">Juridico</label>
+        </div>
+    </div>
+    
+    <div class="flex gap-2 justify-end">
+        <button type="button" onclick="cerrarM('m-fin')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button>
+        <button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Registrar</button>
+    </div>
+</form>
     </div>
 </div>
 
@@ -293,6 +317,7 @@
                 periodo: pat.periodo_cuatrimestral || pat.periodo_nombre || '',
                 h: pat.alumnos_h || 0,
                 m: pat.alumnos_m || 0,
+                comentarios: pat.comentarios_tutor || '',
                 sesiones: sesiones,
                 tipo: 'completo',
                 filename: `Mi_PAT_${pat.grupo}_${(pat.nombre_tutor || '').replace(/ /g, '_')}.pdf`

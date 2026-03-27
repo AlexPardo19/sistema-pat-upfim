@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="../css/styles.css">
 <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body class="min-h-screen bg-gray-50">
 <header class="bg-white border-b sticky top-0 z-10">
@@ -46,9 +48,9 @@
         <i data-lucide="trash-2" class="h-4 w-4 mr-1"></i>Limpiar Borrador
     </button>
 
-    <button onclick="descargarFormatoExcel()" class="flex items-center px-3 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50 text-sm">
-        <i data-lucide="file-down" class="h-4 w-4 mr-1"></i>Descargar Formato
-    </button>
+    <button onclick="descargarPlantillaPDF()" class="flex items-center px-3 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50 text-sm">
+    <i data-lucide="file-down" class="h-4 w-4 mr-1"></i>Descargar PDF
+</button>
     <label class="flex items-center px-3 py-2 border border-blue-500 text-blue-600 rounded-md hover:bg-blue-50 text-sm cursor-pointer">
         <i data-lucide="upload" class="h-4 w-4 mr-1"></i>Importar Excel
         <input type="file" id="excel-input" accept=".xlsx,.xls" class="hidden" onchange="subirExcel()">
@@ -173,7 +175,7 @@
 
 <script src="../js/auth.js"></script>
 <script src="../js/layout.js"></script>
-<script>
+<script src="../js/pdf-utils.js"></script> <script>
 var API='http://localhost:5000/api',periodo=null,cuats=[],plantillas=[],revPatId=null;
 
 function sw(t){
@@ -308,7 +310,34 @@ async function eliminarSes(id){
         var d=await r.json();toast(d.message,d.success);await cargarPl();
     }catch(e){toast('Error',false);}
 }
-
+// === DESCARGAR PLANTILLA EN PDF ===
+function descargarPlantillaPDF() {
+    if (!plantillas || plantillas.length === 0) {
+        toast('No hay sesiones cargadas para descargar.', false);
+        return;
+    }
+    try {
+        var cuat_num = document.getElementById('sel-cuat').value;
+        var nombre_periodo = periodo ? periodo.nombre : 'Periodo Vigente';
+        
+        generarPDFPat({
+            carrera: 'Aplica a todas las carreras',
+            tutor: 'PLANTILLA INSTITUCIONAL',
+            grupo: 'N/A',
+            periodo: nombre_periodo + ' (Cuatrimestre ' + cuat_num + ')',
+            h: 0, 
+            m: 0, 
+            comentarios: 'Formato base de 15 sesiones.',
+            sesiones: plantillas, // <-- Usamos la variable correcta de este archivo
+            tipo: 'completo',
+            filename: 'Formato_Institucional_PAT_Cuat_' + cuat_num + '.pdf'
+        });
+        toast('PDF generado con éxito', true);
+    } catch(e) {
+        console.error(e);
+        toast('Error al generar PDF', false);
+    }
+}
 // LIMPIAR BORRADOR - elimina TODAS las sesiones del cuatrimestre
 async function limpiarBorrador(){
     var cuat=document.getElementById('sel-cuat').value;
