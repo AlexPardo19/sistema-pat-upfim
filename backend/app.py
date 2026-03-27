@@ -151,6 +151,28 @@ def delete_user(uid):
     except Exception as e:
         return jsonify(success=False, message=str(e)), 500
 
+@app.route('/api/usuarios/<int:uid>', methods=['PUT'])
+def update_user(uid):
+    d = request.get_json() or {}
+    nombre = (d.get('nombre') or '').strip()
+    apellidos = (d.get('apellidos') or '').strip()
+    email = (d.get('email') or '').strip().lower()
+    if not all([nombre, apellidos, email]):
+        return jsonify(success=False, message='Faltan campos requeridos'), 400
+    try:
+        cn = db()
+        existe = cn.execute("SELECT id FROM usuarios WHERE LOWER(email)=? AND id!=?", (email, uid)).fetchone()
+        if existe:
+            cn.close()
+            return jsonify(success=False, message='El correo ya está en uso por otro docente'), 409
+        
+        cn.execute("UPDATE usuarios SET nombre=?, apellidos=?, email=? WHERE id=?", (nombre, apellidos, email, uid))
+        cn.commit()
+        cn.close()
+        return jsonify(success=True, message='Perfil actualizado exitosamente')
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
+
 # ============ DOCENTES ============
 @app.route('/api/docentes', methods=['GET'])
 def list_docentes():
@@ -220,24 +242,59 @@ def list_asig():
 
 @app.route('/api/asignaciones', methods=['POST'])
 def create_asig():
+    """Director de Carrera asigna el grupo. No genera el PAT automáticamente, el tutor lo carga después."""
     d = request.get_json() or {}
     carrera_id = d.get('carrera_id')
     tutor_id = d.get('tutor_id')
     grupo = (d.get('grupo') or '').strip().upper()
     cuatrimestre = d.get('cuatrimestre')
+    
     if not all([carrera_id, tutor_id, grupo, cuatrimestre]):
         return jsonify(success=False, message='Campos requeridos'), 400
     try:
         cn = db()
         per = cn.execute("SELECT id FROM periodos WHERE activo=1 LIMIT 1").fetchone()
-        if not per: cn.close(); return jsonify(success=False, message='Sin periodo activo'), 400
+        if not per: 
+            cn.close()
+            return jsonify(success=False, message='Sin periodo activo'), 400
         pid = per['id']
+
         if cn.execute("SELECT id FROM asignaciones WHERE tutor_id=? AND grupo=? AND periodo_id=?", (tutor_id, grupo, pid)).fetchone():
-            cn.close(); return jsonify(success=False, message='Ya existe esa asignacion'), 409
+            cn.close()
+            return jsonify(success=False, message='Ya existe esa asignacion'), 409
+        
+        # Simplemente insertar la asignación
         cn.execute("INSERT INTO asignaciones (carrera_id,tutor_id,grupo,periodo_id,cuatrimestre) VALUES (?,?,?,?,?)",
                    (carrera_id, tutor_id, grupo, pid, cuatrimestre))
-        cn.commit(); cn.close()
-        return jsonify(success=True, message='Tutor asignado al grupo ' + grupo), 201
+        
+        cn.commit()
+        cn.close()
+        return jsonify(success=True, message=f'Tutor asignado al grupo {grupo}.'), 201
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
+
+@app.route('/api/asignaciones/<int:aid>', methods=['PUT'])
+def reassign_tutor(aid):
+    d = request.get_json() or {}
+    nuevo_tutor_id = d.get('tutor_id')
+    if not nuevo_tutor_id:
+        return jsonify(success=False, message='Debe seleccionar un tutor'), 400
+    try:
+        cn = db()
+        asig = cn.execute("SELECT * FROM asignaciones WHERE id=?", (aid,)).fetchone()
+        if not asig:
+            cn.close()
+            return jsonify(success=False, message='Asignación no encontrada'), 404
+        
+        tutor = cn.execute("SELECT nombre, apellidos FROM usuarios WHERE id=?", (nuevo_tutor_id,)).fetchone()
+        nombre_tutor_completo = f"{tutor['nombre']} {tutor['apellidos']}" if tutor else ""
+
+        cn.execute("UPDATE asignaciones SET tutor_id=? WHERE id=?", (nuevo_tutor_id, aid))
+        cn.execute("UPDATE pats SET nombre_tutor=? WHERE asignacion_id=?", (nombre_tutor_completo, aid))
+        
+        cn.commit()
+        cn.close()
+        return jsonify(success=True, message='Tutor reasignado correctamente')
     except Exception as e:
         return jsonify(success=False, message=str(e)), 500
 
@@ -296,16 +353,22 @@ def del_plantilla(pid):
 
 @app.route('/api/plantillas/publicar', methods=['POST'])
 def publicar_plantilla():
+    """Director de Tutorías publica la plantilla. (No genera PATs, solo los hace disponibles)"""
     d = request.get_json() or {}
     cuat = d.get('cuatrimestre')
     try:
         cn = db()
         per = cn.execute("SELECT id FROM periodos WHERE activo=1 LIMIT 1").fetchone()
-        if not per: cn.close(); return jsonify(success=False, message='Sin periodo'), 400
-        cn.execute("UPDATE plantillas_pat SET estado='Publicada' WHERE cuatrimestre=? AND periodo_id=?", (cuat, per['id']))
-        conn_count = cn.execute("SELECT changes()").fetchone()[0]
-        cn.commit(); cn.close()
-        return jsonify(success=True, message='Plantilla publicada (%d sesiones)' % conn_count)
+        if not per: 
+            cn.close()
+            return jsonify(success=False, message='Sin periodo'), 400
+        
+        pid = per['id']
+        cn.execute("UPDATE plantillas_pat SET estado='Publicada' WHERE cuatrimestre=? AND periodo_id=?", (cuat, pid))
+        
+        cn.commit()
+        cn.close()
+        return jsonify(success=True, message=f'Plantilla publicada. (Los tutores ya pueden cargarla en su portal)')
     except Exception as e:
         return jsonify(success=False, message=str(e)), 500
 
@@ -342,9 +405,7 @@ def upload_excel():
         cn = db()
         per = cn.execute("SELECT id FROM periodos WHERE activo=1 LIMIT 1").fetchone()
         pid = per['id'] if per else None
-        # Borrar plantilla existente del cuatrimestre
         cn.execute("DELETE FROM plantillas_pat WHERE cuatrimestre=? AND periodo_id=?", (cuat, pid))
-        # Leer sesiones (filas 12 a 26 segun formato PAT)
         count = 0
         for row in range(12, ws.max_row + 1):
             num = ws.cell(row, 1).value
@@ -365,8 +426,8 @@ def upload_excel():
         return jsonify(success=False, message='openpyxl no instalado. Ejecuta: pip install openpyxl'), 500
     except Exception as e:
         return jsonify(success=False, message='Error procesando Excel: ' + str(e)), 500
-    # --- DESCARGAR FORMATO EXCEL ---
-# --- DESCARGAR FORMATO EXCEL (VISTA INSTITUCIONAL) ---
+
+# --- DESCARGAR FORMATO EXCEL ---
 @app.route('/api/plantillas/download-excel', methods=['GET'])
 def download_excel_format():
     try:
@@ -379,25 +440,17 @@ def download_excel_format():
         ws = wb.active
         ws.title = "Formato PAT"
 
-        # --- DEFINICIÓN DE ESTILOS ---
         font_title = Font(name='Arial', size=12, bold=True)
         font_bold = Font(name='Arial', size=10, bold=True)
         font_header = Font(name='Arial', size=10, bold=True, color="FFFFFF")
-        
-        # Color institucional para los encabezados de tabla (Verde UPFIM)
         fill_header = PatternFill(start_color="69B22E", end_color="69B22E", fill_type="solid") 
-        
         align_center = Alignment(horizontal='center', vertical='center', wrap_text=True)
         align_left_center = Alignment(horizontal='left', vertical='center', wrap_text=True)
         align_top_left = Alignment(horizontal='left', vertical='top', wrap_text=True)
         
-        thin_border = Border(
-            left=Side(style='thin'), right=Side(style='thin'), 
-            top=Side(style='thin'), bottom=Side(style='thin')
-        )
+        thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
         bottom_border = Border(bottom=Side(style='thin'))
 
-        # --- 1. ENCABEZADOS SUPERIORES (Filas 1-3) ---
         ws.merge_cells('A1:F1')
         ws['A1'] = "UNIVERSIDAD POLITÉCNICA DE FRANCISCO I. MADERO"
         ws['A1'].font = font_title
@@ -413,38 +466,30 @@ def download_excel_format():
         ws['A3'].font = font_title
         ws['A3'].alignment = align_center
 
-        # --- 2. DATOS DE IDENTIFICACIÓN (Filas 5-7) ---
-        # Fila 5
         ws['A5'] = "PROGRAMA EDUCATIVO:"
         ws['A5'].font = font_bold
         ws.merge_cells('B5:D5')
         ws['B5'].border = bottom_border
-        
         ws['E5'] = "CUATRIMESTRE:"
         ws['E5'].font = font_bold
         ws['F5'].border = bottom_border
 
-        # Fila 6
         ws['A6'] = "NOMBRE DEL TUTOR:"
         ws['A6'].font = font_bold
         ws.merge_cells('B6:D6')
         ws['B6'].border = bottom_border
-        
         ws['E6'] = "GRUPO:"
         ws['E6'].font = font_bold
         ws['F6'].border = bottom_border
 
-        # Fila 7
         ws['A7'] = "PERIODO:"
         ws['A7'].font = font_bold
         ws.merge_cells('B7:D7')
         ws['B7'].border = bottom_border
-        
         ws['E7'] = "FECHA:"
         ws['E7'].font = font_bold
         ws['F7'].border = bottom_border
 
-        # --- 3. TÍTULO DE LA TABLA (Fila 10) ---
         ws.merge_cells('A10:F10')
         ws['A10'] = "PROGRAMA CUATRIMESTRAL (CALENDARIZACIÓN DE SESIONES)"
         ws['A10'].font = font_header
@@ -452,15 +497,7 @@ def download_excel_format():
         ws['A10'].alignment = align_center
         ws['A10'].border = thin_border
 
-        # --- 4. ENCABEZADOS DE COLUMNAS (Fila 11) ---
-        headers = [
-            "No. de sesión", 
-            "Fecha de la sesión", 
-            "Corte parcial", 
-            "Temática", 
-            "Objetivo de la sesión", 
-            "Resultados Esperados"
-        ]
+        headers = ["No. de sesión", "Fecha de la sesión", "Corte parcial", "Temática", "Objetivo de la sesión", "Resultados Esperados"]
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=11, column=col_num)
             cell.value = header
@@ -469,47 +506,96 @@ def download_excel_format():
             cell.alignment = align_center
             cell.border = thin_border
 
-        # --- 5. CONFIGURACIÓN DE ANCHOS DE COLUMNA ---
         ws.column_dimensions['A'].width = 15
         ws.column_dimensions['B'].width = 20
         ws.column_dimensions['C'].width = 15
         ws.column_dimensions['D'].width = 45
         ws.column_dimensions['E'].width = 45
         ws.column_dimensions['F'].width = 45
-        
-        ws.row_dimensions[11].height = 25 # Encabezado más alto
+        ws.row_dimensions[11].height = 25 
 
-        # --- 6. ÁREA DE CAPTURA DE DATOS (Fila 12 a 26) ---
-        # Tu backend lee el excel específicamente desde el "row 12" en adelante.
-        for row in range(12, 27): # 15 sesiones
-            ws.row_dimensions[row].height = 40 # Filas más altas para escribir
-            ws.cell(row=row, column=1).value = row - 11 # Auto-numerar del 1 al 15
+        for row in range(12, 27): 
+            ws.row_dimensions[row].height = 40 
+            ws.cell(row=row, column=1).value = row - 11 
             ws.cell(row=row, column=1).alignment = align_center
-            
             for col in range(1, 7):
                 cell = ws.cell(row=row, column=col)
                 cell.border = thin_border
                 if col != 1:
                     cell.alignment = align_top_left
 
-        # Preparar archivo para envío
         out = io.BytesIO()
         wb.save(out)
         out.seek(0)
 
-        return send_file(
-            out,
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            as_attachment=True,
-            download_name='Formato_Plantilla_PAT.xlsx'
-        )
+        return send_file(out, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='Formato_Plantilla_PAT.xlsx')
     except ImportError:
         from flask import jsonify
         return jsonify(success=False, message='La librería openpyxl no está instalada.'), 500
     except Exception as e:
         from flask import jsonify
         return jsonify(success=False, message='Error al generar el formato: ' + str(e)), 500
+
 # ============ PATs ============
+
+# NUEVO ENDPOINT: El Tutor carga la plantilla a partir de su asignación
+# NUEVO ENDPOINT: El Tutor carga la plantilla a partir de su asignación
+@app.route('/api/pats/cargar', methods=['POST'])
+def cargar_pat_tutor():
+    d = request.get_json() or {}
+    asig_id = d.get('asignacion_id')
+    if not asig_id: return jsonify(success=False, message='Falta asignacion_id'), 400
+    
+    try:
+        cn = db()
+        asig = cn.execute("""SELECT a.*, c.nombre as carrera_nombre, u.nombre, u.apellidos, p.nombre as periodo_nombre
+                             FROM asignaciones a
+                             JOIN carreras c ON a.carrera_id = c.id
+                             JOIN usuarios u ON a.tutor_id = u.id
+                             JOIN periodos p ON a.periodo_id = p.id
+                             WHERE a.id=?""", (asig_id,)).fetchone()
+        
+        if not asig:
+            cn.close(); return jsonify(success=False, message='Asignación no encontrada'), 404
+
+        # 1. Verificar si el Director de Tutorías ya publicó la plantilla para este cuatrimestre
+        plantillas = cn.execute("SELECT * FROM plantillas_pat WHERE cuatrimestre=? AND estado='Publicada' AND periodo_id=? ORDER BY num_sesion",
+                                (asig['cuatrimestre'], asig['periodo_id'])).fetchall()
+
+        if not plantillas:
+            cn.close()
+            return jsonify(success=False, message='⚠️ El Director de Tutorías aún no ha publicado la plantilla oficial para tu cuatrimestre. Intenta más tarde.'), 400
+
+        # 2. Verificar si ya existe un PAT fantasma o vacío para esta asignación
+        pat = cn.execute("SELECT id FROM pats WHERE asignacion_id=?", (asig_id,)).fetchone()
+        pat_id = None
+        
+        if pat:
+            pat_id = pat['id']
+            # Si existe, verificamos si ya tiene sesiones
+            ses_count = cn.execute("SELECT COUNT(*) FROM sesiones WHERE pat_id=?", (pat_id,)).fetchone()[0]
+            if ses_count > 0:
+                cn.close(); return jsonify(success=False, message='El PAT ya tiene sesiones cargadas previamente.'), 400
+        else:
+            # Si no existe, lo creamos
+            tutor_nombre = f"{asig['nombre']} {asig['apellidos']}"
+            cn.execute("""INSERT INTO pats (asignacion_id,cuatrimestre,programa_educativo,nombre_tutor,periodo_cuatrimestral,grupo,estado)
+                          VALUES (?,?,?,?,?,?,'Borrador')""",
+                       (asig_id, asig['cuatrimestre'], asig['carrera_nombre'], tutor_nombre, asig['periodo_nombre'], asig['grupo']))
+            pat_id = cn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+        # 3. Insertar todas las sesiones clonadas de la plantilla
+        for pl in plantillas:
+            cn.execute("INSERT INTO sesiones (pat_id,num_sesion,corte_parcial,tematica,objetivo,resultados_esperados,estado) VALUES (?,?,?,?,?,?,'Pendiente')",
+                       (pat_id, pl['num_sesion'], pl['corte_parcial'], pl['tematica'], pl['objetivo'], pl['resultados_esperados']))
+
+        cn.commit()
+        cn.close()
+        return jsonify(success=True, message='¡Plantilla cargada exitosamente! Ya puedes iniciar tus registros.')
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
+
+
 @app.route('/api/pats', methods=['GET'])
 def list_pats():
     estado = request.args.get('estado')
@@ -564,7 +650,7 @@ def get_pat(pat_id):
 
 @app.route('/api/pats', methods=['POST'])
 def create_pat():
-    """Crea PAT clonando plantilla publicada. Usado por Director de Carrera."""
+    """Fallback por si se necesita crear un PAT directamente sin botón de Carga"""
     d = request.get_json() or {}
     asig_id = d.get('asignacion_id')
     cuat = d.get('cuatrimestre')
@@ -578,15 +664,12 @@ def create_pat():
         cn = db()
         per = cn.execute("SELECT id FROM periodos WHERE activo=1 LIMIT 1").fetchone()
         pid = per['id'] if per else None
-        # Verificar que no exista PAT para esta asignacion
         if cn.execute("SELECT id FROM pats WHERE asignacion_id=?", (asig_id,)).fetchone():
             cn.close(); return jsonify(success=False, message='Ya existe un PAT para esta asignacion'), 409
-        # Crear PAT
         cn.execute("""INSERT INTO pats (asignacion_id,cuatrimestre,programa_educativo,nombre_tutor,periodo_cuatrimestral,grupo,estado)
                       VALUES (?,?,?,?,?,?,'Borrador')""",
                    (asig_id, cuat, programa, tutor_nombre, periodo, grupo))
         pat_id = cn.execute("SELECT last_insert_rowid()").fetchone()[0]
-        # Clonar sesiones de la plantilla
         plantillas = cn.execute("SELECT * FROM plantillas_pat WHERE cuatrimestre=? AND estado='Publicada' AND periodo_id=? ORDER BY num_sesion",
                                 (cuat, pid)).fetchall()
         for pl in plantillas:
@@ -711,6 +794,33 @@ def stats():
         }
         cn.close()
         return jsonify(success=True, stats=r)
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
+
+# ============ SISTEMA DE AUDITORÍAS (SNAPSHOTS) ============
+try:
+    _cn = sqlite3.connect(RUTA_BD)
+    _cn.execute("ALTER TABLE pats ADD COLUMN snapshot_auditoria TEXT")
+    _cn.commit()
+    _cn.close()
+except:
+    pass 
+
+@app.route('/api/pats/<int:pat_id>/enviar-auditoria', methods=['POST'])
+def enviar_auditoria(pat_id):
+    try:
+        cn = db()
+        cur_ses = cn.execute("SELECT * FROM sesiones WHERE pat_id=? ORDER BY num_sesion", (pat_id,))
+        sesiones = [dict(row) for row in cur_ses.fetchall()]
+        import datetime, json
+        snapshot = {
+            "fecha_envio": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "sesiones": sesiones
+        }
+        cn.execute("UPDATE pats SET snapshot_auditoria=? WHERE id=?", (json.dumps(snapshot), pat_id))
+        cn.commit()
+        cn.close()
+        return jsonify(success=True, message="Avance enviado a Dirección para Auditoría")
     except Exception as e:
         return jsonify(success=False, message=str(e)), 500
 

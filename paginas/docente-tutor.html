@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -45,9 +44,22 @@
         </div>
 
         <div id="tab-pat" class="space-y-4">
-            <div id="sin-pat" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                <p class="text-yellow-800 font-medium">No tienes un PAT asignado. Contacta a tu Director de Carrera.</p>
+            
+            <div id="sin-asig" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+                <i data-lucide="clock" class="h-12 w-12 mx-auto text-yellow-500 mb-3 opacity-80"></i>
+                <h3 class="text-lg font-bold text-yellow-800 mb-1">Aún no tienes grupo asignado</h3>
+                <p class="text-sm text-yellow-700">Por favor, espera a que tu Director de Carrera te asigne un grupo para este periodo cuatrimestral.</p>
             </div>
+
+            <div id="sin-pat" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+                <i data-lucide="download-cloud" class="h-12 w-12 mx-auto text-blue-500 mb-3 opacity-80"></i>
+                <h3 class="text-lg font-bold text-blue-900 mb-1">¡Tienes un grupo asignado!</h3>
+                <p class="text-sm text-blue-800 mb-5">El Director de Carrera te ha asignado el grupo <b id="lbl-grupo-asig" class="text-blue-900"></b> (<span id="lbl-cuat-asig"></span>° Cuatrimestre).<br>Para comenzar a trabajar, debes cargar la plantilla oficial de este periodo.</p>
+                <button id="btn-cargar-plantilla" class="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-sm transition-colors shadow-sm flex items-center justify-center mx-auto">
+                    <i data-lucide="file-input" class="h-4 w-4 mr-2"></i> Cargar Plantilla PAT
+                </button>
+            </div>
+
             <div id="con-pat" class="hidden space-y-4">
                 
                 <div class="bg-white rounded-lg border shadow-sm p-6">
@@ -86,9 +98,17 @@
                     <tbody id="ses-tbody" class="divide-y"></tbody></table></div>
                 </div>
                 
-                <div id="panel-enviar" class="bg-white rounded-lg border shadow-sm p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div id="panel-enviar" class="hidden bg-white rounded-lg border shadow-sm p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p class="text-sm text-gray-600" id="enviar-txt">Envia tu PAT para aprobacion.</p>
                     <button onclick="enviarPAT()" class="px-6 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 font-medium text-sm"><i data-lucide="send" class="h-4 w-4 inline mr-2"></i><span id="btn-enviar-txt">Enviar PAT</span></button>
+                </div>
+
+                <div id="panel-auditoria" class="hidden bg-indigo-50 rounded-lg border border-indigo-200 shadow-sm p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-indigo-900"><i data-lucide="shield" class="h-4 w-4 inline mr-1"></i>Auditoría de Dirección</h3>
+                        <p class="text-sm text-indigo-700 mt-1" id="auditoria-txt">Envía una copia de tu avance actual para que sea auditado.</p>
+                    </div>
+                    <button onclick="enviarAuditoria()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium text-sm whitespace-nowrap"><i data-lucide="send" class="h-4 w-4 inline mr-2"></i>Enviar Avance</button>
                 </div>
             </div>
         </div>
@@ -124,35 +144,26 @@
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 class="text-lg font-medium text-[#7B5936] mb-4">Finalizar Sesion <span id="mf-num"></span></h3>
         <form id="f-fin" class="space-y-4">
-    <div>
-        <label class="block text-xs text-gray-500 mb-1">Resultados Obtenidos</label>
-        <textarea id="mf-res" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea>
-    </div>
-    
-    <div>
-        <label class="block text-xs text-gray-500 mb-1">Tipo de Atención Impartida</label>
-        <div class="flex flex-wrap gap-4 bg-gray-50 p-2 rounded border">
-            <label class="text-xs flex items-center gap-1 font-medium"><input type="checkbox" class="ch-canal" value="AS">Asesoría</label>
-            <label class="text-xs flex items-center gap-1 font-medium"><input type="checkbox" class="ch-canal" value="TU" checked>Tutoría</label>
-        </div>
-    </div>
-
-    <div>
-        <label class="block text-xs text-gray-500 mb-1">Canalizaciones</label>
-        <div class="flex flex-wrap gap-3">
-            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="B">Becas</label>
-            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="M">Medico</label>
-            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="PS">Psicologia</label>
-            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="TS">T.Social</label>
-            <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="JD">Juridico</label>
-        </div>
-    </div>
-    
-    <div class="flex gap-2 justify-end">
-        <button type="button" onclick="cerrarM('m-fin')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button>
-        <button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Registrar</button>
-    </div>
-</form>
+            <div><label class="block text-xs text-gray-500 mb-1">Resultados Obtenidos</label><textarea id="mf-res" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Tipo de Atención Impartida</label>
+                <div class="flex flex-wrap gap-4 bg-gray-50 p-2 rounded border">
+                    <label class="text-xs flex items-center gap-1 font-medium"><input type="checkbox" class="ch-canal" value="AS">Asesoría</label>
+                    <label class="text-xs flex items-center gap-1 font-medium"><input type="checkbox" class="ch-canal" value="TU" checked>Tutoría</label>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Canalizaciones Especiales</label>
+                <div class="flex flex-wrap gap-3">
+                    <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="B">Becas</label>
+                    <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="M">Medico</label>
+                    <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="PS">Psicologia</label>
+                    <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="TS">T.Social</label>
+                    <label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="JD">Juridico</label>
+                </div>
+            </div>
+            <div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-fin')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Registrar</button></div>
+        </form>
     </div>
 </div>
 
@@ -186,6 +197,7 @@
 
 <script>
     var API='http://localhost:5000/api', sesData=window.getSessionData(), miId=sesData&&sesData.id, miCarrera=sesData&&sesData.departamento||'', pat=null, sesiones=[], curSesId=null;
+    var miAsignacion = null;
 
     function sw(t){
         ['pat','jefe'].forEach(function(x){
@@ -204,19 +216,47 @@
         d.className='flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto '+(ok===false?'bg-red-50 border-red-200 text-red-800':'bg-green-50 border-green-200 text-green-800');
         d.innerHTML='<span class="text-sm font-medium">'+m+'</span>';
         c.appendChild(d);
-        setTimeout(function(){d.remove();},4000);
+        setTimeout(function(){d.remove();},5000);
     }
     
     function ic(){if(typeof lucide!=='undefined')lucide.createIcons();}
 
     async function init(){
         try {
-            var r=await fetch(API+'/pats?tutor_id='+miId);
-            var d=await r.json();
-            if(!d.success||!d.pats.length){document.getElementById('sin-pat').classList.remove('hidden');return;}
+            // Ocultar todas las pantallas antes de verificar
+            document.getElementById('sin-asig').classList.add('hidden');
+            document.getElementById('sin-pat').classList.add('hidden');
+            document.getElementById('con-pat').classList.add('hidden');
+
+            // 1. Verificar Asignación del Director de Carrera
+            var rAsig = await fetch(API+'/asignaciones?tutor_id='+miId);
+            var dAsig = await rAsig.json();
+            
+            if(!dAsig.success || !dAsig.asignaciones.length){
+                document.getElementById('sin-asig').classList.remove('hidden');
+                return;
+            }
+            
+            miAsignacion = dAsig.asignaciones[0];
+
+            // 2. Verificar PAT ya generado
+            var rPat=await fetch(API+'/pats?tutor_id='+miId);
+            var dPat=await rPat.json();
+            
+            if(!dPat.success || !dPat.pats.length){
+                // Tiene Asignación, pero no hay PAT cargado
+                document.getElementById('lbl-grupo-asig').textContent = miAsignacion.grupo;
+                document.getElementById('lbl-cuat-asig').textContent = miAsignacion.cuatrimestre;
+                document.getElementById('btn-cargar-plantilla').onclick = function() { cargarPlantilla(miAsignacion.id); };
+                document.getElementById('sin-pat').classList.remove('hidden');
+                ic();
+                return;
+            }
+            
+            // 3. Todo en orden, mostrar PAT
             document.getElementById('con-pat').classList.remove('hidden');
             
-            var p0=d.pats[0];
+            var p0=dPat.pats[0];
             var dr=await fetch(API+'/pats/'+p0.id);
             var dd=await dr.json();
             if(!dd.success) return;
@@ -236,31 +276,93 @@
             b.className='px-2.5 py-1 rounded-full text-xs font-bold border '+(cfg[pat.estado]||cfg.Borrador);
             
             ['ban-rechazado','ban-aprobado','ban-pendiente'].forEach(function(id){document.getElementById(id).classList.add('hidden');});
-            document.getElementById('panel-enviar').classList.remove('hidden');
-            document.getElementById('btn-enviar-txt').textContent='Enviar PAT';
-            document.getElementById('enviar-txt').textContent='Envia tu PAT para aprobacion.';
+            document.getElementById('panel-enviar').classList.add('hidden');
+            document.getElementById('panel-auditoria').classList.add('hidden');
             
             if(pat.estado==='Rechazado'){
                 document.getElementById('rechazo-motivo').textContent=pat.observaciones_director||'Sin motivo especificado';
                 document.getElementById('ban-rechazado').classList.remove('hidden');
+                document.getElementById('panel-enviar').classList.remove('hidden');
                 document.getElementById('btn-enviar-txt').textContent='Reenviar PAT Corregido';
                 document.getElementById('enviar-txt').textContent='Corrige las observaciones y reenvia.';
             } else if(pat.estado==='Aprobado'){
                 document.getElementById('ban-aprobado').classList.remove('hidden');
-                document.getElementById('panel-enviar').classList.add('hidden');
+                document.getElementById('panel-auditoria').classList.remove('hidden');
+                if (pat.snapshot_auditoria) {
+                    try {
+                        var snap = JSON.parse(pat.snapshot_auditoria);
+                        document.getElementById('auditoria-txt').innerHTML = 'Último avance enviado: <b>' + snap.fecha_envio + '</b>.<br>Si hiciste nuevos cambios, vuelve a enviar.';
+                    } catch(e) {}
+                }
             } else if(pat.estado==='Pendiente Revision'){
                 document.getElementById('ban-pendiente').classList.remove('hidden');
-                document.getElementById('panel-enviar').classList.add('hidden');
+            } else {
+                document.getElementById('panel-enviar').classList.remove('hidden');
+                document.getElementById('btn-enviar-txt').textContent='Enviar PAT';
+                document.getElementById('enviar-txt').textContent='Envia tu PAT para aprobacion.';
             }
             renderSesiones();
-        } catch(e) { console.error(e); }
+        } catch(e) { 
+            console.error(e);
+            document.getElementById('sin-asig').innerHTML = '<div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg font-medium text-left">⚠️ Error de conexión con el servidor.</div>';
+            document.getElementById('sin-asig').classList.remove('hidden');
+        }
         cargarSol();
         ic();
     }
 
+    // NUEVO: Función para cargar la plantilla con el botón azul
+    async function cargarPlantilla(asigId) {
+        const btn = document.getElementById('btn-cargar-plantilla');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 mr-2 animate-spin"></i> Cargando...';
+        btn.disabled = true;
+        ic();
+
+        try {
+            const res = await fetch(API+'/pats/cargar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asignacion_id: asigId })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                toast(data.message, true);
+                await init(); // Recargar todo automáticamente
+            } else {
+                toast(data.message, false); 
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                ic();
+            }
+        } catch (err) {
+            toast('Error de conexión al cargar plantilla', false);
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            ic();
+        }
+    }
+
     function renderSesiones(){
         var tb=document.getElementById('ses-tbody');
-        if(!sesiones.length){tb.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Sin sesiones</td></tr>';return;}
+        
+        // --- CAMBIO AQUÍ: Mostrar botón si no hay sesiones ---
+        if(!sesiones || !sesiones.length){
+            tb.innerHTML=`
+                <tr><td colspan="6" class="px-4 py-12 text-center text-gray-500">
+                    <i data-lucide="folder-open" class="h-10 w-10 mx-auto text-gray-300 mb-3"></i>
+                    <p class="mb-4 text-base">Aún no has cargado la plantilla de sesiones para este PAT.</p>
+                    <button onclick="cargarPlantilla(${pat.asignacion_id})" id="btn-cargar-plantilla" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium shadow-sm transition-colors">
+                        <i data-lucide="download-cloud" class="h-4 w-4 inline mr-2"></i>Cargar Plantilla Oficial
+                    </button>
+                </td></tr>
+            `;
+            ic();
+            return;
+        }
+        // ------------------------------------------------------
+
         var done=sesiones.filter(function(s){return['Validada','Finalizada','Cancelada'].indexOf(s.estado)!==-1;}).length;
         document.getElementById('ses-prog').textContent=done+'/'+sesiones.length+' completadas';
         tb.innerHTML=sesiones.map(function(s){
@@ -298,33 +400,24 @@
         ic();
     }
 
-    // === DESCARGAR MI PAT (PDF) ===
     function descargarMiPAT(event) {
-        if (!pat) {
-            toast('Aún no tienes datos del PAT cargados.', false);
-            return;
-        }
-        
+        if (!pat) { toast('Aún no tienes datos del PAT.', false); return; }
         const btnIcon = event.currentTarget.querySelector('i');
         if(btnIcon) btnIcon.className = "h-3 w-3 mr-1 animate-spin lucide lucide-loader-2";
         if (typeof lucide !== 'undefined') lucide.createIcons();
-
         try {
             generarPDFPat({
                 carrera: pat.programa_educativo || pat.carrera || miCarrera,
                 tutor: pat.nombre_tutor || pat.tutor_nombre_completo || '',
                 grupo: pat.grupo,
                 periodo: pat.periodo_cuatrimestral || pat.periodo_nombre || '',
-                h: pat.alumnos_h || 0,
-                m: pat.alumnos_m || 0,
-                comentarios: pat.comentarios_tutor || '',
-                sesiones: sesiones,
-                tipo: 'completo',
+                h: pat.alumnos_h || 0, m: pat.alumnos_m || 0,
+                comentarios: pat.comentarios_tutor || '', 
+                sesiones: sesiones, tipo: 'completo',
                 filename: `Mi_PAT_${pat.grupo}_${(pat.nombre_tutor || '').replace(/ /g, '_')}.pdf`
             });
             toast('PDF generado con éxito', true);
         } catch (e) {
-            console.error(e);
             toast('Error al generar el PDF', false);
         } finally {
             setTimeout(() => {
@@ -334,15 +427,18 @@
         }
     }
 
-    // === ACCIONES DE SESIÓN ===
     function abrirProg(id,n){curSesId=id;document.getElementById('mp-num').textContent=n;document.getElementById('mp-fecha').value='';document.getElementById('mp-hora').value='';abrirM('m-prog');}
     document.getElementById('f-prog').addEventListener('submit',async function(e){e.preventDefault();
         try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha_programada:document.getElementById('mp-fecha').value,hora_programada:document.getElementById('mp-hora').value,estado:'Programada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-prog');await init();}catch(e){toast('Error',false);}
     });
 
-    function abrirFin(id,n){curSesId=id;document.getElementById('mf-num').textContent=n;document.getElementById('mf-res').value='';document.querySelectorAll('.ch-canal').forEach(function(c){c.checked=false;});abrirM('m-fin');}
+    function abrirFin(id,n){
+        curSesId=id; document.getElementById('mf-num').textContent=n; document.getElementById('mf-res').value='';
+        document.querySelectorAll('.ch-canal').forEach(function(c){ c.checked = (c.value === 'TU'); });
+        abrirM('m-fin');
+    }
     document.getElementById('f-fin').addEventListener('submit',async function(e){e.preventDefault();
-        var canales=[].slice.call(document.querySelectorAll('.ch-canal:checked')).map(function(c){return c.value;}).join(', ');
+        var canales=[].slice.call(document.querySelectorAll('.ch-canal:checked')).map(function(c){return c.value;}).join(',');
         try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados_obtenidos:document.getElementById('mf-res').value,canalizaciones:canales,estado:'Finalizada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-fin');await init();}catch(e){toast('Error',false);}
     });
 
@@ -360,6 +456,11 @@
 
     async function enviarPAT(){if(!pat)return;var msg=pat.estado==='Rechazado'?'Reenviar PAT corregido?':'Enviar PAT para revision?';if(!confirm(msg))return;
         try{var r=await fetch(API+'/pats/'+pat.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:'Pendiente Revision',observaciones_director:''})});var d=await r.json();toast(d.success?'PAT enviado':'Error',d.success);await init();}catch(e){toast('Error',false);}}
+
+    async function enviarAuditoria() {
+        if(!confirm('¿Enviar una copia exacta de tus sesiones actuales al Director para auditoría?')) return;
+        try { var r = await fetch(API+'/pats/'+pat.id+'/enviar-auditoria', { method:'POST' }); var d = await r.json(); toast(d.message, d.success); await init(); } catch(e) { toast('Error al enviar', false); }
+    }
 
     document.getElementById('form-jefe').addEventListener('submit',async function(e){e.preventDefault();
         try{var r=await fetch(API+'/solicitudes-jefe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({solicitante_id:miId,nombre_alumno:document.getElementById('jf-nom').value.trim(),apellidos_alumno:document.getElementById('jf-ape').value.trim(),email_alumno:document.getElementById('jf-email').value.trim().toLowerCase(),grupo:document.getElementById('jf-grupo').value.trim().toUpperCase(),carrera:miCarrera})});var d=await r.json();toast(d.message,d.success);if(d.success){this.reset();cargarSol();}}catch(e){toast('Error',false);}
