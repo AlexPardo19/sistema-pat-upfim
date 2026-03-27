@@ -1,22 +1,37 @@
+# -*- coding: utf-8 -*-
 import sqlite3
 import os
+import datetime
 
 CARPETA_ACTUAL = os.path.dirname(os.path.abspath(__file__))
 RUTA_BD = os.path.join(CARPETA_ACTUAL, 'sistema_pat.db')
 
+# Cuatrimestres activos segun periodo
+# ENE-ABR -> 2,5,8 | MAY-AGO -> 3,6,9 | SEP-DIC -> 1,4,7
+CUATS_POR_PERIODO = {
+    'ENE-ABR': [2, 5, 8],
+    'MAY-AGO': [3, 6, 9],
+    'SEP-DIC': [1, 4, 7],
+}
+
+def periodo_actual():
+    mes = datetime.datetime.now().month
+    anio = datetime.datetime.now().year
+    if 1 <= mes <= 4:
+        return 'ENE-ABR %d' % anio, 'ENE-ABR'
+    elif 5 <= mes <= 8:
+        return 'MAY-AGO %d' % anio, 'MAY-AGO'
+    else:
+        return 'SEP-DIC %d' % anio, 'SEP-DIC'
 
 def inicializar_bd():
-    conexion = sqlite3.connect(RUTA_BD)
-    cursor = conexion.cursor()
+    if os.path.exists(RUTA_BD):
+        os.remove(RUTA_BD)
 
-    cursor.executescript('''
-        DROP TABLE IF EXISTS sesiones;
-        DROP TABLE IF EXISTS pats;
-        DROP TABLE IF EXISTS plantillas_pat;
-        DROP TABLE IF EXISTS asignaciones;
-        DROP TABLE IF EXISTS carreras;
-        DROP TABLE IF EXISTS usuarios;
+    conn = sqlite3.connect(RUTA_BD)
+    c = conn.cursor()
 
+    c.executescript('''
         CREATE TABLE usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
@@ -25,49 +40,65 @@ def inicializar_bd():
             password TEXT NOT NULL,
             rol TEXT NOT NULL,
             departamento_o_carrera TEXT,
-            grupo_asignado TEXT
+            grupo_asignado TEXT,
+            tutor_id INTEGER,
+            activo INTEGER DEFAULT 1
         );
-
         CREATE TABLE carreras (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT UNIQUE NOT NULL
+            nombre TEXT UNIQUE NOT NULL,
+            abreviatura TEXT
         );
-
-        CREATE TABLE asignaciones (
+        CREATE TABLE periodos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            carrera_id INTEGER,
-            tutor_id INTEGER,
-            grupo TEXT NOT NULL,
-            periodo TEXT NOT NULL,
-            anio INTEGER NOT NULL
+            nombre TEXT NOT NULL,
+            tipo TEXT NOT NULL,
+            anio INTEGER NOT NULL,
+            activo INTEGER DEFAULT 0,
+            UNIQUE(tipo, anio)
         );
-
         CREATE TABLE plantillas_pat (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cuatrimestre TEXT NOT NULL,
-            num_sesion INTEGER,
+            cuatrimestre INTEGER NOT NULL,
+            num_sesion INTEGER NOT NULL,
             corte_parcial TEXT,
-            tematica TEXT,
-            objetivo TEXT,
+            tematica TEXT NOT NULL,
+            objetivo TEXT NOT NULL,
             resultados_esperados TEXT,
-            estado TEXT DEFAULT 'Publicada'
+            estado TEXT DEFAULT 'Borrador',
+            periodo_id INTEGER
         );
-
+        CREATE TABLE asignaciones (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            carrera_id INTEGER NOT NULL,
+            tutor_id INTEGER NOT NULL,
+            grupo TEXT NOT NULL,
+            periodo_id INTEGER NOT NULL,
+            cuatrimestre INTEGER NOT NULL,
+            jefe_grupo_id INTEGER
+        );
         CREATE TABLE pats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            asignacion_id INTEGER,
-            cuatrimestre TEXT NOT NULL,
+            asignacion_id INTEGER NOT NULL,
+            cuatrimestre INTEGER NOT NULL,
+            programa_educativo TEXT,
+            nombre_tutor TEXT,
+            periodo_cuatrimestral TEXT,
+            grupo TEXT,
             alumnos_h INTEGER DEFAULT 0,
             alumnos_m INTEGER DEFAULT 0,
             comentarios_tutor TEXT,
-            estado TEXT
+            nombre_jefe_grupo TEXT,
+            estado TEXT DEFAULT 'Borrador',
+            observaciones_director TEXT,
+            fecha_envio TEXT,
+            fecha_aprobacion TEXT
         );
-
         CREATE TABLE sesiones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            pat_id INTEGER,
-            num_sesion INTEGER,
-            fecha_programada DATE,
+            pat_id INTEGER NOT NULL,
+            num_sesion INTEGER NOT NULL,
+            fecha_programada TEXT,
             hora_programada TEXT,
             corte_parcial TEXT,
             tematica TEXT,
@@ -75,180 +106,137 @@ def inicializar_bd():
             resultados_esperados TEXT,
             canalizaciones TEXT,
             resultados_obtenidos TEXT,
-            estado TEXT,
+            estado TEXT DEFAULT 'Pendiente',
             motivo_cancelacion TEXT,
-            fecha_validacion DATE
+            firma_jefe TEXT,
+            fecha_validacion TEXT
+        );
+        CREATE TABLE solicitudes_jefe (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            solicitante_id INTEGER NOT NULL,
+            nombre_alumno TEXT NOT NULL,
+            apellidos_alumno TEXT NOT NULL,
+            email_alumno TEXT NOT NULL,
+            grupo TEXT NOT NULL,
+            carrera TEXT NOT NULL,
+            estado TEXT DEFAULT 'Pendiente',
+            observaciones TEXT,
+            fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP
         );
     ''')
 
-    # ─── 1. CARRERAS ───
+    # --- CARRERAS ---
     carreras = [
-        'Ingeniería en Tecnologías de la Información',
-        'Ingeniería Civil',
-        'Ingeniería en Agrotecnología',
-        'Ingeniería Financiera',
-        'Ingeniería en Producción Animal',
-        'Ingeniería en Diseño Industrial',
-        'Ingeniería en Energía',
-        'Licenciatura en Administración y Gestión Empresarial'
+        ('Ingenieria en Tecnologias de la Informacion', 'ITI'),
+        ('Ingenieria Civil', 'IC'),
+        ('Ingenieria en Agrotecnologia', 'IA'),
+        ('Ingenieria Financiera', 'IF'),
+        ('Ingenieria en Produccion Animal', 'IPA'),
+        ('Ingenieria en Diseno Industrial', 'IDI'),
+        ('Ingenieria en Energia', 'IE'),
+        ('Licenciatura en Administracion y Gestion Empresarial', 'LAGE'),
     ]
-    for c in carreras:
-        cursor.execute('INSERT INTO carreras (nombre) VALUES (?)', (c,))
+    c.executemany('INSERT INTO carreras (nombre, abreviatura) VALUES (?,?)', carreras)
 
-    # ─── 2. USUARIOS BASE ───
-    # IMPORTANTE: Los emails coinciden EXACTAMENTE con login.html
+    # --- PERIODO ACTIVO ---
+    p_nombre, p_tipo = periodo_actual()
+    anio = datetime.datetime.now().year
+    c.execute('INSERT INTO periodos (nombre, tipo, anio, activo) VALUES (?,?,?,1)',
+              (p_nombre, p_tipo, anio))
+    periodo_id = c.lastrowid
+
+    # --- USUARIOS ---
     usuarios = [
-        # Rol Admin
-        ('Super', 'Admin',
-         'admin@upfim.edu.mx', 'admin123', 'admin', 'Sistemas', None),
+        ('Super', 'Admin', 'admin@upfim.edu.mx', 'admin123', 'admin', 'Sistemas', None, None),
+        ('Blanca', 'Monroy Estrada', 'director.tutorias@upfim.edu.mx', 'admin123', 'director-tutorias', 'Direccion de Tutorias', None, None),
+        ('Roberto', 'Carrera Lopez', 'director.carrera@upfim.edu.mx', 'admin123', 'director-carrera', 'Ingenieria en Tecnologias de la Informacion', None, None),
+        ('Alicia', 'Leon Martinez', 'tutor@upfim.edu.mx', 'admin123', 'docente-tutor', 'Ingenieria en Tecnologias de la Informacion', None, None),
+        ('Alyzonn', 'Reyes Cruz', 'jefe.grupo@upfim.edu.mx', 'admin123', 'jefe-grupo', 'Ingenieria en Tecnologias de la Informacion', '1TIG3', None),
+    ]
+    c.executemany(
+        'INSERT INTO usuarios (nombre,apellidos,email,password,rol,departamento_o_carrera,grupo_asignado,tutor_id) VALUES (?,?,?,?,?,?,?,?)',
+        usuarios)
 
-        # Director de Tutorías — email mostrado en login.html
-        ('Blanca', 'Monroy',
-         'director.tutorias@upfim.edu.mx', 'admin123', 'director-tutorias', 'Dirección de Tutorías', None),
+    # Vincular jefe con tutor
+    c.execute("UPDATE usuarios SET tutor_id=4 WHERE email='jefe.grupo@upfim.edu.mx'")
 
-        # Director de Carrera — email mostrado en login.html (carrera TI por defecto)
-        ('Roberto', 'Carrera',
-         'director.carrera@upfim.edu.mx', 'admin123', 'director-carrera',
-         'Ingeniería en Tecnologías de la Información', None),
+    # Directores extra por carrera
+    for i, (car, abr) in enumerate(carreras):
+        c.execute('INSERT INTO usuarios (nombre,apellidos,email,password,rol,departamento_o_carrera) VALUES (?,?,?,?,?,?)',
+                  ('Director', 'Carrera '+abr, 'dir.carrera%d@upfim.edu.mx' % (i+1), 'admin123', 'director-carrera', car))
 
-        # Docente Tutor — email mostrado en login.html
-        ('Alicia', 'León Martínez',
-         'tutor@upfim.edu.mx', 'admin123', 'docente-tutor',
-         'Ingeniería en Tecnologías de la Información', None),
+    # Tutores extra
+    for i in range(1, 4):
+        c.execute('INSERT INTO usuarios (nombre,apellidos,email,password,rol,departamento_o_carrera) VALUES (?,?,?,?,?,?)',
+                  ('Tutor', 'Docente %d' % i, 'tutor%d@upfim.edu.mx' % i, 'admin123', 'docente-tutor', carreras[0][0]))
 
-        # Jefe de Grupo — email mostrado en login.html
-        ('Alyzonn', 'Reyes Pérez',
-         'jefe.grupo@upfim.edu.mx', 'admin123', 'jefe-grupo',
-         'Ingeniería en Tecnologías de la Información', '1G1'),
+    # --- PLANTILLA BASE (cuatrimestres del periodo activo) ---
+    temas = [
+        (1, 'I', 'Bienvenida e integracion al grupo', 'Fomentar la integracion del grupo', 'Que los alumnos conozcan las actividades del cuatrimestre'),
+        (2, 'I', 'Diagnostico individual', 'Generar el diagnostico del grupo', 'Conocer la situacion del estudiante'),
+        (3, 'I', 'Normativa institucional', 'Informar sobre el reglamento', 'Comunidad informada sobre derechos y obligaciones'),
+        (4, 'I', 'Disciplina y logro de objetivos', 'Analizar la importancia de la disciplina', 'Concientizar sobre la disciplina'),
+        (5, 'I', 'Estilos de aprendizaje', 'Informar sobre estilos de aprendizaje', 'Identificar su estilo de aprendizaje'),
+        (6, 'II', 'Habitos de estudio', 'Reafirmar rutinas de estudio', 'Reforzar habitos de estudio'),
+        (7, 'II', 'Seguimiento primer parcial', 'Revisar avance del grupo', 'Incrementar aprovechamiento'),
+        (8, 'II', 'Prevencion de violencia', 'Informar sobre prevencion y reaccion', 'Comunidad informada sobre protocolos'),
+        (9, 'II', 'Gestion de emociones', 'Identificar y gestionar emociones', 'Concientizar sobre gestion emocional'),
+        (10, 'II', 'Seguimiento segundo parcial', 'Revisar avance del grupo', 'Disminuir reprobacion'),
+        (11, 'III', 'Actitud para el logro de metas', 'Reflexionar sobre la actitud positiva', 'Beneficios de la actitud'),
+        (12, 'III', 'Trabajo en equipo', 'Importancia del trabajo en equipo', 'Reflexion sobre trabajo colaborativo'),
+        (13, 'III', 'Actividad integradora', 'Reforzar trabajo en equipo con dinamicas', 'Favorecer comunicacion e integracion'),
+        (14, 'III', 'Seguimiento tercer parcial', 'Revisar avance y dar seguimiento', 'Disminuir reprobacion'),
+        (15, 'III', 'Evaluacion del tutor e informe', 'Evaluar el trabajo del tutor', 'Evaluacion favorable de la accion tutorial'),
     ]
 
-    # ─── 3. DIRECTORES ADICIONALES (uno por carrera) ───
-    for i, c in enumerate(carreras):
-        email = f'dir.carrera{i + 1}@upfim.edu.mx'
-        usuarios.append(
-            (f'Director', f'Carrera {i + 1}', email, 'admin123', 'director-carrera', c, None)
-        )
+    cuats_activos = CUATS_POR_PERIODO.get(p_tipo, [1, 4, 7])
+    for cuat in cuats_activos:
+        for num, corte, tema, obj, res in temas:
+            c.execute(
+                'INSERT INTO plantillas_pat (cuatrimestre,num_sesion,corte_parcial,tematica,objetivo,resultados_esperados,estado,periodo_id) VALUES (?,?,?,?,?,?,?,?)',
+                (cuat, num, corte, tema, obj, res, 'Publicada', periodo_id))
 
-    # ─── 4. TUTORES Y JEFES ADICIONALES ───
-    for i in range(1, 10):
-        carrera_asignada = carreras[(i - 1) % 8]
-        grupo = f'1G{i}'
-        usuarios.append(
-            (f'Tutor', f'Docente {i}', f'tutor{i}@upfim.edu.mx', 'admin123',
-             'docente-tutor', carrera_asignada, None)
-        )
-        usuarios.append(
-            (f'Jefe', f'Alumno {i}', f'jefe{i}@upfim.edu.mx', 'admin123',
-             'jefe-grupo', carrera_asignada, grupo)
-        )
+    # --- ASIGNACION + PAT DEMO ---
+    c.execute("SELECT id FROM carreras WHERE nombre='Ingenieria en Tecnologias de la Informacion'")
+    carrera_id = c.fetchone()[0]
+    cuat_demo = cuats_activos[0]
 
-    cursor.executemany(
-        'INSERT INTO usuarios (nombre, apellidos, email, password, rol, departamento_o_carrera, grupo_asignado) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?)',
-        usuarios
-    )
+    c.execute('INSERT INTO asignaciones (carrera_id,tutor_id,grupo,periodo_id,cuatrimestre,jefe_grupo_id) VALUES (?,4,?,?,?,5)',
+              (carrera_id, '1TIG3', periodo_id, cuat_demo))
+    asig_id = c.lastrowid
 
-    # ─── 5. PLANTILLA DEL DIRECTOR DE TUTORÍAS (15 sesiones, Cuatrimestre 1) ───
-    plantilla = []
-    temas_base = [
-        ('Bienvenida e integración al grupo', 'Fomentar la integración del grupo y conocer su perfil'),
-        ('Reglamento escolar y normativas', 'Informar sobre las normas institucionales vigentes'),
-        ('Hábitos de estudio efectivos', 'Desarrollar técnicas de aprendizaje para el cuatrimestre'),
-        ('Prevención de adicciones', 'Concientizar sobre riesgos y vías de apoyo institucional'),
-        ('Orientación vocacional', 'Fortalecer la identidad profesional del estudiante'),
-        ('Manejo del estrés académico', 'Brindar herramientas para la gestión del estrés'),
-        ('Cierre del primer corte', 'Evaluar avances y detectar alumnos en riesgo (Corte I)'),
-        ('Habilidades de comunicación', 'Desarrollar competencias de comunicación efectiva'),
-        ('Trabajo en equipo y liderazgo', 'Promover la colaboración y el trabajo colaborativo'),
-        ('Salud mental y bienestar', 'Identificar señales de alerta y canales de apoyo'),
-        ('Cierre del segundo corte', 'Evaluar avances y detectar alumnos en riesgo (Corte II)'),
-        ('Proyecto profesional integrador', 'Vincular contenidos académicos con el campo laboral'),
-        ('Emprendimiento e innovación', 'Fomentar la cultura emprendedora'),
-        ('Repaso general y dudas finales', 'Resolver dudas y reforzar temas del cuatrimestre'),
-        ('Cierre y retroalimentación final', 'Evaluar el PAT y la satisfacción de los estudiantes'),
-    ]
+    c.execute('''INSERT INTO pats (asignacion_id,cuatrimestre,programa_educativo,nombre_tutor,periodo_cuatrimestral,grupo,alumnos_h,alumnos_m,comentarios_tutor,nombre_jefe_grupo,estado)
+                 VALUES (?,?,'Ingenieria en Tecnologias de la Informacion','Alicia Leon Martinez',?,?,16,10,'Grupo participativo, se trabajo en dinamicas de integracion.','Alyzonn Reyes Cruz','Aprobado')''',
+              (asig_id, cuat_demo, p_nombre, '1TIG3'))
+    pat_id = c.lastrowid
 
-    for i, (tematica, objetivo) in enumerate(temas_base, 1):
-        corte = 'I' if i <= 5 else ('II' if i <= 10 else 'III')
-        plantilla.append(('1', i, corte, tematica, objetivo, 'Que los alumnos participen activamente', 'Publicada'))
+    for num, corte, tema, obj, res in temas:
+        estado = 'Validada' if num <= 2 else ('Finalizada' if num == 3 else 'Pendiente')
+        fecha = '2026-0%d-%02d' % (1 + (num-1)//4, 5 + ((num-1)%4)*7) if num <= 6 else None
+        resultado = 'Sesion impartida exitosamente' if num <= 3 else ''
+        c.execute(
+            'INSERT INTO sesiones (pat_id,num_sesion,fecha_programada,corte_parcial,tematica,objetivo,resultados_esperados,resultados_obtenidos,estado) VALUES (?,?,?,?,?,?,?,?,?)',
+            (pat_id, num, fecha, corte, tema, obj, res, resultado, estado))
 
-    cursor.executemany(
-        'INSERT INTO plantillas_pat (cuatrimestre, num_sesion, corte_parcial, tematica, objetivo, resultados_esperados, estado) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?)',
-        plantilla
-    )
+    # Solicitud demo
+    c.execute("INSERT INTO solicitudes_jefe (solicitante_id,nombre_alumno,apellidos_alumno,email_alumno,grupo,carrera) VALUES (4,'Carlos','Mendoza','carlos@upfim.edu.mx','2TIG1','Ingenieria en Tecnologias de la Informacion')")
 
-    # ─── 6. PAT DEL TUTOR DEMO (tutor@upfim.edu.mx) ───
-    # Obtenemos el ID del tutor demo y su carrera
-    cursor.execute("SELECT id FROM usuarios WHERE email = 'tutor@upfim.edu.mx'")
-    tutor_demo = cursor.fetchone()
+    conn.commit()
+    conn.close()
 
-    cursor.execute("SELECT id FROM carreras WHERE nombre = 'Ingeniería en Tecnologías de la Información'")
-    carrera_ti = cursor.fetchone()
-
-    if tutor_demo and carrera_ti:
-        cursor.execute(
-            "INSERT INTO asignaciones (carrera_id, tutor_id, grupo, periodo, anio) VALUES (?, ?, '1G1', 'SEPT-DIC 2026', 2026)",
-            (carrera_ti[0], tutor_demo[0])
-        )
-        asignacion_id = cursor.lastrowid
-
-        cursor.execute(
-            "INSERT INTO pats (asignacion_id, cuatrimestre, alumnos_h, alumnos_m, comentarios_tutor, estado) "
-            "VALUES (?, '1', 15, 12, 'Grupo de prueba inicial del sistema.', 'Aprobado')",
-            (asignacion_id,)
-        )
-        pat_id = cursor.lastrowid
-
-        # Sesiones de ejemplo con diferentes estados
-        sesiones_demo = [
-            (pat_id, 1, '2026-09-05', '14:00', 'I', temas_base[0][0], temas_base[0][1],
-             'Que los alumnos participen', 'B, PS', 'Excelente participación grupal',
-             'Validada', None, '2026-09-06'),
-            (pat_id, 2, '2026-09-12', '14:00', 'I', temas_base[1][0], temas_base[1][1],
-             'Alumnos informados', '', 'Todos informados del reglamento',
-             'Finalizada_Por_Tutor', None, None),
-            (pat_id, 3, '2026-09-19', '14:00', 'I', temas_base[2][0], temas_base[2][1],
-             'Aprobar parcial', '', '',
-             'Programada', None, None),
-            (pat_id, 4, '2026-09-26', '14:00', 'I', temas_base[3][0], temas_base[3][1],
-             'Concientización', '', '',
-             'Cancelada', 'No asistió el ponente invitado', None),
-        ]
-
-        # Las sesiones 5-15 sin programar
-        for i in range(5, 16):
-            corte = 'I' if i <= 5 else ('II' if i <= 10 else 'III')
-            tema = temas_base[i - 1]
-            sesiones_demo.append(
-                (pat_id, i, None, None, corte, tema[0], tema[1],
-                 'Que los alumnos participen', '', '',
-                 'Programada', None, None)
-            )
-
-        cursor.executemany(
-            'INSERT INTO sesiones (pat_id, num_sesion, fecha_programada, hora_programada, corte_parcial, '
-            'tematica, objetivo, resultados_esperados, canalizaciones, resultados_obtenidos, '
-            'estado, motivo_cancelacion, fecha_validacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            sesiones_demo
-        )
-
-    conexion.commit()
-    conexion.close()
-
-    print("=" * 55)
-    print("  Base de Datos inicializada correctamente")
-    print("=" * 55)
-    print("\n  CREDENCIALES DE PRUEBA:")
-    print("  ─────────────────────────────────────────────")
-    print("  admin@upfim.edu.mx             → Admin")
-    print("  director.tutorias@upfim.edu.mx → Director Tutorías")
-    print("  director.carrera@upfim.edu.mx  → Director Carrera")
-    print("  tutor@upfim.edu.mx             → Docente Tutor")
-    print("  jefe.grupo@upfim.edu.mx        → Jefe de Grupo")
-    print("  Contraseña general: admin123")
-    print("=" * 55)
-
+    print("============================================================")
+    print("  Base de Datos creada OK")
+    print("============================================================")
+    print("  Periodo: " + p_nombre)
+    print("  Cuatrimestres: " + str(cuats_activos))
+    print("  --------------------------------------------------------")
+    print("  admin@upfim.edu.mx             -> Admin")
+    print("  director.tutorias@upfim.edu.mx -> Dir. Tutorias")
+    print("  director.carrera@upfim.edu.mx  -> Dir. Carrera (ITI)")
+    print("  tutor@upfim.edu.mx             -> Docente Tutor")
+    print("  jefe.grupo@upfim.edu.mx        -> Jefe de Grupo")
+    print("  Password: admin123")
+    print("============================================================")
 
 if __name__ == '__main__':
     inicializar_bd()

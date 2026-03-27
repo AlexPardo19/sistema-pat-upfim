@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnostico - Sistema PAT</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #111; color: #0f0; }
+        .ok { color: #0f0; }
+        .fail { color: #f44; }
+        .warn { color: #ff0; }
+        .info { color: #0af; }
+        button { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; cursor: pointer; margin: 5px; }
+        button:hover { background: #555; }
+        pre { background: #1a1a1a; padding: 10px; border: 1px solid #333; overflow-x: auto; }
+        #log { white-space: pre-wrap; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <h1>Diagnostico Sistema PAT</h1>
+    <p class="info">Esta pagina prueba la conexion con Flask y el login.</p>
+    <hr>
+    <button onclick="runAll()">Ejecutar TODAS las pruebas</button>
+    <button onclick="testLogin()">Probar Login Manual</button>
+    <button onclick="clearLog()">Limpiar</button>
+    <hr>
+    <div id="log"></div>
+
+    <script>
+        var log = document.getElementById('log');
+        
+        function addLog(msg, cls) {
+            var line = document.createElement('div');
+            line.className = cls || 'info';
+            line.textContent = msg;
+            log.appendChild(line);
+        }
+
+        function clearLog() { log.innerHTML = ''; }
+
+        async function runAll() {
+            clearLog();
+            addLog('=== INICIO DIAGNOSTICO ===', 'info');
+            addLog('Fecha: ' + new Date().toLocaleString(), 'info');
+            addLog('URL actual: ' + window.location.href, 'info');
+            addLog('', 'info');
+
+            // Test 1: Fetch basico a Flask
+            addLog('--- TEST 1: Conexion a Flask ---', 'warn');
+            try {
+                var r1 = await fetch('http://localhost:5000/api/carreras');
+                addLog('GET /api/carreras -> status: ' + r1.status, r1.ok ? 'ok' : 'fail');
+                var d1 = await r1.json();
+                addLog('Respuesta: success=' + d1.success + ' carreras=' + (d1.carreras ? d1.carreras.length : 0), d1.success ? 'ok' : 'fail');
+            } catch (e) {
+                addLog('ERROR: No se pudo conectar a Flask en puerto 5000', 'fail');
+                addLog('Detalle: ' + e.message, 'fail');
+                addLog('', 'fail');
+                addLog('>>> SOLUCION: Asegurate de que Flask este corriendo.', 'fail');
+                addLog('>>> Abre terminal en la carpeta backend/ y ejecuta:', 'fail');
+                addLog('>>>   python app.py', 'fail');
+                addLog('>>> Debes ver "Running on http://127.0.0.1:5000"', 'fail');
+                return;
+            }
+
+            addLog('', 'info');
+
+            // Test 2: CORS preflight
+            addLog('--- TEST 2: CORS ---', 'warn');
+            try {
+                var r2 = await fetch('http://localhost:5000/api/login', { method: 'OPTIONS' });
+                var cors = r2.headers.get('Access-Control-Allow-Origin');
+                addLog('OPTIONS /api/login -> status: ' + r2.status, r2.ok ? 'ok' : 'fail');
+                addLog('CORS Allow-Origin: ' + (cors || 'NO PRESENTE'), cors ? 'ok' : 'fail');
+            } catch (e) {
+                addLog('ERROR CORS: ' + e.message, 'fail');
+            }
+
+            addLog('', 'info');
+
+            // Test 3: Login real
+            addLog('--- TEST 3: Login con admin@upfim.edu.mx / admin123 ---', 'warn');
+            try {
+                var r3 = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@upfim.edu.mx', password: 'admin123' })
+                });
+                addLog('POST /api/login -> status: ' + r3.status, 'info');
+                var d3 = await r3.json();
+                addLog('Respuesta completa: ' + JSON.stringify(d3, null, 2), d3.success ? 'ok' : 'fail');
+                if (d3.success) {
+                    addLog('LOGIN EXITOSO! role=' + d3.role, 'ok');
+                } else {
+                    addLog('LOGIN FALLIDO: ' + d3.message, 'fail');
+                    addLog('>>> Posible causa: la BD no se creo correctamente', 'fail');
+                    addLog('>>> Solucion: ejecuta "python crear_bd.py" en la carpeta backend/', 'fail');
+                }
+            } catch (e) {
+                addLog('ERROR en fetch login: ' + e.message, 'fail');
+            }
+
+            addLog('', 'info');
+
+            // Test 4: Probar todos los usuarios
+            addLog('--- TEST 4: Todas las credenciales ---', 'warn');
+            var creds = [
+                ['admin@upfim.edu.mx', 'admin123'],
+                ['director.tutorias@upfim.edu.mx', 'admin123'],
+                ['director.carrera@upfim.edu.mx', 'admin123'],
+                ['tutor@upfim.edu.mx', 'admin123'],
+                ['jefe.grupo@upfim.edu.mx', 'admin123'],
+            ];
+            for (var i = 0; i < creds.length; i++) {
+                try {
+                    var r = await fetch('http://localhost:5000/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: creds[i][0], password: creds[i][1] })
+                    });
+                    var d = await r.json();
+                    if (d.success) {
+                        addLog('  OK  ' + creds[i][0] + ' -> ' + d.role, 'ok');
+                    } else {
+                        addLog('  FAIL ' + creds[i][0] + ' -> ' + d.message, 'fail');
+                    }
+                } catch (e) {
+                    addLog('  ERROR ' + creds[i][0] + ' -> ' + e.message, 'fail');
+                }
+            }
+
+            addLog('', 'info');
+
+            // Test 5: Verificar auth.js
+            addLog('--- TEST 5: Verificar auth.js ---', 'warn');
+            try {
+                var r5 = await fetch('../js/auth.js');
+                addLog('GET ../js/auth.js -> status: ' + r5.status, r5.ok ? 'ok' : 'fail');
+                if (r5.ok) {
+                    var txt = await r5.text();
+                    var hasAPI = txt.indexOf('localhost:5000') !== -1;
+                    var hasDOMReady = txt.indexOf('DOMContentLoaded') !== -1;
+                    var hasLoginForm = txt.indexOf('loginForm') !== -1;
+                    addLog('  Contiene localhost:5000? ' + hasAPI, hasAPI ? 'ok' : 'fail');
+                    addLog('  Contiene DOMContentLoaded? ' + hasDOMReady, hasDOMReady ? 'ok' : 'fail');
+                    addLog('  Contiene loginForm? ' + hasLoginForm, hasLoginForm ? 'ok' : 'fail');
+                    if (!hasAPI) {
+                        addLog('  >>> ERROR: auth.js no apunta a puerto 5000!', 'fail');
+                    }
+                } else {
+                    addLog('  No se pudo cargar auth.js - verifica la ruta', 'fail');
+                }
+            } catch (e) {
+                addLog('Error cargando auth.js: ' + e.message, 'fail');
+            }
+
+            addLog('', 'info');
+
+            // Test 6: Periodo activo
+            addLog('--- TEST 6: Periodo activo ---', 'warn');
+            try {
+                var r6 = await fetch('http://localhost:5000/api/periodos/activo');
+                var d6 = await r6.json();
+                if (d6.success) {
+                    addLog('Periodo: ' + d6.periodo.nombre + ' | Cuatrimestres: ' + JSON.stringify(d6.periodo.cuatrimestres), 'ok');
+                } else {
+                    addLog('Sin periodo activo: ' + d6.message, 'fail');
+                }
+            } catch (e) {
+                addLog('Error: ' + e.message, 'fail');
+            }
+
+            addLog('', 'info');
+            addLog('=== DIAGNOSTICO COMPLETO ===', 'info');
+        }
+
+        async function testLogin() {
+            clearLog();
+            var email = prompt('Email:', 'admin@upfim.edu.mx');
+            if (!email) return;
+            var password = prompt('Password:', 'admin123');
+            if (!password) return;
+
+            addLog('Probando login: ' + email, 'info');
+            try {
+                var r = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                addLog('Status: ' + r.status, 'info');
+                var d = await r.json();
+                addLog('Respuesta: ' + JSON.stringify(d, null, 2), d.success ? 'ok' : 'fail');
+            } catch (e) {
+                addLog('Error: ' + e.message, 'fail');
+                addLog('Flask no esta corriendo o hay un problema de red', 'fail');
+            }
+        }
+    </script>
+</body>
+</html>

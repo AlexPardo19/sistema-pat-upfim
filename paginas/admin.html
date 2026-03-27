@@ -1,408 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración del Sistema - PAT</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Admin - PAT</title><link rel="stylesheet" href="../css/styles.css"><script src="https://unpkg.com/@tailwindcss/browser@4"></script><script src="https://unpkg.com/lucide@latest"></script></head>
 <body class="bg-gray-50 flex h-screen overflow-hidden">
-
     <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white lg:static flex flex-col">
-        <div class="p-6 border-b border-gray-800 flex items-center gap-3">
-            <div class="h-8 w-8 bg-[#69B22E] rounded-md flex items-center justify-center">
-                <i data-lucide="shield" class="h-5 w-5 text-white"></i>
-            </div>
-            <span class="font-semibold text-white tracking-wide">Admin PAT</span>
-        </div>
+        <div class="p-6 border-b border-gray-800 flex items-center gap-3"><div class="h-8 w-8 bg-[#69B22E] rounded-md flex items-center justify-center"><i data-lucide="shield" class="h-5 w-5 text-white"></i></div><span class="font-semibold">Admin PAT</span></div>
         <nav class="flex-1 p-4 space-y-2">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#69B22E] text-white">
-                <i data-lucide="users" class="h-5 w-5"></i>
-                <span>Gestión de Credenciales</span>
-            </a>
+            <button onclick="sw('usuarios')" id="tb-usuarios" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-[#69B22E] text-white"><i data-lucide="users" class="h-5 w-5"></i><span>Usuarios</span></button>
+            <button onclick="sw('sol')" id="tb-sol" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800"><i data-lucide="user-check" class="h-5 w-5"></i><span>Solicitudes JG</span><span id="badge-sol" class="hidden ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5"></span></button>
         </nav>
-        <div class="p-4 border-t border-gray-800">
-            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
-                <i data-lucide="log-out" class="h-5 w-5"></i>
-                <span>Cerrar Sesión</span>
-            </button>
-        </div>
+        <div class="p-4 border-t border-gray-800"><button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800"><i data-lucide="log-out" class="h-5 w-5"></i><span>Cerrar Sesion</span></button></div>
     </aside>
-
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 flex justify-between items-center">
-            <h1 class="text-xl font-semibold text-[#7B5936]">Alta de Usuarios del Sistema</h1>
-            <div class="flex items-center gap-3">
-                <span id="user-email-display" class="text-sm font-medium text-gray-700">Cargando...</span>
-                <div class="h-10 w-10 rounded-full bg-gray-900 text-[#69B22E] flex items-center justify-center">
-                    <i data-lucide="shield-check" class="h-5 w-5"></i>
-                </div>
-            </div>
-        </header>
-
+        <header class="bg-white border-b px-6 py-4 flex-shrink-0 flex justify-between items-center"><h1 class="text-xl font-semibold text-[#7B5936]" id="header-t">Usuarios</h1><div class="flex items-center gap-3"><span id="user-email-display" class="text-sm text-gray-700"></span><div class="h-10 w-10 rounded-full bg-gray-900 text-[#69B22E] flex items-center justify-center"><i data-lucide="shield-check" class="h-5 w-5"></i></div></div></header>
         <main class="flex-1 overflow-auto p-6">
-            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                <!-- Formulario -->
-                <div class="md:col-span-1 bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-fit">
+            <!-- TAB USUARIOS -->
+            <div id="tab-usuarios" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 bg-white rounded-lg border shadow-sm p-6 h-fit">
                     <h3 class="text-lg font-medium text-[#7B5936] mb-4">Nueva Credencial</h3>
-                    <form id="form-admin" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Nombre(s)</label>
-                            <input type="text" id="nombre" required
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Apellidos</label>
-                            <input type="text" id="apellidos" required
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Correo (@upfim.edu.mx)</label>
-                            <input type="email" id="email" required placeholder="usuario@upfim.edu.mx"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Rol del Sistema</label>
-                            <select id="rol" required onchange="toggleGrupoInput()"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
-                                <option value="" disabled selected>Selecciona un rol...</option>
-                                <option value="director-tutorias">Director de Tutorías</option>
-                                <option value="director-carrera">Director de Carrera</option>
-                                <option value="docente-tutor">Docente Tutor</option>
-                                <option value="jefe-grupo">Jefe de Grupo (Estudiante)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Carrera</label>
-                            <select id="carrera"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]">
-                                <option value="" selected>Selecciona una carrera...</option>
-                            </select>
-                            <p id="carrera-hint" class="text-[10px] text-gray-400 mt-1 hidden">Requerido para este rol</p>
-                        </div>
-                        <div id="campo-grupo" class="hidden">
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Grupo Asignado</label>
-                            <input type="text" id="grupo" placeholder="Ej: 1G1"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] uppercase">
-                        </div>
-
-                        <!-- Mensaje de error/éxito del formulario -->
-                        <div id="form-msg" class="hidden text-sm rounded-md px-3 py-2"></div>
-
-                        <button type="submit" id="btn-crear"
-                            class="w-full py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-opacity text-sm font-medium mt-2">
-                            Crear Cuenta
-                        </button>
+                    <form id="form-usr" class="space-y-4">
+                        <div><label class="block text-xs text-gray-500 mb-1">Nombre</label><input id="u-nom" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                        <div><label class="block text-xs text-gray-500 mb-1">Apellidos</label><input id="u-ape" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                        <div><label class="block text-xs text-gray-500 mb-1">Correo</label><input id="u-email" type="email" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                        <div><label class="block text-xs text-gray-500 mb-1">Rol</label><select id="u-rol" required onchange="document.getElementById('u-grupo-div').classList.toggle('hidden',this.value!=='jefe-grupo')" class="w-full border rounded-md px-3 py-2 text-sm"><option value="" disabled selected>Selecciona...</option><option value="director-tutorias">Dir. Tutorias</option><option value="director-carrera">Dir. Carrera</option><option value="docente-tutor">Docente Tutor</option><option value="jefe-grupo">Jefe de Grupo</option></select></div>
+                        <div><label class="block text-xs text-gray-500 mb-1">Carrera</label><select id="u-carrera" class="w-full border rounded-md px-3 py-2 text-sm"><option value="">Selecciona...</option></select></div>
+                        <div id="u-grupo-div" class="hidden"><label class="block text-xs text-gray-500 mb-1">Grupo</label><input id="u-grupo" class="w-full border rounded-md px-3 py-2 text-sm uppercase"></div>
+                        <div id="u-msg" class="hidden text-sm rounded-md px-3 py-2"></div>
+                        <button type="submit" class="w-full py-2 bg-[#69B22E] text-white rounded-md text-sm font-medium">Crear Cuenta</button>
                     </form>
                 </div>
-
-                <!-- Tabla de usuarios -->
-                <div class="md:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden h-fit">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                        <h3 class="font-medium text-[#7B5936]">Usuarios Registrados</h3>
-                        <span id="contador-usuarios" class="text-xs text-gray-500"></span>
-                    </div>
-
-                    <!-- Buscador -->
-                    <div class="px-4 py-3 border-b border-gray-100 flex flex-col sm:flex-row gap-3 bg-white">
-                        <div class="relative flex-1">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
-                            <input type="text" id="buscador" placeholder="Buscar por nombre o correo..."
-                                oninput="filtrarUsuarios()"
-                                class="w-full pl-9 border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E]">
-                        </div>
-                        <select id="filtro-rol" onchange="filtrarUsuarios()" class="border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E] bg-gray-50 text-gray-700">
-                            <option value="">Todos los Roles</option>
-                            <option value="director-tutorias">Director de Tutorías</option>
-                            <option value="director-carrera">Director de Carrera</option>
-                            <option value="docente-tutor">Docente Tutor</option>
-                            <option value="jefe-grupo">Jefe de Grupo</option>
-                        </select>
-                        <select id="filtro-carrera" onchange="filtrarUsuarios()" class="border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E] bg-gray-50 text-gray-700 max-w-[200px]">
-                            <option value="">Todas las Carreras</option>
-                        </select>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
-                                <tr>
-                                    <th class="px-4 py-3">Usuario</th>
-                                    <th class="px-4 py-3">Rol</th>
-                                    <th class="px-4 py-3">Detalle</th>
-                                    <th class="px-4 py-3 text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usuarios-tbody" class="divide-y divide-gray-100">
-                                <tr>
-                                    <td colspan="4" class="px-4 py-8 text-center text-gray-400">
-                                        <i data-lucide="loader-2" class="h-5 w-5 animate-spin inline mr-2"></i>
-                                        Cargando usuarios...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="md:col-span-2 bg-white rounded-lg border shadow-sm overflow-hidden h-fit">
+                    <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between"><h3 class="font-medium text-[#7B5936]">Usuarios</h3><span id="u-count" class="text-xs text-gray-500"></span></div>
+                    <div class="px-4 py-3 border-b flex gap-3"><div class="relative flex-1"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i><input id="u-buscar" oninput="filtrar()" class="w-full pl-9 border rounded-md px-3 py-1.5 text-sm"></div><select id="u-filt-rol" onchange="filtrar()" class="border rounded-md px-3 py-1.5 text-sm bg-gray-50"><option value="">Todos</option><option value="director-tutorias">Dir. Tutorias</option><option value="director-carrera">Dir. Carrera</option><option value="docente-tutor">Docente</option><option value="jefe-grupo">Jefe Grupo</option></select></div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b"><tr><th class="px-4 py-3">Usuario</th><th class="px-4 py-3">Rol</th><th class="px-4 py-3">Detalle</th><th class="px-4 py-3 text-center">Acc.</th></tr></thead><tbody id="u-tbody" class="divide-y"></tbody></table></div>
                 </div>
-
+            </div>
+            <!-- TAB SOLICITUDES -->
+            <div id="tab-sol" class="hidden max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b bg-gray-50"><h3 class="font-medium text-[#7B5936]">Solicitudes de Jefe de Grupo</h3></div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b"><tr><th class="px-4 py-3">Alumno</th><th class="px-4 py-3">Grupo</th><th class="px-4 py-3">Solicitante</th><th class="px-4 py-3 text-center">Estado</th><th class="px-4 py-3 text-center">Acc.</th></tr></thead><tbody id="sol-tbody" class="divide-y"></tbody></table></div>
+                </div>
             </div>
         </main>
     </div>
-
-    <!-- Toast container -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
+    <div id="toast-c" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
     <script src="../js/auth.js"></script>
     <script>
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+    var API='http://localhost:5000/api',allUsers=[];
+    function sw(t){['usuarios','sol'].forEach(function(x){document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);var b=document.getElementById('tb-'+x);b.className=x===t?'w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-[#69B22E] text-white':'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800';});document.getElementById('header-t').textContent=t==='usuarios'?'Usuarios':'Solicitudes JG';ic();}
+    function toast(m,t){var c=document.getElementById('toast-c'),d=document.createElement('div');d.className='flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto '+(t==='error'?'bg-red-50 border-red-200 text-red-800':'bg-green-50 border-green-200 text-green-800');d.innerHTML='<span class="text-sm font-medium">'+m+'</span>';c.appendChild(d);setTimeout(function(){d.remove();},4000);}
+    function ic(){if(typeof lucide!=='undefined')lucide.createIcons();}
+    var rolBadge={'admin':'bg-gray-900 text-white','director-tutorias':'bg-purple-100 text-purple-800','director-carrera':'bg-blue-100 text-blue-800','docente-tutor':'bg-green-100 text-green-800','jefe-grupo':'bg-orange-100 text-orange-800'};
+    var rolLabel={'admin':'Admin','director-tutorias':'Dir.Tutorias','director-carrera':'Dir.Carrera','docente-tutor':'Docente','jefe-grupo':'Jefe Grupo'};
 
-        const API = 'http://localhost:5000/api';
-        let todosLosUsuarios = [];
+    async function cargarUsers(){try{var r=await fetch(API+'/usuarios');var d=await r.json();if(d.success){allUsers=d.usuarios;renderUsers(allUsers);}}catch(e){}}
+    function renderUsers(list){var tb=document.getElementById('u-tbody');document.getElementById('u-count').textContent=list.length+' usuario(s)';tb.innerHTML=list.map(function(u){return'<tr class="hover:bg-gray-50"><td class="px-4 py-3"><p class="font-medium text-gray-900">'+u.nombre+' '+u.apellidos+'</p><p class="text-xs text-gray-500">'+u.email+'</p></td><td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium '+(rolBadge[u.rol]||'')+'">'+(rolLabel[u.rol]||u.rol)+'</span></td><td class="px-4 py-3 text-xs text-gray-600">'+(u.grupo_asignado?'Grupo: '+u.grupo_asignado:(u.departamento_o_carrera||'-'))+'</td><td class="px-4 py-3 text-center">'+(u.rol!=='admin'?'<button onclick="delUser('+u.id+',\''+u.nombre+'\')" class="p-1 text-gray-400 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>':'')+'</td></tr>';}).join('');ic();}
+    function filtrar(){var q=document.getElementById('u-buscar').value.toLowerCase();var fr=document.getElementById('u-filt-rol').value;renderUsers(allUsers.filter(function(u){return(u.nombre+' '+u.apellidos+' '+u.email).toLowerCase().indexOf(q)!==-1&&(!fr||u.rol===fr);}));}
 
-        // ────────────────────────────────────────────
-        // Toast notifications
-        // ────────────────────────────────────────────
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const config = {
-                success: { bg: 'bg-green-50 border-green-200 text-green-800', icon: 'check-circle' },
-                error:   { bg: 'bg-red-50 border-red-200 text-red-800',   icon: 'alert-circle' },
-                info:    { bg: 'bg-blue-50 border-blue-200 text-blue-800', icon: 'info' },
-            };
-            const { bg, icon } = config[type] || config.info;
+    document.getElementById('form-usr').addEventListener('submit',async function(e){e.preventDefault();var msg=document.getElementById('u-msg');msg.classList.add('hidden');try{var r=await fetch(API+'/usuarios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:document.getElementById('u-nom').value.trim(),apellidos:document.getElementById('u-ape').value.trim(),email:document.getElementById('u-email').value.trim().toLowerCase(),rol:document.getElementById('u-rol').value,carrera:document.getElementById('u-carrera').value,grupo:document.getElementById('u-grupo').value.trim().toUpperCase()||null})});var d=await r.json();if(d.success){toast(d.message);this.reset();await cargarUsers();}else{msg.textContent=d.message;msg.className='text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';msg.classList.remove('hidden');}}catch(e){toast('Error','error');}});
+    async function delUser(id,n){if(!confirm('Eliminar "'+n+'"?'))return;try{var r=await fetch(API+'/usuarios/'+id,{method:'DELETE'});var d=await r.json();if(d.success){toast('Eliminado');allUsers=allUsers.filter(function(u){return u.id!==id;});renderUsers(allUsers);}else{toast(d.message,'error');}}catch(e){toast('Error','error');}}
 
-            toast.className = `flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto ${bg}`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="h-4 w-4 flex-shrink-0"></i><span class="text-sm font-medium">${message}</span>`;
-            container.appendChild(toast);
-            if (typeof lucide !== 'undefined') lucide.createIcons({ root: toast });
+    // Solicitudes
+    async function cargarSol(){try{var r=await fetch(API+'/solicitudes-jefe');var d=await r.json();if(!d.success)return;var pend=d.solicitudes.filter(function(s){return s.estado==='Pendiente';});var badge=document.getElementById('badge-sol');if(pend.length){badge.textContent=pend.length;badge.classList.remove('hidden');}else{badge.classList.add('hidden');}
+        var tb=document.getElementById('sol-tbody');if(!d.solicitudes.length){tb.innerHTML='<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Sin solicitudes</td></tr>';return;}
+        tb.innerHTML=d.solicitudes.map(function(s){var bc={'Pendiente':'bg-yellow-100 text-yellow-800','Aprobada':'bg-green-100 text-green-800','Rechazada':'bg-red-100 text-red-800'};var acc=s.estado==='Pendiente'?'<div class="flex gap-2 justify-center"><button onclick="aprSol('+s.id+')" class="px-3 py-1 text-xs bg-[#69B22E] text-white rounded">Aprobar</button><button onclick="rejSol('+s.id+')" class="px-3 py-1 text-xs bg-red-50 text-red-600 border border-red-200 rounded">Rechazar</button></div>':'<span class="text-xs text-gray-400">'+s.estado+'</span>';return'<tr class="hover:bg-gray-50"><td class="px-4 py-3"><p class="font-medium">'+s.nombre_alumno+' '+s.apellidos_alumno+'</p><p class="text-xs text-gray-500">'+s.email_alumno+'</p></td><td class="px-4 py-3 font-bold">'+s.grupo+'</td><td class="px-4 py-3 text-xs">'+s.solicitante_nombre+'</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-medium '+(bc[s.estado]||'')+'">'+s.estado+'</span></td><td class="px-4 py-3 text-center">'+acc+'</td></tr>';}).join('');ic();}catch(e){}}
+    async function aprSol(id){if(!confirm('Aprobar? Se creara cuenta.'))return;try{var r=await fetch(API+'/solicitudes-jefe/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:'Aprobada'})});var d=await r.json();toast(d.message);await cargarSol();await cargarUsers();}catch(e){toast('Error','error');}}
+    async function rejSol(id){var obs=prompt('Motivo del rechazo:');if(obs===null)return;try{var r=await fetch(API+'/solicitudes-jefe/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:'Rechazada',observaciones:obs})});var d=await r.json();toast(d.message);await cargarSol();}catch(e){toast('Error','error');}}
 
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.3s';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // ────────────────────────────────────────────
-        // Mostrar/ocultar campo de grupo
-        // ────────────────────────────────────────────
-        function toggleGrupoInput() {
-            const rol = document.getElementById('rol').value;
-            const campoGrupo = document.getElementById('campo-grupo');
-            const inputGrupo = document.getElementById('grupo');
-            const inputCarrera = document.getElementById('carrera');
-            const carreraHint = document.getElementById('carrera-hint');
-
-            // Grupo: solo para jefe-grupo
-            if (rol === 'jefe-grupo') {
-                campoGrupo.classList.remove('hidden');
-                inputGrupo.setAttribute('required', 'true');
-            } else {
-                campoGrupo.classList.add('hidden');
-                inputGrupo.removeAttribute('required');
-                inputGrupo.value = '';
-            }
-
-            // Carrera: requerida para director-carrera, docente-tutor, jefe-grupo
-            const rolesConCarrera = ['director-carrera', 'docente-tutor', 'jefe-grupo'];
-            if (rolesConCarrera.includes(rol)) {
-                inputCarrera.setAttribute('required', 'true');
-                carreraHint.classList.remove('hidden');
-            } else {
-                inputCarrera.removeAttribute('required');
-                carreraHint.classList.add('hidden');
-            }
-        }
-
-        // ────────────────────────────────────────────
-        // Badges de rol
-        // ────────────────────────────────────────────
-        const ROLE_CONFIG = {
-            'admin':             { label: 'Admin',              color: 'bg-gray-800 text-white' },
-            'director-tutorias': { label: 'Dir. Tutorías',      color: 'bg-amber-100 text-amber-800' },
-            'director-carrera':  { label: 'Dir. Carrera',       color: 'bg-orange-100 text-orange-800' },
-            'docente-tutor':     { label: 'Docente Tutor',      color: 'bg-blue-100 text-blue-800' },
-            'jefe-grupo':        { label: 'Jefe de Grupo',      color: 'bg-purple-100 text-purple-800' },
-        };
-
-        function rolBadge(rol) {
-            const cfg = ROLE_CONFIG[rol] || { label: rol, color: 'bg-gray-100 text-gray-800' };
-            return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${cfg.color}">${cfg.label}</span>`;
-        }
-
-        // ────────────────────────────────────────────
-        // Cargar usuarios desde la API
-        // ────────────────────────────────────────────
-        async function cargarUsuarios() {
-            try {
-                const res = await fetch(`${API}/usuarios`);
-                const data = await res.json();
-                if (data.success) {
-                    // Excluir admins de la vista (no se deben gestionar aquí)
-                    todosLosUsuarios = data.usuarios.filter(u => u.rol !== 'admin');
-                    renderUsuarios(todosLosUsuarios);
-                } else {
-                    showToast('Error al cargar usuarios', 'error');
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('usuarios-tbody').innerHTML = `
-                    <tr><td colspan="4" class="px-4 py-8 text-center text-red-500 text-sm">
-                        <i data-lucide="wifi-off" class="h-5 w-5 inline mr-2"></i>
-                        Sin conexión con el servidor. Verifica que Flask esté activo.
-                    </td></tr>`;
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            }
-        }
-
-        // ────────────────────────────────────────────
-        // Renderizar tabla
-        // ────────────────────────────────────────────
-        function renderUsuarios(lista) {
-            const tbody = document.getElementById('usuarios-tbody');
-            document.getElementById('contador-usuarios').textContent = `${lista.length} usuario(s)`;
-
-            if (lista.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 italic">No se encontraron usuarios.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = lista.map(u => `
-                <tr class="hover:bg-gray-50" id="row-${u.id}">
-                    <td class="px-4 py-3">
-                        <p class="font-medium text-gray-900">${u.nombre} ${u.apellidos}</p>
-                        <p class="text-xs text-gray-500">${u.email}</p>
-                    </td>
-                    <td class="px-4 py-3">${rolBadge(u.rol)}</td>
-                    <td class="px-4 py-3 text-xs text-gray-600">
-                        ${u.grupo_asignado ? `<span class="font-bold">Grupo:</span> ${u.grupo_asignado}` :
-                          (u.departamento_o_carrera ? u.departamento_o_carrera : '—')}
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                        <button onclick="eliminarUsuario(${u.id}, '${u.nombre} ${u.apellidos}')"
-                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                            title="Eliminar usuario">
-                            <i data-lucide="trash-2" class="h-4 w-4"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-
-        // ────────────────────────────────────────────
-        // Filtrar por buscador
-        // ────────────────────────────────────────────
-        function filtrarUsuarios() {
-            const q = document.getElementById('buscador').value.toLowerCase();
-            const fRol = document.getElementById('filtro-rol').value;
-            const fCarrera = document.getElementById('filtro-carrera').value;
-            
-            const filtrados = todosLosUsuarios.filter(u => {
-                const matchTexto = `${u.nombre} ${u.apellidos}`.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
-                const matchRol = fRol === '' || u.rol === fRol;
-                const matchCarrera = fCarrera === '' || (u.departamento_o_carrera && u.departamento_o_carrera === fCarrera);
-                
-                return matchTexto && matchRol && matchCarrera;
-            });
-            renderUsuarios(filtrados);
-        }
-        // ────────────────────────────────────────────
-        // Crear usuario
-        // ────────────────────────────────────────────
-        document.getElementById('form-admin').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-crear');
-            const msgEl = document.getElementById('form-msg');
-            btn.disabled = true;
-            btn.textContent = 'Creando...';
-            msgEl.classList.add('hidden');
-
-            const payload = {
-                nombre:   document.getElementById('nombre').value.trim(),
-                apellidos: document.getElementById('apellidos').value.trim(),
-                email:    document.getElementById('email').value.trim().toLowerCase(),
-                rol:      document.getElementById('rol').value,
-                carrera:  document.getElementById('carrera').value, // NUEVA LÍNEA
-                grupo:    document.getElementById('grupo').value.trim().toUpperCase() || null,
-            };
-            try {
-                const res  = await fetch(`${API}/usuarios`, {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify(payload),
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    showToast(`✓ ${data.message}`, 'success');
-                    this.reset();
-                    toggleGrupoInput();
-                    await cargarUsuarios();
-                } else {
-                    msgEl.textContent = data.message;
-                    msgEl.className = 'text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';
-                    msgEl.classList.remove('hidden');
-                }
-            } catch (err) {
-                msgEl.textContent = 'Sin conexión con el servidor.';
-                msgEl.className = 'text-sm rounded-md px-3 py-2 bg-red-50 text-red-700 border border-red-200';
-                msgEl.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Crear Cuenta';
-            }
-        });
-
-        // ────────────────────────────────────────────
-        // Eliminar usuario
-        // ────────────────────────────────────────────
-        async function eliminarUsuario(id, nombre) {
-            if (!confirm(`¿Eliminar al usuario "${nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
-
-            try {
-                const res  = await fetch(`${API}/usuarios/${id}`, { method: 'DELETE' });
-                const data = await res.json();
-
-                if (data.success) {
-                    showToast(`Usuario eliminado`, 'info');
-                    // Eliminar fila sin recargar
-                    const row = document.getElementById(`row-${id}`);
-                    if (row) {
-                        row.style.opacity = '0';
-                        row.style.transition = 'opacity 0.3s';
-                        setTimeout(() => { row.remove(); todosLosUsuarios = todosLosUsuarios.filter(u => u.id !== id); }, 300);
-                    }
-                } else {
-                    showToast(data.message, 'error');
-                }
-            } catch (err) {
-                showToast('Error de conexión al eliminar', 'error');
-            }
-        }
-        async function cargarCarreras() {
-            try {
-                const res = await fetch(`${API}/carreras`);
-                const data = await res.json();
-                if (data.success) {
-                    const selForm = document.getElementById('carrera');
-                    const selFiltro = document.getElementById('filtro-carrera');
-                    data.carreras.forEach(c => {
-                        selForm.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
-                        selFiltro.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
-                    });
-                }
-            } catch (err) { console.error("Error cargando carreras"); }
-        }
-
-        // Cargar al iniciar
-        cargarCarreras();
-        cargarUsuarios();
+    async function cargarCarreras(){try{var r=await fetch(API+'/carreras');var d=await r.json();if(d.success){var sel=document.getElementById('u-carrera');d.carreras.forEach(function(c){sel.innerHTML+='<option value="'+c.nombre+'">'+c.nombre+'</option>';});}}catch(e){}}
+    cargarCarreras();cargarUsers();cargarSol();ic();
     </script>
 </body>
 </html>

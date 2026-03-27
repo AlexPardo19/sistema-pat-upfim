@@ -1,730 +1,461 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Director de Tutorías - Sistema PAT</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        /* Estilo para que el modal grande pueda hacer scroll si el PAT es muy largo */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Director de Tutorias - Sistema PAT</title>
+<link rel="stylesheet" href="../css/styles.css">
+<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="min-h-screen bg-gray-50">
+<header class="bg-white border-b sticky top-0 z-10">
+<div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4"><img src="../assets/logoUpfim.png" class="h-12 w-auto"/><div class="border-l border-gray-300 pl-4"><h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1><p class="text-sm text-gray-600">Director de Tutorias</p></div></div>
+<div class="flex items-center gap-4"><div class="text-right hidden sm:block"><p id="user-role-display" class="text-sm font-medium text-[#7B5936]"></p><p id="user-email-display" class="text-xs text-gray-500"></p></div><div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]"><span id="user-avatar-letter">D</span></div><button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border rounded-md hover:text-red-600"><i data-lucide="log-out" class="h-4 w-4 mr-1"></i>Salir</button></div>
+</div>
+</header>
 
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-12 w-auto" />
-                    <div class="border-l border-gray-300 pl-4">
-                        <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
-                        <p class="text-sm text-gray-600">Director de Tutorías</p>
-                    </div>
-                </div>
+<main class="max-w-7xl mx-auto px-6 py-8">
+<div class="max-w-6xl mx-auto space-y-6">
 
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p id="user-role-display" class="text-sm font-medium text-[#7B5936]">Cargando...</p>
-                        <p id="user-email-display" class="text-xs text-gray-500">Cargando...</p>
-                    </div>
-                    <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E]">
-                        <i data-lucide="user-circle" class="h-6 w-6"></i>
-                    </div>
-                    <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:text-red-600 hover:border-red-600 transition-colors">
-                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> Salir
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+<div>
+<h1 class="text-3xl text-[#7B5936]">Gestion del Programa Tutorial</h1>
+<div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
+<i data-lucide="calendar" class="h-4 w-4"></i><span id="periodo-txt">Cargando...</span>
+</div>
+</div>
 
-    <main class="max-w-7xl mx-auto px-6 py-8">
-        <div class="max-w-6xl mx-auto space-y-6">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h1 class="text-3xl text-[#7B5936]">Gestión de Programa Tutorial</h1>
-                    <p class="text-sm text-gray-500 mt-1">Administra plantillas, revisa propuestas y audita las sesiones en curso.</p>
-                </div>
-            </div>
+<!-- TABS -->
+<div class="bg-gray-100 border p-1 rounded-xl w-full sm:w-max flex flex-wrap">
+<button onclick="sw('plantillas')" id="tb-plantillas" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm"><i data-lucide="file-spreadsheet" class="h-4 w-4"></i>Plantillas</button>
+<button onclick="sw('revision')" id="tb-revision" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900"><i data-lucide="file-check-2" class="h-4 w-4"></i>Revision PATs</button>
+<button onclick="sw('auditoria')" id="tb-auditoria" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900"><i data-lucide="search" class="h-4 w-4"></i>Auditoria de Sesiones</button>
+</div>
 
-            <div class="bg-gray-100 border border-gray-200 p-1 rounded-xl w-full sm:w-max flex flex-wrap">
-                <button onclick="switchTab('plantillas')" id="tab-btn-plantillas" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all">
-                    <i data-lucide="file-spreadsheet" class="h-4 w-4"></i> Plantillas Sugeridas
-                </button>
-                <button onclick="switchTab('revision')" id="tab-btn-revision" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
-                    <i data-lucide="file-check-2" class="h-4 w-4"></i> Revisión de Propuestas
-                </button>
-                <button onclick="switchTab('auditoria')" id="tab-btn-auditoria" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all">
-                    <i data-lucide="search" class="h-4 w-4"></i> Auditoría de Sesiones (En Vivo)
-                </button>
-            </div>
+<!-- ==================== TAB PLANTILLAS ==================== -->
+<div id="tab-plantillas" class="space-y-4">
+<!-- Controles -->
+<div class="bg-white p-5 rounded-lg border shadow-sm space-y-4">
+<div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+<div class="flex items-center gap-4">
+<label class="text-sm font-medium text-gray-700">Cuatrimestre:</label>
+<select id="sel-cuat" onchange="cargarPl()" class="border rounded-md px-3 py-2 text-sm bg-gray-50"></select>
+</div>
+<div class="flex items-center gap-2 flex-wrap">
+<button onclick="limpiarBorrador()" class="flex items-center px-3 py-2 border border-red-400 text-red-500 rounded-md hover:bg-red-50 text-sm"><i data-lucide="trash-2" class="h-4 w-4 mr-1"></i>Limpiar Borrador</button>
+<label class="flex items-center px-3 py-2 border border-blue-500 text-blue-600 rounded-md hover:bg-blue-50 text-sm cursor-pointer">
+<i data-lucide="upload" class="h-4 w-4 mr-1"></i>Importar Excel
+<input type="file" id="excel-input" accept=".xlsx,.xls" class="hidden" onchange="subirExcel()">
+</label>
+<button onclick="abrirAgregar()" class="flex items-center px-3 py-2 border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white text-sm"><i data-lucide="plus" class="h-4 w-4 mr-1"></i>Agregar Sesion</button>
+<button onclick="publicarPl()" class="flex items-center px-3 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm"><i data-lucide="send" class="h-4 w-4 mr-1"></i>Publicar</button>
+</div>
+</div>
+<!-- Progress bar -->
+<div>
+<div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Progreso</span><span id="pl-progreso" class="font-bold text-[#7B5936]">0/15</span></div>
+<div class="w-full bg-gray-200 rounded-full h-2.5"><div id="pl-barra" class="bg-[#69B22E] h-2.5 rounded-full" style="width:0%"></div></div>
+</div>
+</div>
+<!-- Info estado -->
+<div class="bg-blue-50 px-5 py-3 border border-blue-100 rounded-lg flex items-center gap-2">
+<i data-lucide="info" class="h-4 w-4 text-blue-600"></i>
+<p class="text-sm text-blue-800" id="pl-info">Cargando...</p>
+</div>
+<!-- Tabla plantilla -->
+<div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+<div class="overflow-x-auto"><table class="w-full text-sm text-left">
+<thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
+<tr><th class="px-4 py-3 w-14 text-center">No.</th><th class="px-4 py-3 w-20">Corte</th><th class="px-4 py-3">Tematica</th><th class="px-4 py-3">Objetivo</th><th class="px-4 py-3">Resultados Esperados</th><th class="px-4 py-3 w-20 text-center">Estado</th><th class="px-4 py-3 w-20 text-center">Acc.</th></tr>
+</thead>
+<tbody id="pl-tbody" class="divide-y"></tbody>
+</table></div>
+</div>
+</div>
 
-            <div id="tab-plantillas" class="mt-5 block space-y-6">
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
-                    <div class="flex items-center gap-4 w-full md:w-auto">
-                        <label class="text-sm font-medium text-gray-700">Editar Cuatrimestre:</label>
-                        <select id="select-cuatrimestre" onchange="renderPlantilla()" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] bg-gray-50">
-                            <option value="1" selected>1er Cuatrimestre</option>
-                            <option value="2">2do Cuatrimestre</option>
-                            <option value="3">3er Cuatrimestre</option>
-                        </select>
-                    </div>
-                    
-                    <div class="flex-1 w-full max-w-md">
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600 font-medium">Progreso del Borrador</span>
-                            <span id="progreso-texto" class="font-bold text-[#7B5936]">0/15 Sesiones</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div id="progreso-barra" class="bg-[#69B22E] h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                    </div>
+<!-- ==================== TAB REVISION ==================== -->
+<div id="tab-revision" class="hidden space-y-4">
+<div class="bg-white p-4 rounded-lg border shadow-sm flex flex-wrap gap-4 items-center justify-between">
+<h3 class="font-medium text-gray-900">Revision de PATs enviados por Tutores</h3>
+<div class="flex gap-3">
+<select id="filt-carrera" onchange="cargarRev()" class="border rounded-md px-3 py-2 text-sm"><option value="">Todas las carreras</option></select>
+<select id="filt-estado" onchange="cargarRev()" class="border rounded-md px-3 py-2 text-sm"><option value="Pendiente Revision">Pendientes</option><option value="">Todos</option><option value="Aprobado">Aprobados</option><option value="Rechazado">Rechazados</option></select>
+</div>
+</div>
+<div class="bg-white rounded-lg border shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm">
+<thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b"><tr><th class="px-4 py-3">Tutor</th><th class="px-4 py-3">Carrera</th><th class="px-4 py-3">Grupo</th><th class="px-4 py-3 text-center">Alumnos</th><th class="px-4 py-3 text-center">Estado</th><th class="px-4 py-3 text-center">Acciones</th></tr></thead>
+<tbody id="rev-tbody" class="divide-y"></tbody>
+</table></div></div>
+</div>
 
-                    <div class="flex items-center gap-3 w-full md:w-auto">
-                        <button id="btn-agregar-sesion" onclick="prepararModalSesion()" class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 border border-[#69B22E] text-[#69B22E] rounded-md hover:bg-[#69B22E] hover:text-white transition-colors text-sm">
-                            <i data-lucide="plus" class="h-4 w-4 mr-2"></i> Añadir Sesión
-                        </button>
-                        <button id="btn-publicar" onclick="publicarPlantilla()" disabled class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm transition-colors">
-                            <i data-lucide="send" class="h-4 w-4 mr-2"></i> Enviar a Tutores
-                        </button>
-                    </div>
-                </div>
+<!-- ==================== TAB AUDITORIA ==================== -->
+<div id="tab-auditoria" class="hidden space-y-4">
+<div class="bg-white p-4 rounded-lg border shadow-sm flex flex-wrap gap-4 items-center justify-between">
+<h3 class="font-medium text-gray-900">Auditoria de Sesiones (estado en vivo)</h3>
+<select id="filt-carrera-aud" onchange="cargarAud()" class="border rounded-md px-3 py-2 text-sm"><option value="">Todas las carreras</option></select>
+</div>
+<div id="aud-container" class="space-y-4"></div>
+</div>
 
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="bg-blue-50 px-6 py-3 border-b border-blue-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="edit-3" class="h-5 w-5 text-blue-600"></i>
-                            <p class="text-sm text-blue-800" id="estado-plantilla-texto">Área de trabajo en <strong>Borrador</strong>. Completa 15 sesiones para crear una nueva versión.</p>
-                        </div>
-                        <button onclick="limpiarBorrador()" class="text-xs text-red-600 hover:text-red-800 font-medium flex items-center"><i data-lucide="trash-2" class="h-3 w-3 mr-1"></i> Limpiar Editor</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b">
-                    
-                                <tr>
-                                    <th class="px-4 py-3 w-16 text-center">No.</th>
-                                    <th class="px-4 py-3 w-24">Corte</th>
-                                    <th class="px-4 py-3 min-w-[200px]">Temática a Abordar</th>
-                                    <th class="px-4 py-3 min-w-[200px]">Objetivo</th>
-                                    <th class="px-4 py-3 min-w-[200px]">Resultados Esperados</th>
-                                    <th class="px-4 py-3 w-20 text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="plantilla-tbody" class="divide-y divide-gray-200">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
+</div>
+</main>
 
-                <div class="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap justify-between items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="history" class="h-5 w-5 text-[#7B5936]"></i>
-                            <h3 class="font-medium text-[#7B5936]">Historial de Versiones Publicadas</h3>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <label class="text-sm text-gray-600">Filtrar por año:</label>
-                            <select id="filtro-anio-historial" onchange="renderPlantilla()" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-[#69B22E]">
-                                <option value="Todos">Todos</option>
-                                <option value="2026">2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 uppercase bg-white border-b border-gray-200">
-                                <tr>
-                                    <th class="px-4 py-3 w-32">Fecha / Año</th>
-                                    <th class="px-4 py-3">Nombre de la Versión</th>
-                                    <th class="px-4 py-3 text-center w-24">Sesiones</th>
-                                    <th class="px-4 py-3 text-center w-48">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historial-tbody" class="divide-y divide-gray-100">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+<!-- MODAL AGREGAR/EDITAR SESION -->
+<div id="modal-sesion" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+<h3 class="text-lg font-medium text-[#7B5936] mb-4" id="ms-title">Agregar Sesion</h3>
+<form id="form-sesion" class="space-y-3">
+<input type="hidden" id="ms-id">
+<div class="grid grid-cols-2 gap-3">
+<div><label class="block text-xs text-gray-500 mb-1">No. Sesion</label><input type="number" id="ms-num" min="1" max="15" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+<div><label class="block text-xs text-gray-500 mb-1">Corte Parcial</label><select id="ms-corte" class="w-full border rounded-md px-3 py-2 text-sm"><option>I</option><option>II</option><option>III</option></select></div>
+</div>
+<div><label class="block text-xs text-gray-500 mb-1">Tematica</label><textarea id="ms-tema" required rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+<div><label class="block text-xs text-gray-500 mb-1">Objetivo</label><textarea id="ms-obj" required rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+<div><label class="block text-xs text-gray-500 mb-1">Resultados Esperados</label><textarea id="ms-res" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+<div class="flex gap-2 justify-end">
+<button type="button" onclick="document.getElementById('modal-sesion').classList.add('hidden')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button>
+<button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Guardar</button>
+</div>
+</form>
+</div>
+</div>
 
-            <div id="tab-revision" class="mt-5 hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"><p class="text-sm font-medium text-gray-600 mb-3">Pendientes de Revisión</p><div class="flex items-center gap-3"><i data-lucide="clock" class="h-8 w-8 text-yellow-500"></i><div id="stat-pendientes" class="text-3xl text-yellow-600">0</div></div></div>
-                    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"><p class="text-sm font-medium text-gray-600 mb-3">Aprobados</p><div class="flex items-center gap-3"><i data-lucide="check-circle" class="h-8 w-8 text-green-500"></i><div id="stat-aprobados" class="text-3xl text-green-600">0</div></div></div>
-                    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"><p class="text-sm font-medium text-gray-600 mb-3">Rechazados</p><div class="flex items-center gap-3"><i data-lucide="x-circle" class="h-8 w-8 text-red-500"></i><div id="stat-rechazados" class="text-3xl text-red-600">0</div></div></div>
-                </div>
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50"><h3 class="text-lg font-medium text-[#7B5936]">Propuestas PAT enviadas por Tutores</h3></div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left"><thead class="text-xs text-[#7B5936] uppercase bg-white border-b border-gray-200"><tr><th class="px-4 py-3">Carrera / Grupo</th><th class="px-4 py-3">Tutor</th><th class="px-4 py-3 text-center">Alumnos (H/M)</th><th class="px-4 py-3 text-center">Estado</th><th class="px-4 py-3 text-center">Acciones</th></tr></thead><tbody id="revision-tbody" class="divide-y divide-gray-200"></tbody></table>
-                    </div>
-                </div>
-            </div>
+<!-- MODAL REVISAR PAT -->
+<div id="modal-rev" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+<div class="flex justify-between items-start mb-4">
+<div><h3 class="text-lg font-medium text-[#7B5936]">Revision de PAT</h3><p class="text-sm text-gray-500" id="rv-info"></p></div>
+<button onclick="document.getElementById('modal-rev').classList.add('hidden')" class="p-1 hover:bg-gray-100 rounded"><i data-lucide="x" class="h-5 w-5"></i></button>
+</div>
+<!-- Datos generales -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 bg-gray-50 p-4 rounded border">
+<div><p class="text-xs text-gray-500">Programa</p><p class="font-medium text-xs" id="rv-prog"></p></div>
+<div><p class="text-xs text-gray-500">Tutor</p><p class="font-medium text-sm" id="rv-tutor"></p></div>
+<div><p class="text-xs text-gray-500">Grupo</p><p class="font-bold text-sm" id="rv-grupo"></p></div>
+<div><p class="text-xs text-gray-500">Alumnos</p><p class="font-medium text-sm" id="rv-alumnos"></p></div>
+<div><p class="text-xs text-gray-500">Comentarios</p><p class="text-xs italic" id="rv-com"></p></div>
+</div>
+<!-- Campos faltantes -->
+<div id="rv-faltantes" class="hidden mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+<p class="text-xs text-yellow-700 font-bold mb-1">Campos pendientes por llenar:</p>
+<ul id="rv-falt-list" class="text-xs text-yellow-800 list-disc ml-4"></ul>
+</div>
+<!-- Sesiones -->
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border">
+<thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b"><tr><th class="px-3 py-2 text-center">No.</th><th class="px-3 py-2">Corte</th><th class="px-3 py-2">Tematica</th><th class="px-3 py-2">Objetivo</th><th class="px-3 py-2">Res. Esperados</th></tr></thead>
+<tbody id="rv-ses-tbody" class="divide-y"></tbody>
+</table></div>
+<!-- Accion -->
+<div id="rv-actions" class="space-y-3 border-t pt-4">
+<textarea id="rv-obs" rows="3" placeholder="Observaciones (obligatorio al rechazar)..." class="w-full border rounded-md px-3 py-2 text-sm"></textarea>
+<div class="flex gap-3 justify-end">
+<button onclick="decidirPat('Rechazado')" class="px-4 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white text-sm">Rechazar</button>
+<button onclick="decidirPat('Aprobado')" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm">Aprobar</button>
+</div>
+</div>
+</div>
+</div>
 
-            <div id="tab-auditoria" class="mt-5 hidden space-y-6">
-                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Grupo / Carrera</label>
-                        <select id="audit-grupo" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] min-w-[200px]">
-                            <option value="1G1">1G1 - TI (Grupo de Prueba)</option>
-                        </select>
-                    </div>
-                    <button onclick="renderAuditoria()" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 transition-colors text-sm font-medium">
-                        <i data-lucide="refresh-cw" class="h-4 w-4 inline mr-1"></i> Actualizar Monitor
-                    </button>
-                </div>
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                        <h3 class="font-medium text-[#7B5936]">Monitor de Estatus en Tiempo Real</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-[#7B5936] uppercase bg-white border-b border-gray-200">
-                                <tr>
-                                    <th class="px-4 py-3">No. Sesión y Temática</th>
-                                    <th class="px-4 py-3">Fecha y Hora</th>
-                                    <th class="px-4 py-3 min-w-[250px]">Resultados Obtenidos y Canalizaciones</th>
-                                    <th class="px-4 py-3 text-center">Estado Oficial (Firma J.G.)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="auditoria-tbody" class="divide-y divide-gray-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+<div id="toast-c" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-        </div>
-    </main>
+<script src="../js/auth.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+var API='http://localhost:5000/api',periodo=null,cuats=[],plantillas=[],revPatId=null;
 
-    <div id="modal-sesion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h3 id="modal-sesion-titulo" class="text-lg font-medium text-[#7B5936] mb-4">Agregar Sesión al Borrador</h3>
-            <form id="form-plantilla" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Número de Sesión</label>
-                        <input type="number" id="input-num" readonly class="w-full border border-gray-300 bg-gray-100 text-gray-500 font-bold rounded-md px-3 py-2 focus:outline-none cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Corte Parcial</label>
-                        <select id="input-corte" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]">
-                            <option value="I">I</option>
-                            <option value="II">II</option>
-                            <option value="III">III</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Temática a Abordar</label>
-                    <textarea id="input-tematica" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Objetivo</label>
-                    <textarea id="input-objetivo" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Resultados Esperados</label>
-                    <textarea id="input-resultados" rows="2" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
-                </div>
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" onclick="cerrarModal('modal-sesion')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
-                    <button type="submit" id="btn-guardar-sesion" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90">Guardar en Borrador</button>
-                </div>
-            </form>
-        </div>
-    </div>
+function sw(t){
+    ['plantillas','revision','auditoria'].forEach(function(x){
+        document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);
+        var b=document.getElementById('tb-'+x);
+        b.className=x===t?'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm':'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900';
+    });
+    if(t==='revision')cargarRev();
+    if(t==='auditoria')cargarAud();
+    ic();
+}
+function toast(m,ok){var c=document.getElementById('toast-c'),d=document.createElement('div');d.className='flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto '+(ok===false?'bg-red-50 border-red-200 text-red-800':'bg-green-50 border-green-200 text-green-800');d.innerHTML='<span class="text-sm font-medium">'+m+'</span>';c.appendChild(d);setTimeout(function(){d.remove();},4000);}
+function ic(){if(typeof lucide!=='undefined')lucide.createIcons();}
 
-    <div id="modal-revisar" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <div class="flex items-center gap-4">
-                    <h3 class="text-xl font-medium text-[#7B5936]">Revisión de Propuesta PAT</h3>
-                    <button onclick="descargarPDFDesdeDirector(event)" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center font-medium">
-                        <i data-lucide="file-down" class="h-4 w-4 mr-1"></i> Descargar PDF
-                    </button>
-                </div>
-                <button onclick="cerrarModal('modal-revisar')" class="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full"><i data-lucide="x" class="h-5 w-5"></i></button>
-            </div>
-
-            <div class="overflow-y-auto pr-2 custom-scrollbar">
-                
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <p class="mb-1"><span class="font-bold text-gray-700">Tutor Asignado:</span> <span id="rev-tutor" class="text-gray-900"></span></p>
-                        <p><span class="font-bold text-gray-700">Programa y Grupo:</span> <span id="rev-grupo" class="text-gray-900"></span></p>
-                    </div>
-                    <div>
-                        <p class="mb-1"><span class="font-bold text-gray-700">Total de Alumnos:</span> <span id="rev-alumnos" class="text-gray-900"></span> (<span id="rev-h"></span> H, <span id="rev-m"></span> M)</p>
-                        <p><span class="font-bold text-gray-700">Comentarios del Grupo:</span> <span id="rev-comentarios" class="text-gray-600 italic"></span></p>
-                    </div>
-                </div>
-
-                <div class="border border-gray-200 rounded-lg overflow-hidden mb-6 shadow-sm">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-[#7B5936] uppercase bg-gray-100 border-b border-gray-200">
-                            <tr>
-                                <th class="px-4 py-3 w-12 text-center">No.</th>
-                                <th class="px-4 py-3 w-1/3 border-l border-gray-200">Temática a Abordar</th>
-                                <th class="px-4 py-3 w-1/3 border-l border-gray-200">Objetivo</th>
-                                <th class="px-4 py-3 w-1/3 border-l border-gray-200">Resultados Esperados</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rev-sesiones-tbody" class="divide-y divide-gray-200 bg-white">
-                            </tbody>
-                    </table>
-                </div>
-
-                <form id="form-revision" class="mt-auto border-t border-gray-200 pt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones de la Dirección (Obligatorio si se rechaza)</label>
-                        <textarea id="input-observaciones" rows="3" placeholder="Escribe tus observaciones para que el tutor corrija su propuesta..." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-[#69B22E]"></textarea>
-                    </div>
-                    <div class="mt-4 flex justify-end gap-3">
-                        <button type="button" onclick="cerrarModal('modal-revisar')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium text-sm">Cancelar Revisión</button>
-                        <button type="button" onclick="procesarRevision('Rechazado')" class="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 font-medium text-sm transition-colors">Rechazar con Observaciones</button>
-                        <button type="button" onclick="procesarRevision('Aprobado')" class="px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 font-medium text-sm shadow-sm transition-colors"><i data-lucide="check-check" class="h-4 w-4 inline mr-1"></i> Aprobar Propuesta PAT</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script src="../js/auth.js"></script>
-    <script src="../js/pdf-utils.js"></script>
-    <script>
-        // --- NAVEGACIÓN DE TABS ---
-        function switchTab(tabId) {
-            ['plantillas', 'revision', 'auditoria'].forEach(id => {
-                document.getElementById(`tab-${id}`).classList.add('hidden');
-                document.getElementById(`tab-btn-${id}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900 transition-all";
+// ==================== INIT ====================
+async function init(){
+    try{
+        var r=await fetch(API+'/periodos/activo');var d=await r.json();
+        if(d.success){
+            periodo=d.periodo;cuats=periodo.cuatrimestres||[];
+            document.getElementById('periodo-txt').textContent=periodo.nombre+' (Cuatrimestres: '+cuats.join(', ')+')';
+            var sel=document.getElementById('sel-cuat');sel.innerHTML='';
+            var ord={1:'1er',2:'2do',3:'3er',4:'4to',5:'5to',6:'6to',7:'7mo',8:'8vo',9:'9no'};
+            cuats.forEach(function(c,i){sel.innerHTML+='<option value="'+c+'" '+(i===0?'selected':'')+'>'+(ord[c]||c)+'o Cuatrimestre</option>';});
+        }
+        var cr=await fetch(API+'/carreras');var cd=await cr.json();
+        if(cd.success){
+            ['filt-carrera','filt-carrera-aud'].forEach(function(id){
+                var el=document.getElementById(id);
+                cd.carreras.forEach(function(c){el.innerHTML+='<option value="'+c.nombre+'">'+c.nombre+'</option>';});
             });
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tabId}`).className = "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm transition-all";
         }
+        await cargarPl();
+    }catch(e){console.error(e);}
+    ic();
+}
 
-        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); modoEdicion = null; }
+// ==================== PLANTILLAS ====================
+async function cargarPl(){
+    var cuat=document.getElementById('sel-cuat').value;if(!cuat)return;
+    var tb=document.getElementById('pl-tbody');
+    tb.innerHTML='<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">Cargando...</td></tr>';
+    try{
+        var pid=periodo?periodo.id:'';
+        var r=await fetch(API+'/plantillas?cuatrimestre='+cuat+'&periodo_id='+pid);
+        var d=await r.json();
+        plantillas=d.success?d.plantillas:[];
+        var n=plantillas.length;
+        // Progreso
+        document.getElementById('pl-progreso').textContent=n+'/15 Sesiones';
+        document.getElementById('pl-barra').style.width=Math.round((n/15)*100)+'%';
+        // Info
+        var allPub=n>0&&plantillas.every(function(p){return p.estado==='Publicada';});
+        var infoEl=document.getElementById('pl-info');
+        if(allPub) infoEl.innerHTML='Plantilla <b>Publicada</b>. Los directores de carrera pueden crear PATs desde ella.';
+        else if(n>=15) infoEl.innerHTML='<b>15 sesiones listas.</b> Publica la plantilla para que los directores de carrera la usen.';
+        else infoEl.innerHTML='Area de trabajo en <b>Borrador</b>. Agrega sesiones manualmente o importa un Excel.';
 
-        // ==========================================
-        // MÓDULO 1: GESTIÓN DE PLANTILLAS Y VERSIONADO
-        // ==========================================
-        let plantillasActivas = { "1": [], "2": [], "3": [] };
+        if(!n){tb.innerHTML='<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400 italic">Sin sesiones. Usa "Agregar" o "Importar Excel".</td></tr>';ic();return;}
+        tb.innerHTML=plantillas.map(function(p){
+            var badge=p.estado==='Publicada'?'<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">Publicada</span>':'<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border">Borrador</span>';
+            return '<tr class="hover:bg-gray-50">'+
+                '<td class="px-4 py-3 text-center font-bold text-gray-700">'+p.num_sesion+'</td>'+
+                '<td class="px-4 py-3"><span class="px-2 py-1 bg-gray-200 rounded text-xs font-bold">'+p.corte_parcial+'</span></td>'+
+                '<td class="px-4 py-3 text-gray-900">'+p.tematica+'</td>'+
+                '<td class="px-4 py-3 text-xs text-gray-600">'+p.objetivo+'</td>'+
+                '<td class="px-4 py-3 text-xs text-gray-600">'+(p.resultados_esperados||'')+'</td>'+
+                '<td class="px-4 py-3 text-center">'+badge+'</td>'+
+                '<td class="px-4 py-3 text-center"><div class="flex gap-1 justify-center">'+
+                    '<button onclick="editarSes('+p.id+')" class="p-1 text-gray-400 hover:text-blue-600" title="Editar"><i data-lucide="edit-2" class="h-4 w-4"></i></button>'+
+                    '<button onclick="eliminarSes('+p.id+')" class="p-1 text-gray-400 hover:text-red-600" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>'+
+                '</div></td></tr>';
+        }).join('');
+        ic();
+    }catch(e){tb.innerHTML='<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error de conexion</td></tr>';}
+}
 
-        let historialPlantillas = {
-            "1": [
-                {
-                    id: 1709841000000,
-                    fecha: "15/02/2026",
-                    anio: "2026",
-                    nombre: "Plantilla Oficial 2026",
-                    sesiones: [
-                        { num: 1, corte: "I", tematica: "Bienvenida al cuatrimestre 26", objetivo: "Presentarse ante el grupo", resultados: "Conocer el plan" },
-                        { num: 2, corte: "I", tematica: "Reglamento Escolar", objetivo: "Dar a conocer normativa", resultados: "Cero incidencias" }
-                    ]
-                },
-                {
-                    id: 1678281000000,
-                    fecha: "10/01/2025",
-                    anio: "2025",
-                    nombre: "Plantilla de Respaldo 2025",
-                    sesiones: [
-                        { num: 1, corte: "I", tematica: "Bienvenida Antigua", objetivo: "Antiguo", resultados: "Antiguo" }
-                    ]
-                }
-            ],
-            "2": [], "3": []
-        };
-        let modoEdicion = null;
+// Agregar sesion
+function abrirAgregar(){
+    document.getElementById('ms-title').textContent='Agregar Sesion';
+    document.getElementById('ms-id').value='';
+    document.getElementById('ms-num').value=plantillas.length+1;
+    document.getElementById('ms-corte').value='I';
+    document.getElementById('ms-tema').value='';
+    document.getElementById('ms-obj').value='';
+    document.getElementById('ms-res').value='';
+    document.getElementById('modal-sesion').classList.remove('hidden');
+}
 
-        function renderPlantilla() {
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            const sesiones = plantillasActivas[cuatri];
-            const historial = historialPlantillas[cuatri];
-            const cant = sesiones.length;
-            
-            // --- 1. RENDERIZAR BORRADOR ---
-            document.getElementById('progreso-barra').style.width = `${(cant / 15) * 100}%`;
-            document.getElementById('progreso-texto').innerText = `${cant}/15 Sesiones`;
+// Editar sesion
+function editarSes(id){
+    var p=plantillas.find(function(x){return x.id===id;});if(!p)return;
+    document.getElementById('ms-title').textContent='Editar Sesion '+p.num_sesion;
+    document.getElementById('ms-id').value=id;
+    document.getElementById('ms-num').value=p.num_sesion;
+    document.getElementById('ms-corte').value=p.corte_parcial;
+    document.getElementById('ms-tema').value=p.tematica;
+    document.getElementById('ms-obj').value=p.objetivo;
+    document.getElementById('ms-res').value=p.resultados_esperados||'';
+    document.getElementById('modal-sesion').classList.remove('hidden');
+}
 
-            const btnPublicar = document.getElementById('btn-publicar');
-            const textoEstado = document.getElementById('estado-plantilla-texto');
+// Guardar (agregar o editar)
+document.getElementById('form-sesion').addEventListener('submit',async function(e){
+    e.preventDefault();
+    var editId=document.getElementById('ms-id').value;
+    var body={
+        cuatrimestre:parseInt(document.getElementById('sel-cuat').value),
+        num_sesion:parseInt(document.getElementById('ms-num').value),
+        corte_parcial:document.getElementById('ms-corte').value,
+        tematica:document.getElementById('ms-tema').value.trim(),
+        objetivo:document.getElementById('ms-obj').value.trim(),
+        resultados_esperados:document.getElementById('ms-res').value.trim()
+    };
+    try{
+        var url=editId?API+'/plantillas/'+editId:API+'/plantillas';
+        var method=editId?'PUT':'POST';
+        var r=await fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        var d=await r.json();
+        toast(d.message,d.success);
+        document.getElementById('modal-sesion').classList.add('hidden');
+        await cargarPl();
+    }catch(e){toast('Error de conexion',false);}
+});
 
-            if (cant === 15) {
-                btnPublicar.disabled = false;
-                btnPublicar.className = "flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 text-sm shadow-md transition-colors";
-                btnPublicar.innerHTML = `<i data-lucide="send" class="h-4 w-4 mr-2"></i> Crear y Publicar Versión`;
-                textoEstado.innerHTML = `¡Tienes las <strong>15 sesiones completas</strong>! Listo para publicar.`;
-            } else {
-                btnPublicar.disabled = true;
-                btnPublicar.className = "flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm transition-colors";
-                btnPublicar.innerHTML = `<i data-lucide="send" class="h-4 w-4 mr-2"></i> Crear y Publicar Versión`;
-                textoEstado.innerHTML = `Área de trabajo en <strong>Borrador</strong>. Faltan ${15 - cant} sesiones para poder crear una versión.`;
-            }
+// Eliminar sesion individual
+async function eliminarSes(id){
+    if(!confirm('Eliminar esta sesion?'))return;
+    try{
+        var r=await fetch(API+'/plantillas/'+id,{method:'DELETE'});
+        var d=await r.json();toast(d.message,d.success);await cargarPl();
+    }catch(e){toast('Error',false);}
+}
 
-            const tbody = document.getElementById('plantilla-tbody');
-            tbody.innerHTML = '';
-            if (sesiones.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">El editor está vacío. Añade sesiones o carga una versión del historial.</td></tr>`;
-            } else {
-                sesiones.forEach(p => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-center font-bold text-gray-700">${p.num}</td>
-                            <td class="px-4 py-3 text-center"><span class="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs">${p.corte}</span></td>
-                            <td class="px-4 py-3 text-gray-800">${p.tematica}</td>
-                            <td class="px-4 py-3 text-gray-600 text-sm">${p.objetivo}</td>
-                            <td class="px-4 py-3 text-gray-600 text-sm">${p.resultados}</td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="prepararEdicion(${p.num})" class="text-[#7B5936] hover:text-[#69B22E] border border-gray-200 p-1.5 rounded-md bg-white shadow-sm" title="Editar"><i data-lucide="edit" class="h-4 w-4"></i></button>
-                            </td>
-                        </tr>`;
-                });
-            }
+// LIMPIAR BORRADOR - elimina TODAS las sesiones del cuatrimestre
+async function limpiarBorrador(){
+    var cuat=document.getElementById('sel-cuat').value;
+    if(!plantillas.length){toast('No hay sesiones que limpiar',false);return;}
+    if(!confirm('ELIMINAR todas las '+plantillas.length+' sesiones del cuatrimestre '+cuat+'?\n\nEsta accion no se puede deshacer.'))return;
+    try{
+        var r=await fetch(API+'/plantillas/limpiar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuatrimestre:cuat})});
+        var d=await r.json();toast(d.message,d.success);await cargarPl();
+    }catch(e){toast('Error al limpiar',false);}
+}
 
-            // --- 2. RENDERIZAR HISTORIAL CON FILTRO ---
-            const tbodyHist = document.getElementById('historial-tbody');
-            const anioFiltro = document.getElementById('filtro-anio-historial').value;
-            tbodyHist.innerHTML = '';
-            
-            let versionesFiltradas = historial;
-            if(anioFiltro !== 'Todos') {
-                versionesFiltradas = historial.filter(v => v.anio === anioFiltro);
-            }
+// PUBLICAR plantilla
+async function publicarPl(){
+    var cuat=document.getElementById('sel-cuat').value;
+    if(!plantillas.length){toast('Agrega sesiones primero',false);return;}
+    if(!confirm('Publicar la plantilla del cuatrimestre '+cuat+'?\nLos directores de carrera podran crear PATs a partir de ella.'))return;
+    try{
+        var r=await fetch(API+'/plantillas/publicar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuatrimestre:cuat})});
+        var d=await r.json();toast(d.message,d.success);await cargarPl();
+    }catch(e){toast('Error',false);}
+}
 
-            if (versionesFiltradas.length === 0) {
-                tbodyHist.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">No hay versiones publicadas para este año.</td></tr>`;
-            } else {
-                versionesFiltradas.forEach((v) => {
-                    let isActiva = (historial[0] && historial[0].id === v.id);
-                    let badgeActiva = isActiva ? `<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full border border-green-200">Activa Oficial</span>` : '';
-                    
-                    tbodyHist.innerHTML += `
-                        <tr class="hover:bg-gray-50 border-b border-gray-100">
-                            <td class="px-4 py-3 text-gray-600 font-medium">${v.fecha} <br><span class="text-xs text-gray-400">Año: ${v.anio}</span></td>
-                            <td class="px-4 py-3 font-bold text-[#7B5936]">${v.nombre} ${badgeActiva}</td>
-                            <td class="px-4 py-3 text-center font-bold text-gray-500">15</td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="cargarDelHistorial(${v.id})" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors font-medium shadow-sm">
-                                    <i data-lucide="copy" class="h-3 w-3 inline mr-1"></i> Cargar al Editor
-                                </button>
-                            </td>
-                        </tr>`;
-                });
-            }
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+// SUBIR EXCEL
+async function subirExcel(){
+    var fileInput=document.getElementById('excel-input');
+    var file=fileInput.files[0];
+    if(!file)return;
+    var cuat=document.getElementById('sel-cuat').value;
+    if(!confirm('Importar sesiones del archivo "'+file.name+'" al cuatrimestre '+cuat+'?\nLas sesiones existentes seran reemplazadas.'))return;
+    var fd=new FormData();
+    fd.append('file',file);
+    fd.append('cuatrimestre',cuat);
+    try{
+        var r=await fetch(API+'/plantillas/upload-excel',{method:'POST',body:fd});
+        var d=await r.json();
+        toast(d.message,d.success);
+        fileInput.value='';
+        await cargarPl();
+    }catch(e){toast('Error subiendo archivo',false);}
+}
+
+// ==================== REVISION ====================
+async function cargarRev(){
+    var tb=document.getElementById('rev-tbody');
+    tb.innerHTML='<tr><td colspan="6" class="px-4 py-6 text-center text-gray-400">Cargando...</td></tr>';ic();
+    try{
+        var params=new URLSearchParams();
+        var est=document.getElementById('filt-estado').value;
+        var car=document.getElementById('filt-carrera').value;
+        if(est)params.append('estado',est);if(car)params.append('carrera',car);
+        var r=await fetch(API+'/pats?'+params);var d=await r.json();
+        if(!d.success||!d.pats.length){tb.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400 italic">Sin PATs</td></tr>';return;}
+        tb.innerHTML=d.pats.map(function(p){
+            var cfg={'Aprobado':'bg-green-100 text-green-800','Pendiente Revision':'bg-yellow-100 text-yellow-800','Rechazado':'bg-red-100 text-red-800','Borrador':'bg-gray-100 text-gray-700'};
+            return '<tr class="hover:bg-gray-50">'+
+                '<td class="px-4 py-3 font-medium">'+(p.nombre_tutor||p.tutor)+'</td>'+
+                '<td class="px-4 py-3 text-xs text-gray-600">'+p.carrera+'</td>'+
+                '<td class="px-4 py-3 font-bold">'+(p.grupo||'')+'</td>'+
+                '<td class="px-4 py-3 text-center">'+((p.alumnos_h||0)+(p.alumnos_m||0))+'</td>'+
+                '<td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-medium '+(cfg[p.estado]||cfg.Borrador)+'">'+p.estado+'</span></td>'+
+                '<td class="px-4 py-3 text-center"><button onclick="abrirRev('+p.id+')" class="px-3 py-1 text-sm border border-[#69B22E] text-[#69B22E] rounded hover:bg-[#69B22E] hover:text-white">Revisar</button></td></tr>';
+        }).join('');ic();
+    }catch(e){tb.innerHTML='<tr><td colspan="6" class="px-4 py-6 text-center text-red-400">Sin conexion</td></tr>';}
+}
+
+async function abrirRev(id){
+    revPatId=id;
+    try{
+        var r=await fetch(API+'/pats/'+id);var d=await r.json();if(!d.success)return;
+        var p=d.pat;
+        document.getElementById('rv-info').textContent='PAT #'+p.id+' - Cuatrimestre '+p.cuatrimestre;
+        document.getElementById('rv-prog').textContent=p.programa_educativo||p.carrera||'';
+        document.getElementById('rv-tutor').textContent=p.nombre_tutor||p.tutor_nombre_completo||'';
+        document.getElementById('rv-grupo').textContent=p.grupo||'';
+        document.getElementById('rv-alumnos').textContent=(p.alumnos_h||0)+'H / '+(p.alumnos_m||0)+'M = '+((p.alumnos_h||0)+(p.alumnos_m||0));
+        document.getElementById('rv-com').textContent=p.comentarios_tutor||'Sin comentarios';
+        // Faltantes
+        var falt=[];
+        if(!p.alumnos_h&&!p.alumnos_m)falt.push('Total de alumnos H/M (responsabilidad del tutor)');
+        if(!p.comentarios_tutor)falt.push('Comentarios del tutor');
+        var ses=p.sesiones||[];
+        var sinTema=ses.filter(function(s){return!s.tematica||!s.tematica.trim();}).length;
+        if(sinTema)falt.push(sinTema+' sesion(es) sin tematica definida');
+        var fd=document.getElementById('rv-faltantes');
+        if(falt.length){document.getElementById('rv-falt-list').innerHTML=falt.map(function(f){return'<li>'+f+'</li>';}).join('');fd.classList.remove('hidden');}
+        else{fd.classList.add('hidden');}
+        // Sesiones
+        document.getElementById('rv-ses-tbody').innerHTML=ses.map(function(s){
+            var vacio='<span class="text-red-400 italic text-xs">Vacio</span>';
+            return '<tr class="hover:bg-gray-50">'+
+                '<td class="px-3 py-2 text-center font-bold">'+s.num_sesion+'</td>'+
+                '<td class="px-3 py-2"><span class="px-1.5 py-0.5 bg-gray-100 text-[10px] rounded font-bold">'+(s.corte_parcial||'')+'</span></td>'+
+                '<td class="px-3 py-2">'+(s.tematica||vacio)+'</td>'+
+                '<td class="px-3 py-2 text-xs text-gray-600">'+(s.objetivo||vacio)+'</td>'+
+                '<td class="px-3 py-2 text-xs text-gray-600">'+(s.resultados_esperados||'')+'</td></tr>';
+        }).join('');
+        // Botones
+        document.getElementById('rv-actions').classList.toggle('hidden',p.estado!=='Pendiente Revision');
+        document.getElementById('rv-obs').value='';
+        document.getElementById('modal-rev').classList.remove('hidden');
+        ic();
+    }catch(e){toast('Error cargando PAT',false);}
+}
+
+async function decidirPat(estado){
+    var obs=document.getElementById('rv-obs').value.trim();
+    if(estado==='Rechazado'&&!obs){alert('Las observaciones son obligatorias al rechazar.');return;}
+    try{
+        var r=await fetch(API+'/pats/'+revPatId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:estado,observaciones_director:obs})});
+        var d=await r.json();toast(d.message,d.success);
+        document.getElementById('modal-rev').classList.add('hidden');
+        await cargarRev();
+    }catch(e){toast('Error',false);}
+}
+
+// ==================== AUDITORIA ====================
+async function cargarAud(){
+    var ct=document.getElementById('aud-container');
+    ct.innerHTML='<div class="text-center text-gray-400 py-8">Cargando...</div>';
+    try{
+        var params=new URLSearchParams({estado:'Aprobado'});
+        var car=document.getElementById('filt-carrera-aud').value;
+        if(car)params.append('carrera',car);
+        var r=await fetch(API+'/pats?'+params);var d=await r.json();
+        if(!d.success||!d.pats.length){ct.innerHTML='<div class="text-center text-gray-400 py-8 italic">Sin PATs aprobados para auditar.</div>';return;}
+        ct.innerHTML='';
+        for(var i=0;i<d.pats.length;i++){
+            var pat=d.pats[i];
+            var dr=await fetch(API+'/pats/'+pat.id);var dd=await dr.json();
+            if(!dd.success)continue;
+            var pp=dd.pat;var ses=pp.sesiones||[];
+            var val=ses.filter(function(s){return s.estado==='Validada';}).length;
+            var canc=ses.filter(function(s){return s.estado==='Cancelada';}).length;
+            var card=document.createElement('div');
+            card.className='bg-white rounded-lg border shadow-sm overflow-hidden';
+            card.innerHTML='<div class="px-6 py-3 bg-gray-50 border-b flex items-center justify-between">'+
+                '<div><b class="text-[#7B5936]">'+(pp.grupo||'')+'</b> - '+(pp.nombre_tutor||pp.tutor_nombre_completo||'')+' <span class="text-xs text-gray-500 ml-2">'+pp.carrera+'</span></div>'+
+                '<div class="flex gap-2 text-xs"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded">'+val+' validadas</span><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded">'+canc+' canceladas</span><span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded">'+(ses.length-val-canc)+' pendientes</span></div></div>'+
+                '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-xs text-gray-500 uppercase bg-white border-b"><tr><th class="px-4 py-2 text-center">No.</th><th class="px-4 py-2">Tematica</th><th class="px-4 py-2">Fecha/Hora</th><th class="px-4 py-2">Resultados Obtenidos</th><th class="px-4 py-2">Canalizaciones</th><th class="px-4 py-2 text-center">Firma JG</th><th class="px-4 py-2 text-center">Estado</th></tr></thead><tbody class="divide-y">'+
+                ses.map(function(s){
+                    var ec={'Validada':'bg-green-100 text-green-700','Cancelada':'bg-red-100 text-red-700','Finalizada':'bg-yellow-100 text-yellow-700','Pendiente':'bg-gray-100 text-gray-600','Programada':'bg-blue-100 text-blue-700'};
+                    var firma=s.estado==='Validada'?'<span class="text-green-600 text-xs font-bold">FIRMADO</span>':(s.estado==='Cancelada'?'<span class="text-red-500 text-xs">CANCELADA</span>':'<span class="text-gray-300 text-xs">-</span>');
+                    var motivo=s.estado==='Cancelada'&&s.motivo_cancelacion?'<br><span class="text-[10px] text-red-600 italic">Motivo: '+s.motivo_cancelacion+'</span>':'';
+                    return '<tr class="hover:bg-gray-50">'+
+                        '<td class="px-4 py-2 text-center font-bold text-gray-500">'+s.num_sesion+'</td>'+
+                        '<td class="px-4 py-2 text-xs">'+(s.tematica||'')+'</td>'+
+                        '<td class="px-4 py-2 text-xs text-gray-600">'+(s.fecha_programada||'Sin agendar')+(s.hora_programada?' '+s.hora_programada:'')+'</td>'+
+                        '<td class="px-4 py-2 text-xs">'+(s.resultados_obtenidos||'-')+motivo+'</td>'+
+                        '<td class="px-4 py-2 text-xs text-gray-600">'+(s.canalizaciones||'-')+'</td>'+
+                        '<td class="px-4 py-2 text-center">'+firma+'</td>'+
+                        '<td class="px-4 py-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold '+(ec[s.estado]||ec.Pendiente)+'">'+(s.estado||'Pendiente')+'</span></td></tr>';
+                }).join('')+'</tbody></table></div>';
+            ct.appendChild(card);
         }
+        ic();
+    }catch(e){ct.innerHTML='<div class="text-center text-red-400 py-8">Error de conexion</div>';}
+}
 
-        // --- FUNCIONES DEL EDITOR ---
-        function prepararModalSesion() {
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            const cantidad = plantillasActivas[cuatri].length;
-            if(cantidad >= 15) return alert("Límite de 15 sesiones alcanzado.");
-            modoEdicion = null;
-            document.getElementById('modal-sesion-titulo').innerText = "Agregar Sesión";
-            document.getElementById('form-plantilla').reset();
-            document.getElementById('input-num').value = cantidad + 1;
-            document.getElementById('input-corte').value = (cantidad + 1 > 10) ? "III" : (cantidad + 1 > 5) ? "II" : "I";
-            abrirModal('modal-sesion');
-        }
-
-        function prepararEdicion(numSesion) {
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            const sesion = plantillasActivas[cuatri].find(s => s.num === numSesion);
-            modoEdicion = numSesion;
-            document.getElementById('modal-sesion-titulo').innerText = `Editar Sesión ${numSesion}`;
-            document.getElementById('input-num').value = sesion.num;
-            document.getElementById('input-corte').value = sesion.corte;
-            document.getElementById('input-tematica').value = sesion.tematica;
-            document.getElementById('input-objetivo').value = sesion.objetivo;
-            document.getElementById('input-resultados').value = sesion.resultados;
-            abrirModal('modal-sesion');
-        }
-
-        document.getElementById('form-plantilla').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            const nuevaSesion = {
-                num: parseInt(document.getElementById('input-num').value),
-                corte: document.getElementById('input-corte').value,
-                tematica: document.getElementById('input-tematica').value,
-                objetivo: document.getElementById('input-objetivo').value,
-                resultados: document.getElementById('input-resultados').value
-            };
-
-            if (modoEdicion) {
-                const index = plantillasActivas[cuatri].findIndex(s => s.num === modoEdicion);
-                plantillasActivas[cuatri][index] = nuevaSesion;
-            } else plantillasActivas[cuatri].push(nuevaSesion);
-            
-            renderPlantilla();
-            cerrarModal('modal-sesion');
-        });
-
-        function limpiarBorrador() {
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            if(plantillasActivas[cuatri].length > 0) {
-                if(confirm("¿Estás seguro de vaciar el editor? Se perderán las sesiones que no hayas publicado.")) {
-                    plantillasActivas[cuatri] = [];
-                    renderPlantilla();
-                }
-            }
-        }
-
-        function publicarPlantilla() {
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            if (plantillasActivas[cuatri].length < 15) return; 
-            
-            let nombreVersion = prompt("Asigna un nombre a esta versión para identificarla (Ej: Plantilla Oficial 2026-B):", "Nueva Versión PAT");
-            if (!nombreVersion) return; 
-
-            let currentDate = new Date();
-            let nuevaVersion = {
-                id: Date.now(),
-                fecha: currentDate.toLocaleDateString('es-MX'),
-                anio: currentDate.getFullYear().toString(),
-                nombre: nombreVersion,
-                sesiones: JSON.parse(JSON.stringify(plantillasActivas[cuatri])) 
-            };
-
-            historialPlantillas[cuatri].unshift(nuevaVersion);
-            plantillasActivas[cuatri] = [];
-            
-            alert("¡Éxito! La plantilla ha sido guardada en el historial y ya está disponible para los Docentes Tutores.");
-            document.getElementById('filtro-anio-historial').value = "Todos";
-            renderPlantilla();
-        }
-
-        function cargarDelHistorial(idVersion) {
-            const cuatri = document.getElementById('select-cuatrimestre').value;
-            if (plantillasActivas[cuatri].length > 0) {
-                if (!confirm("Tienes un borrador activo en el editor. Si cargas una versión del historial, se borrará tu trabajo actual. ¿Deseas continuar?")) return;
-            }
-
-            const version = historialPlantillas[cuatri].find(v => v.id === idVersion);
-            plantillasActivas[cuatri] = JSON.parse(JSON.stringify(version.sesiones));
-            
-            if(plantillasActivas[cuatri].length < 15) {
-                for(let i=plantillasActivas[cuatri].length + 1; i<=15; i++) {
-                     plantillasActivas[cuatri].push({ num: i, corte: "II", tematica: "Sesión " + i, objetivo: "Objetivo", resultados: "Resultados" });
-                }
-            }
-            renderPlantilla();
-            alert(`Versión "${version.nombre}" cargada al editor.`);
-        }
-
-
-        // ==========================================
-        // MÓDULO 2: REVISIÓN DE PATs
-        // ==========================================
-        
-        // Data Mocks (Incluyendo un falso para rellenar, más el real de LocalStorage)
-        // Dejamos la lista vacía para que solo lea los PATs reales enviados por los tutores
-        let patsEntregados = [];
-        
-        let patSeleccionadoId = null;
-
-        // Inyectar el PAT real del Tutor si existe y está en estado de revisión/aprobado
-        function cargarPatsReales() {
-            let patSincronizado = JSON.parse(localStorage.getItem('patSincronizado'));
-            let asignacionActiva = JSON.parse(localStorage.getItem('asignacionActiva'));
-            let estadoActualPat = localStorage.getItem('estadoPat');
-
-            if(patSincronizado && patSincronizado.length > 0 && asignacionActiva && (estadoActualPat === 'Aprobado' || estadoActualPat === 'En Revision')) {
-                // Verificamos si ya está en la lista para no duplicar
-                let exists = patsEntregados.find(p => p.grupo === asignacionActiva.grupo);
-                if(!exists) {
-                    patsEntregados.unshift({
-                        id: 99, // ID dinámico
-                        carrera: asignacionActiva.programa,
-                        grupo: asignacionActiva.grupo,
-                        tutor: asignacionActiva.tutor,
-                        h: asignacionActiva.h || 16,
-                        m: asignacionActiva.m || 10,
-                        comentarios: 'Propuesta enviada desde el portal del tutor.',
-                        estado: estadoActualPat === 'Aprobado' ? 'Aprobado' : 'Pendiente Revision',
-                        sesiones: patSincronizado
-                    });
-                }
-            }
-        }
-
-        function renderRevisiones() {
-            cargarPatsReales(); // Asegura que el PAT del test esté en la lista
-
-            document.getElementById('stat-pendientes').innerText = patsEntregados.filter(p => p.estado === 'Pendiente Revision').length;
-            document.getElementById('stat-aprobados').innerText = patsEntregados.filter(p => p.estado === 'Aprobado').length;
-            document.getElementById('stat-rechazados').innerText = patsEntregados.filter(p => p.estado === 'Rechazado').length;
-            
-            const tbody = document.getElementById('revision-tbody');
-            tbody.innerHTML = '';
-            
-            if(patsEntregados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No hay propuestas pendientes de revisión.</td></tr>`;
-                return;
-            }
-
-            patsEntregados.forEach(pat => {
-                let badge = pat.estado === 'Pendiente Revision' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : pat.estado === 'Aprobado' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200';
-                let btn = pat.estado === 'Pendiente Revision' ? `<button onclick="abrirModalRevision(${pat.id})" class="text-sm px-3 py-1.5 bg-[#69B22E] text-white rounded hover:opacity-90 shadow-sm transition-colors"><i data-lucide="eye" class="h-3 w-3 inline mr-1"></i> Revisar PAT</button>` : `<button onclick="abrirModalRevision(${pat.id})" class="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded hover:bg-gray-50 transition-colors">Ver Detalles</button>`;
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="px-4 py-3"><p class="font-bold text-gray-900">${pat.grupo}</p><p class="text-xs text-gray-500 line-clamp-1">${pat.carrera}</p></td>
-                        <td class="px-4 py-3 text-gray-800 font-medium">${pat.tutor}</td>
-                        <td class="px-4 py-3 text-center"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-600">${pat.h + pat.m} Alumnos</span></td>
-                        <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold border ${badge}">${pat.estado}</span></td>
-                        <td class="px-4 py-3 text-center">${btn}</td>
-                    </tr>`;
-            });
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-        }
-
-        // Esta función abre el nuevo Modal Gigante y dibuja la tabla del PAT
-        function abrirModalRevision(id) {
-            const pat = patsEntregados.find(p => p.id === id);
-            patSeleccionadoId = id;
-            
-            // Llenar Cabecera del Modal
-            document.getElementById('rev-tutor').innerText = pat.tutor; 
-            document.getElementById('rev-grupo').innerText = pat.grupo;
-            document.getElementById('rev-alumnos').innerText = pat.h + pat.m;
-            document.getElementById('rev-h').innerText = pat.h;
-            document.getElementById('rev-m').innerText = pat.m;
-            document.getElementById('rev-comentarios').innerText = `"${pat.comentarios}"`;
-            
-            // Llenar la Tabla de Sesiones del Tutor
-            const tbodySesiones = document.getElementById('rev-sesiones-tbody');
-            tbodySesiones.innerHTML = '';
-            
-            if(pat.sesiones && pat.sesiones.length > 0) {
-                pat.sesiones.forEach(s => {
-                    tbodySesiones.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 text-center font-bold text-gray-700">${s.num}</td>
-                            <td class="px-4 py-2 text-gray-900 font-medium border-l border-gray-200">${s.tematica}</td>
-                            <td class="px-4 py-2 text-gray-600 border-l border-gray-200">${s.objetivo}</td>
-                            <td class="px-4 py-2 text-[#7B5936] font-medium border-l border-gray-200">${s.resultados_esperados}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                 tbodySesiones.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500 italic">No hay sesiones detalladas en este PAT.</td></tr>`;
-            }
-
-            // Resetear el textarea
-            document.getElementById('input-observaciones').value = '';
-
-            // Ocultar botones si ya está revisado
-            const formRevision = document.getElementById('form-revision');
-            if(pat.estado !== 'Pendiente Revision') {
-                formRevision.classList.add('hidden');
-            } else {
-                formRevision.classList.remove('hidden');
-            }
-
-            abrirModal('modal-revisar');
-        }
-
-        function procesarRevision(estado) {
-            const obs = document.getElementById('input-observaciones').value;
-            if (estado === 'Rechazado' && obs.trim() === '') return alert('Es obligatorio escribir observaciones para rechazar la propuesta.');
-            
-            patsEntregados = patsEntregados.map(p => p.id === patSeleccionadoId ? { ...p, estado } : p);
-            
-            // Si aprobó el PAT del test, lo marcamos en LocalStorage
-            if(patSeleccionadoId === 99 && estado === 'Aprobado') {
-                 localStorage.setItem('estadoPat', 'Aprobado');
-            }
-
-            renderRevisiones(); 
-            cerrarModal('modal-revisar');
-        }
-
-        // ==========================================
-        // MÓDULO 3: AUDITORÍA DE SESIONES (EN VIVO CON TUTOR/JEFE)
-        // ==========================================
-        function renderAuditoria() {
-            let sesionesSincronizadas = JSON.parse(localStorage.getItem('patSincronizado')) || [];
-            let asignacionActiva = JSON.parse(localStorage.getItem('asignacionActiva'));
-            let nombreGrupo = asignacionActiva ? asignacionActiva.grupo : '1G1';
-
-            // Actualizar nombre del grupo en el selector
-            document.getElementById('audit-grupo').innerHTML = `<option value="${nombreGrupo}">${nombreGrupo} (En Vivo)</option>`;
-
-            const tbody = document.getElementById('auditoria-tbody');
-            tbody.innerHTML = '';
-
-            if (sesionesSincronizadas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">El Tutor aún no ha enviado su propuesta PAT o no ha agendado clases.</td></tr>`;
-                return;
-            }
-
-            sesionesSincronizadas.forEach(s => {
-                let badge = '', textoResultados = '';
-                let fechaHora = s.fecha ? `<span class="font-medium text-gray-800">${s.fecha}</span><br><span class="text-xs text-gray-500">${s.hora} hrs</span>` : '<span class="text-xs text-gray-400">Sin agendar</span>';
-
-                if(s.estado === 'Programada') {
-                    badge = `<span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200"><i data-lucide="calendar" class="h-3 w-3 inline mr-1"></i> Programada</span>`;
-                    textoResultados = `<span class="text-xs text-gray-400 italic">Esperando que el tutor imparta la clase...</span>`;
-                } else if(s.estado === 'Finalizada_Por_Tutor') {
-                    badge = `<span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700 text-xs font-bold border border-yellow-200"><i data-lucide="clock" class="h-3 w-3 inline mr-1"></i> Esperando Jefe</span>`;
-                    textoResultados = `<span class="italic text-gray-800">"${s.resultados_obtenidos}"</span>`;
-                } else if(s.estado === 'Validada') {
-                    badge = `<span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold border border-green-200"><i data-lucide="shield-check" class="h-3 w-3 inline mr-1"></i> Validada</span>`;
-                    textoResultados = `<span class="italic text-gray-800">"${s.resultados_obtenidos}"</span>`;
-                } else if(s.estado === 'Cancelada') {
-                    badge = `<span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold border border-red-200"><i data-lucide="x-circle" class="h-3 w-3 inline mr-1"></i> Cancelada</span>`;
-                    textoResultados = `<span class="text-xs text-red-600 font-bold">Motivo reportado:</span> <span class="text-sm italic text-gray-700">"${s.motivo}"</span>`;
-                } else badge = `<span class="text-xs text-gray-400">Pendiente</span>`;
-
-                let pills = s.canalizaciones && s.canalizaciones.length > 0 ? `<div class="mt-2">` + s.canalizaciones.map(c => `<span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded font-bold border border-blue-200 mr-1">${c}</span>`).join('') + `</div>` : '';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="px-4 py-3"><p class="text-xs font-bold text-gray-400">Sesión ${s.num}</p><p class="text-sm font-medium text-gray-900">${s.tematica}</p></td>
-                        <td class="px-4 py-3">${fechaHora}</td>
-                        <td class="px-4 py-3 border-l border-gray-100">${textoResultados}${pills}</td>
-                        <td class="px-4 py-3 text-center align-middle">${badge}</td>
-                    </tr>`;
-            });
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-        }
-        function descargarPDFDesdeDirector(event) {
-            const pat = patsEntregados.find(p => p.id === patSeleccionadoId);
-            if (!pat) return;
-            try {
-                generarPDFPat({
-                    carrera: pat.carrera || '',
-                    tutor: pat.tutor,
-                    grupo: pat.grupo,
-                    h: pat.h || 0,
-                    m: pat.m || 0,
-                    sesiones: pat.sesiones,
-                    tipo: 'propuesta',
-                    filename: `Propuesta_PAT_${pat.grupo}_${pat.tutor.replace(/ /g, '_')}.pdf`
-                });
-            } catch (err) {
-                console.error('Error PDF:', err);
-                alert('Error al generar el PDF.');
-            }
-        }
-        // Iniciar
-        renderPlantilla();
-        renderRevisiones();
-        renderAuditoria();
-        switchTab('plantillas'); // Empieza en la pestaña de plantillas
-    </script>
+init();
+</script>
 </body>
 </html>

@@ -4,89 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistema PAT UPFIM</title>
-    
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-50">
-
     <div class="w-full max-w-md px-8 py-12">
         <div class="flex justify-center mb-8">
-            <img src="../assets/logoUpfim.png" alt="UPFIM Logo" class="h-32 w-auto object-contain" />
+            <img src="../assets/logoUpfim.png" alt="UPFIM" class="h-32 w-auto object-contain" />
         </div>
-
         <div class="text-center mb-8">
             <h1 class="text-3xl font-semibold text-[#69B22E]">Sistema PAT</h1>
             <p class="mt-2 text-[#7B5936] font-medium">Portal Universitario</p>
         </div>
-
         <p id="error-message" class="hidden mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm text-center font-medium"></p>
-
         <form id="loginForm" class="space-y-5">
             <div class="space-y-2">
                 <label for="email" class="text-[#7B5936] text-sm font-medium">Correo Institucional</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i data-lucide="mail" class="h-5 w-5 text-gray-400"></i>
-                    </div>
-                    <input 
-                        id="email" 
-                        type="email" 
-                        placeholder="usuario@upfim.edu.mx" 
-                        required
-                        class="pl-10 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]"
-                    />
-                </div>
+                <input id="email" type="email" placeholder="usuario@upfim.edu.mx" required
+                    class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]" />
             </div>
-
             <div class="space-y-2">
-                <label for="password" class="text-[#7B5936] text-sm font-medium">Contraseña</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i data-lucide="lock" class="h-5 w-5 text-gray-400"></i>
-                    </div>
-                    <input 
-                        id="password" 
-                        type="password" 
-                        placeholder="••••••••" 
-                        required
-                        class="pl-10 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E] focus:ring-1 focus:ring-[#69B22E]"
-                    />
-                </div>
+                <label for="password" class="text-[#7B5936] text-sm font-medium">Contrasena</label>
+                <input id="password" type="password" placeholder="********" required
+                    class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#69B22E]" />
             </div>
-
-            <div class="flex justify-end">
-                <a href="#" class="text-sm hover:underline text-[#69B22E]">¿Olvidaste tu contraseña?</a>
-            </div>
-
-            <button type="submit" id="login-btn" class="w-full h-10 rounded-md text-white font-medium hover:opacity-90 transition-opacity bg-[#69B22E] shadow-sm">
-                Iniciar Sesión
+            <button type="submit" id="login-btn" class="w-full h-10 rounded-md text-white font-medium hover:opacity-90 bg-[#69B22E] shadow-sm">
+                Iniciar Sesion
             </button>
         </form>
-
         <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p class="text-sm font-medium text-blue-900 mb-2">Credenciales de prueba:</p>
             <div class="text-xs text-blue-700 space-y-1">
-                <p>&bull; Administrador: <strong>admin@upfim.edu.mx</strong></p>
-                <p>&bull; Dir. Tutorías: <strong>director.tutorias@upfim.edu.mx</strong></p>
-                <p>&bull; Dir. Carrera: <strong>director.carrera@upfim.edu.mx</strong></p>
-                <p>&bull; Docente Tutor: <strong>tutor@upfim.edu.mx</strong></p>
-                <p>&bull; Jefe de Grupo: <strong>jefe.grupo@upfim.edu.mx</strong></p>
-                <p class="mt-2 font-medium text-blue-900">Contraseña general: admin123</p>
+                <p>* Admin: <b>admin@upfim.edu.mx</b></p>
+                <p>* Dir. Tutorias: <b>director.tutorias@upfim.edu.mx</b></p>
+                <p>* Dir. Carrera: <b>director.carrera@upfim.edu.mx</b></p>
+                <p>* Docente Tutor: <b>tutor@upfim.edu.mx</b></p>
+                <p>* Jefe de Grupo: <b>jefe.grupo@upfim.edu.mx</b></p>
+                <p class="mt-2 font-medium text-blue-900">Password: admin123</p>
             </div>
         </div>
-
-        <div class="mt-8 text-center text-sm text-gray-500">
-            <p>&copy; 2026 UPFIM - Todos los derechos reservados</p>
-        </div>
+        <p class="mt-6 text-center text-xs text-gray-400">2026 UPFIM</p>
     </div>
-
     <script src="../js/auth.js"></script>
-    <script>
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    </script>
+    <script>if(typeof lucide!=='undefined')lucide.createIcons();</script>
 </body>
 </html>
