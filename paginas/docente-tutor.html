@@ -1,238 +1,348 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Docente Tutor - PAT</title><link rel="stylesheet" href="../css/styles.css"><script src="https://unpkg.com/@tailwindcss/browser@4"></script><script src="https://unpkg.com/lucide@latest"></script></head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Docente Tutor - PAT</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
 <body class="min-h-screen bg-gray-50">
-<header class="bg-white border-b sticky top-0 z-10"><div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between"><div class="flex items-center gap-4"><img src="../assets/logoUpfim.png" class="h-12 w-auto"/><div class="border-l border-gray-300 pl-4"><h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1><p class="text-sm text-gray-600">Docente Tutor</p></div></div><div class="flex items-center gap-4"><div class="text-right hidden sm:block"><p id="user-role-display" class="text-sm font-medium text-[#7B5936]"></p><p id="user-email-display" class="text-xs text-gray-500"></p></div><div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E] font-bold"><span id="user-avatar-letter">T</span></div><button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border rounded-md hover:text-red-600"><i data-lucide="log-out" class="h-4 w-4 mr-1"></i>Salir</button></div></div></header>
-<main class="max-w-7xl mx-auto px-6 py-8"><div class="max-w-6xl mx-auto space-y-6">
-<h1 class="text-3xl text-[#7B5936]">Mi Espacio Tutorial</h1>
-<div class="bg-gray-100 border p-1 rounded-xl w-full sm:w-max flex flex-wrap">
-<button onclick="sw('pat')" id="tb-pat" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm"><i data-lucide="book-open" class="h-4 w-4"></i>Mi PAT</button>
-<button onclick="sw('jefe')" id="tb-jefe" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900"><i data-lucide="user-plus" class="h-4 w-4"></i>Solicitar Jefe</button>
-</div>
+<header class="bg-white border-b sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <img src="../assets/logoUpfim.png" class="h-12 w-auto"/>
+            <div class="border-l border-gray-300 pl-4">
+                <h1 class="text-xl font-semibold text-[#69B22E]">Sistema PAT</h1>
+                <p class="text-sm text-gray-600">Docente Tutor</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p id="user-role-display" class="text-sm font-medium text-[#7B5936]"></p>
+                <p id="user-email-display" class="text-xs text-gray-500"></p>
+            </div>
+            <div class="h-10 w-10 rounded-full flex items-center justify-center text-white bg-[#69B22E] font-bold">
+                <span id="user-avatar-letter">T</span>
+            </div>
+            <button onclick="logout()" class="flex items-center px-3 py-1.5 text-sm border rounded-md hover:text-red-600">
+                <i data-lucide="log-out" class="h-4 w-4 mr-1"></i>Salir
+            </button>
+        </div>
+    </div>
+</header>
 
-<!-- TAB PAT -->
-<div id="tab-pat" class="space-y-4">
-<div id="sin-pat" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center"><p class="text-yellow-800 font-medium">No tienes un PAT asignado. Contacta a tu Director de Carrera.</p></div>
-<div id="con-pat" class="hidden space-y-4">
-<!-- Header -->
-<div class="bg-white rounded-lg border shadow-sm p-6">
-<div class="flex justify-between items-start"><div><span id="badge-per" class="px-2.5 py-1 rounded-md text-xs font-bold border bg-blue-50 text-blue-700 border-blue-200 mb-2 inline-block"></span><h2 class="text-2xl font-bold text-gray-900">Grupo: <span id="info-grupo" class="text-[#69B22E]"></span></h2><p class="text-gray-600" id="info-carrera"></p></div><span id="badge-estado" class="px-2.5 py-1 rounded-full text-xs font-bold border"></span></div>
-</div>
-<!-- Banners -->
-<div id="ban-rechazado" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"><i data-lucide="alert-triangle" class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5"></i><div><p class="text-sm font-bold text-red-800">PAT Rechazado</p><p class="text-sm text-red-700 mt-1" id="rechazo-motivo"></p><p class="text-xs text-red-600 mt-2">Corrige y reenvia tu PAT.</p></div></div>
-<div id="ban-aprobado" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3"><i data-lucide="check-circle" class="h-5 w-5 text-green-500"></i><p class="text-sm font-bold text-green-800">PAT Aprobado. Gestiona tus sesiones abajo.</p></div>
-<div id="ban-pendiente" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3"><i data-lucide="clock" class="h-5 w-5 text-yellow-500"></i><p class="text-sm text-yellow-800">PAT enviado. Esperando revision del Director de Tutorias.</p></div>
-<!-- Datos -->
-<div class="bg-white rounded-lg border shadow-sm p-6">
-<h3 class="font-medium text-[#7B5936] mb-4">Datos del Grupo (tu responsabilidad)</h3>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-<div><label class="block text-xs text-gray-500 mb-1">Alumnos H</label><input type="number" id="in-h" min="0" class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div><label class="block text-xs text-gray-500 mb-1">Alumnas M</label><input type="number" id="in-m" min="0" class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div class="col-span-2"><label class="block text-xs text-gray-500 mb-1">Comentarios</label><input type="text" id="in-com" class="w-full border rounded-md px-3 py-2 text-sm"></div>
-</div>
-<button onclick="guardarDatos()" class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm">Guardar datos</button>
-</div>
-<!-- Sesiones -->
-<div class="bg-white rounded-lg border shadow-sm overflow-hidden">
-<div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between"><h3 class="font-medium text-[#7B5936]">Programa de Sesiones</h3><span class="text-xs text-gray-500" id="ses-prog"></span></div>
-<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b"><tr><th class="px-3 py-3 text-center w-12">No.</th><th class="px-3 py-3 w-16">Corte</th><th class="px-3 py-3 min-w-[150px]">Tematica</th><th class="px-3 py-3 min-w-[120px]">Objetivo</th><th class="px-3 py-3 w-32">Estado/Fecha</th><th class="px-3 py-3 text-center min-w-[180px]">Acciones</th></tr></thead>
-<tbody id="ses-tbody" class="divide-y"></tbody></table></div>
-</div>
-<!-- Enviar -->
-<div id="panel-enviar" class="bg-white rounded-lg border shadow-sm p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-<p class="text-sm text-gray-600" id="enviar-txt">Envia tu PAT para aprobacion.</p>
-<button onclick="enviarPAT()" class="px-6 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 font-medium text-sm"><i data-lucide="send" class="h-4 w-4 inline mr-2"></i><span id="btn-enviar-txt">Enviar PAT</span></button>
-</div>
-</div>
-</div>
+<main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <h1 class="text-3xl text-[#7B5936]">Mi Espacio Tutorial</h1>
+        <div class="bg-gray-100 border p-1 rounded-xl w-full sm:w-max flex flex-wrap">
+            <button onclick="sw('pat')" id="tb-pat" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm"><i data-lucide="book-open" class="h-4 w-4"></i>Mi PAT</button>
+            <button onclick="sw('jefe')" id="tb-jefe" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900"><i data-lucide="user-plus" class="h-4 w-4"></i>Solicitar Jefe</button>
+        </div>
 
-<!-- TAB JEFE -->
-<div id="tab-jefe" class="hidden space-y-4">
-<div class="bg-white rounded-lg border shadow-sm p-6 max-w-lg">
-<h3 class="font-medium text-[#7B5936] mb-4">Solicitar Alta de Jefe de Grupo</h3>
-<form id="form-jefe" class="space-y-4">
-<div><label class="block text-xs text-gray-500 mb-1">Nombre(s)</label><input id="jf-nom" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div><label class="block text-xs text-gray-500 mb-1">Apellidos</label><input id="jf-ape" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div><label class="block text-xs text-gray-500 mb-1">Correo</label><input id="jf-email" type="email" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div><label class="block text-xs text-gray-500 mb-1">Grupo</label><input id="jf-grupo" required class="w-full border rounded-md px-3 py-2 text-sm uppercase"></div>
-<button type="submit" class="w-full py-2 bg-[#69B22E] text-white rounded-md text-sm font-medium">Enviar Solicitud</button>
-</form>
-</div>
-<div class="bg-white rounded-lg border shadow-sm p-4 max-w-lg"><h3 class="text-sm font-medium text-[#7B5936] mb-2">Mis Solicitudes</h3><div id="mis-sol" class="text-sm text-gray-500">Cargando...</div></div>
-</div>
-</div></main>
+        <div id="tab-pat" class="space-y-4">
+            <div id="sin-pat" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                <p class="text-yellow-800 font-medium">No tienes un PAT asignado. Contacta a tu Director de Carrera.</p>
+            </div>
+            <div id="con-pat" class="hidden space-y-4">
+                
+                <div class="bg-white rounded-lg border shadow-sm p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span id="badge-per" class="px-2.5 py-1 rounded-md text-xs font-bold border bg-blue-50 text-blue-700 border-blue-200 mb-2 inline-block"></span>
+                            <h2 class="text-2xl font-bold text-gray-900">Grupo: <span id="info-grupo" class="text-[#69B22E]"></span></h2>
+                            <p class="text-gray-600" id="info-carrera"></p>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <span id="badge-estado" class="px-2.5 py-1 rounded-full text-xs font-bold border"></span>
+                            <button onclick="descargarMiPAT(event)" class="flex items-center px-3 py-1.5 bg-gray-900 text-white rounded text-xs font-medium hover:bg-black shadow-sm transition-colors">
+                                <i data-lucide="file-down" class="h-3 w-3 mr-1"></i>Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-<!-- MODAL PROGRAMAR -->
+                <div id="ban-rechazado" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"><i data-lucide="alert-triangle" class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5"></i><div><p class="text-sm font-bold text-red-800">PAT Rechazado</p><p class="text-sm text-red-700 mt-1" id="rechazo-motivo"></p><p class="text-xs text-red-600 mt-2">Corrige y reenvia tu PAT.</p></div></div>
+                <div id="ban-aprobado" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3"><i data-lucide="check-circle" class="h-5 w-5 text-green-500"></i><p class="text-sm font-bold text-green-800">PAT Aprobado. Gestiona tus sesiones abajo.</p></div>
+                <div id="ban-pendiente" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3"><i data-lucide="clock" class="h-5 w-5 text-yellow-500"></i><p class="text-sm text-yellow-800">PAT enviado. Esperando revision del Director de Tutorias.</p></div>
+                
+                <div class="bg-white rounded-lg border shadow-sm p-6">
+                    <h3 class="font-medium text-[#7B5936] mb-4">Datos del Grupo (tu responsabilidad)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div><label class="block text-xs text-gray-500 mb-1">Alumnos H</label><input type="number" id="in-h" min="0" class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                        <div><label class="block text-xs text-gray-500 mb-1">Alumnas M</label><input type="number" id="in-m" min="0" class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                        <div class="col-span-2"><label class="block text-xs text-gray-500 mb-1">Comentarios</label><input type="text" id="in-com" class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                    </div>
+                    <button onclick="guardarDatos()" class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm">Guardar datos</button>
+                </div>
+                
+                <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between"><h3 class="font-medium text-[#7B5936]">Programa de Sesiones</h3><span class="text-xs text-gray-500" id="ses-prog"></span></div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-xs text-[#7B5936] uppercase bg-gray-50 border-b"><tr><th class="px-3 py-3 text-center w-12">No.</th><th class="px-3 py-3 w-16">Corte</th><th class="px-3 py-3 min-w-[150px]">Tematica</th><th class="px-3 py-3 min-w-[120px]">Objetivo</th><th class="px-3 py-3 w-32">Estado/Fecha</th><th class="px-3 py-3 text-center min-w-[180px]">Acciones</th></tr></thead>
+                    <tbody id="ses-tbody" class="divide-y"></tbody></table></div>
+                </div>
+                
+                <div id="panel-enviar" class="bg-white rounded-lg border shadow-sm p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-sm text-gray-600" id="enviar-txt">Envia tu PAT para aprobacion.</p>
+                    <button onclick="enviarPAT()" class="px-6 py-2 bg-[#69B22E] text-white rounded-md hover:opacity-90 font-medium text-sm"><i data-lucide="send" class="h-4 w-4 inline mr-2"></i><span id="btn-enviar-txt">Enviar PAT</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-jefe" class="hidden space-y-4">
+            <div class="bg-white rounded-lg border shadow-sm p-6 max-w-lg">
+                <h3 class="font-medium text-[#7B5936] mb-4">Solicitar Alta de Jefe de Grupo</h3>
+                <form id="form-jefe" class="space-y-4">
+                    <div><label class="block text-xs text-gray-500 mb-1">Nombre(s)</label><input id="jf-nom" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs text-gray-500 mb-1">Apellidos</label><input id="jf-ape" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs text-gray-500 mb-1">Correo</label><input id="jf-email" type="email" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs text-gray-500 mb-1">Grupo</label><input id="jf-grupo" required class="w-full border rounded-md px-3 py-2 text-sm uppercase"></div>
+                    <button type="submit" class="w-full py-2 bg-[#69B22E] text-white rounded-md text-sm font-medium">Enviar Solicitud</button>
+                </form>
+            </div>
+            <div class="bg-white rounded-lg border shadow-sm p-4 max-w-lg"><h3 class="text-sm font-medium text-[#7B5936] mb-2">Mis Solicitudes</h3><div id="mis-sol" class="text-sm text-gray-500">Cargando...</div></div>
+        </div>
+    </div>
+</main>
+
 <div id="m-prog" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-<div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-<h3 class="text-lg font-medium text-[#7B5936] mb-4">Programar Sesion <span id="mp-num"></span></h3>
-<form id="f-prog" class="space-y-4">
-<div><label class="block text-xs text-gray-500 mb-1">Fecha</label><input type="date" id="mp-fecha" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div><label class="block text-xs text-gray-500 mb-1">Hora</label><input type="time" id="mp-hora" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
-<div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-prog')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Guardar</button></div>
-</form></div></div>
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-lg font-medium text-[#7B5936] mb-4">Programar Sesion <span id="mp-num"></span></h3>
+        <form id="f-prog" class="space-y-4">
+            <div><label class="block text-xs text-gray-500 mb-1">Fecha</label><input type="date" id="mp-fecha" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+            <div><label class="block text-xs text-gray-500 mb-1">Hora</label><input type="time" id="mp-hora" required class="w-full border rounded-md px-3 py-2 text-sm"></div>
+            <div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-prog')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Guardar</button></div>
+        </form>
+    </div>
+</div>
 
-<!-- MODAL FINALIZAR -->
 <div id="m-fin" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-<div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-<h3 class="text-lg font-medium text-[#7B5936] mb-4">Finalizar Sesion <span id="mf-num"></span></h3>
-<form id="f-fin" class="space-y-4">
-<div><label class="block text-xs text-gray-500 mb-1">Resultados Obtenidos</label><textarea id="mf-res" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
-<div><label class="block text-xs text-gray-500 mb-1">Canalizaciones</label>
-<div class="flex flex-wrap gap-3"><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="B">Becas</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="M">Medico</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="PS">Psicologia</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="TS">T.Social</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="JD">Juridico</label></div></div>
-<div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-fin')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Registrar</button></div>
-</form></div></div>
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-lg font-medium text-[#7B5936] mb-4">Finalizar Sesion <span id="mf-num"></span></h3>
+        <form id="f-fin" class="space-y-4">
+            <div><label class="block text-xs text-gray-500 mb-1">Resultados Obtenidos</label><textarea id="mf-res" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+            <div><label class="block text-xs text-gray-500 mb-1">Canalizaciones</label>
+            <div class="flex flex-wrap gap-3"><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="B">Becas</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="M">Medico</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="PS">Psicologia</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="TS">T.Social</label><label class="text-xs flex items-center gap-1"><input type="checkbox" class="ch-canal" value="JD">Juridico</label></div></div>
+            <div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-fin')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Registrar</button></div>
+        </form>
+    </div>
+</div>
 
-<!-- MODAL CANCELAR -->
 <div id="m-can" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-<div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-<h3 class="text-lg font-medium text-red-600 mb-4">Cancelar Sesion <span id="mc-num"></span></h3>
-<form id="f-can" class="space-y-4">
-<div><label class="block text-xs text-gray-500 mb-1">Motivo de cancelacion</label><textarea id="mc-mot" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
-<div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-can')" class="px-4 py-2 text-sm border rounded-md">Volver</button><button type="submit" class="px-4 py-2 text-sm bg-red-600 text-white rounded-md">Confirmar Cancelacion</button></div>
-</form></div></div>
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-lg font-medium text-red-600 mb-4">Cancelar Sesion <span id="mc-num"></span></h3>
+        <form id="f-can" class="space-y-4">
+            <div><label class="block text-xs text-gray-500 mb-1">Motivo de cancelacion</label><textarea id="mc-mot" required rows="3" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+            <div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-can')" class="px-4 py-2 text-sm border rounded-md">Volver</button><button type="submit" class="px-4 py-2 text-sm bg-red-600 text-white rounded-md">Confirmar Cancelacion</button></div>
+        </form>
+    </div>
+</div>
 
-<!-- MODAL EDITAR SESION -->
 <div id="m-edit" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-<div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-<h3 class="text-lg font-medium text-[#7B5936] mb-4">Editar Actividad - Sesion <span id="me-num"></span></h3>
-<form id="f-edit" class="space-y-3">
-<div><label class="block text-xs text-gray-500 mb-1">Tematica</label><textarea id="me-tema" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
-<div><label class="block text-xs text-gray-500 mb-1">Objetivo</label><textarea id="me-obj" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
-<div><label class="block text-xs text-gray-500 mb-1">Resultados Esperados</label><textarea id="me-resexp" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
-<div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-edit')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Guardar Cambios</button></div>
-</form></div></div>
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+        <h3 class="text-lg font-medium text-[#7B5936] mb-4">Editar Actividad - Sesion <span id="me-num"></span></h3>
+        <form id="f-edit" class="space-y-3">
+            <div><label class="block text-xs text-gray-500 mb-1">Tematica</label><textarea id="me-tema" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+            <div><label class="block text-xs text-gray-500 mb-1">Objetivo</label><textarea id="me-obj" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+            <div><label class="block text-xs text-gray-500 mb-1">Resultados Esperados</label><textarea id="me-resexp" rows="2" class="w-full border rounded-md px-3 py-2 text-sm"></textarea></div>
+            <div class="flex gap-2 justify-end"><button type="button" onclick="cerrarM('m-edit')" class="px-4 py-2 text-sm border rounded-md">Cancelar</button><button type="submit" class="px-4 py-2 text-sm bg-[#69B22E] text-white rounded-md">Guardar Cambios</button></div>
+        </form>
+    </div>
+</div>
 
 <div id="toast-c" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-<script src="../js/auth.js"></script><script src="../js/layout.js"></script>
+
+<script src="../js/auth.js"></script>
+<script src="../js/layout.js"></script>
+<script src="../js/pdf-utils.js"></script>
+
 <script>
-var API='http://localhost:5000/api',sesData=window.getSessionData(),miId=sesData&&sesData.id,miCarrera=sesData&&sesData.departamento||'',pat=null,sesiones=[],curSesId=null;
-function sw(t){['pat','jefe'].forEach(function(x){document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);var b=document.getElementById('tb-'+x);b.className=x===t?'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm':'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900';});ic();}
-function abrirM(id){document.getElementById(id).classList.remove('hidden');}
-function cerrarM(id){document.getElementById(id).classList.add('hidden');}
-function toast(m,ok){var c=document.getElementById('toast-c'),d=document.createElement('div');d.className='flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto '+(ok===false?'bg-red-50 border-red-200 text-red-800':'bg-green-50 border-green-200 text-green-800');d.innerHTML='<span class="text-sm font-medium">'+m+'</span>';c.appendChild(d);setTimeout(function(){d.remove();},4000);}
-function ic(){if(typeof lucide!=='undefined')lucide.createIcons();}
+    var API='http://localhost:5000/api', sesData=window.getSessionData(), miId=sesData&&sesData.id, miCarrera=sesData&&sesData.departamento||'', pat=null, sesiones=[], curSesId=null;
 
-async function init(){
-    try{
-        var r=await fetch(API+'/pats?tutor_id='+miId);var d=await r.json();
-        if(!d.success||!d.pats.length){document.getElementById('sin-pat').classList.remove('hidden');return;}
-        document.getElementById('con-pat').classList.remove('hidden');
-        var p0=d.pats[0];
-        var dr=await fetch(API+'/pats/'+p0.id);var dd=await dr.json();if(!dd.success)return;
-        pat=dd.pat;sesiones=pat.sesiones||[];
-        document.getElementById('info-grupo').textContent=pat.grupo||'';
-        document.getElementById('info-carrera').textContent=pat.programa_educativo||pat.carrera||'';
-        document.getElementById('badge-per').textContent=pat.periodo_cuatrimestral||pat.periodo_nombre||'';
-        document.getElementById('in-h').value=pat.alumnos_h||'';
-        document.getElementById('in-m').value=pat.alumnos_m||'';
-        document.getElementById('in-com').value=pat.comentarios_tutor||'';
-        // Estado badge
-        var cfg={'Borrador':'bg-blue-100 text-blue-700 border-blue-300','Pendiente Revision':'bg-yellow-100 text-yellow-800 border-yellow-300','Aprobado':'bg-green-100 text-green-800 border-green-300','Rechazado':'bg-red-100 text-red-800 border-red-300'};
-        var b=document.getElementById('badge-estado');b.textContent=pat.estado;b.className='px-2.5 py-1 rounded-full text-xs font-bold border '+(cfg[pat.estado]||cfg.Borrador);
-        // Reset banners
-        ['ban-rechazado','ban-aprobado','ban-pendiente'].forEach(function(id){document.getElementById(id).classList.add('hidden');});
-        document.getElementById('panel-enviar').classList.remove('hidden');
-        document.getElementById('btn-enviar-txt').textContent='Enviar PAT';
-        document.getElementById('enviar-txt').textContent='Envia tu PAT para aprobacion.';
-        // Show appropriate banner
-        if(pat.estado==='Rechazado'){
-            document.getElementById('rechazo-motivo').textContent=pat.observaciones_director||'Sin motivo especificado';
-            document.getElementById('ban-rechazado').classList.remove('hidden');
-            document.getElementById('btn-enviar-txt').textContent='Reenviar PAT Corregido';
-            document.getElementById('enviar-txt').textContent='Corrige las observaciones y reenvia.';
-        }else if(pat.estado==='Aprobado'){
-            document.getElementById('ban-aprobado').classList.remove('hidden');
-            document.getElementById('panel-enviar').classList.add('hidden');
-        }else if(pat.estado==='Pendiente Revision'){
-            document.getElementById('ban-pendiente').classList.remove('hidden');
-            document.getElementById('panel-enviar').classList.add('hidden');
+    function sw(t){
+        ['pat','jefe'].forEach(function(x){
+            document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);
+            var b=document.getElementById('tb-'+x);
+            b.className=x===t?'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-[#7B5936] bg-white shadow-sm':'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:text-gray-900';
+        });
+        ic();
+    }
+    
+    function abrirM(id){document.getElementById(id).classList.remove('hidden');}
+    function cerrarM(id){document.getElementById(id).classList.add('hidden');}
+    
+    function toast(m,ok){
+        var c=document.getElementById('toast-c'),d=document.createElement('div');
+        d.className='flex items-center gap-2 px-4 py-3 rounded-md border shadow-lg pointer-events-auto '+(ok===false?'bg-red-50 border-red-200 text-red-800':'bg-green-50 border-green-200 text-green-800');
+        d.innerHTML='<span class="text-sm font-medium">'+m+'</span>';
+        c.appendChild(d);
+        setTimeout(function(){d.remove();},4000);
+    }
+    
+    function ic(){if(typeof lucide!=='undefined')lucide.createIcons();}
+
+    async function init(){
+        try {
+            var r=await fetch(API+'/pats?tutor_id='+miId);
+            var d=await r.json();
+            if(!d.success||!d.pats.length){document.getElementById('sin-pat').classList.remove('hidden');return;}
+            document.getElementById('con-pat').classList.remove('hidden');
+            
+            var p0=d.pats[0];
+            var dr=await fetch(API+'/pats/'+p0.id);
+            var dd=await dr.json();
+            if(!dd.success) return;
+            
+            pat=dd.pat;
+            sesiones=pat.sesiones||[];
+            document.getElementById('info-grupo').textContent=pat.grupo||'';
+            document.getElementById('info-carrera').textContent=pat.programa_educativo||pat.carrera||'';
+            document.getElementById('badge-per').textContent=pat.periodo_cuatrimestral||pat.periodo_nombre||'';
+            document.getElementById('in-h').value=pat.alumnos_h||'';
+            document.getElementById('in-m').value=pat.alumnos_m||'';
+            document.getElementById('in-com').value=pat.comentarios_tutor||'';
+            
+            var cfg={'Borrador':'bg-blue-100 text-blue-700 border-blue-300','Pendiente Revision':'bg-yellow-100 text-yellow-800 border-yellow-300','Aprobado':'bg-green-100 text-green-800 border-green-300','Rechazado':'bg-red-100 text-red-800 border-red-300'};
+            var b=document.getElementById('badge-estado');
+            b.textContent=pat.estado;
+            b.className='px-2.5 py-1 rounded-full text-xs font-bold border '+(cfg[pat.estado]||cfg.Borrador);
+            
+            ['ban-rechazado','ban-aprobado','ban-pendiente'].forEach(function(id){document.getElementById(id).classList.add('hidden');});
+            document.getElementById('panel-enviar').classList.remove('hidden');
+            document.getElementById('btn-enviar-txt').textContent='Enviar PAT';
+            document.getElementById('enviar-txt').textContent='Envia tu PAT para aprobacion.';
+            
+            if(pat.estado==='Rechazado'){
+                document.getElementById('rechazo-motivo').textContent=pat.observaciones_director||'Sin motivo especificado';
+                document.getElementById('ban-rechazado').classList.remove('hidden');
+                document.getElementById('btn-enviar-txt').textContent='Reenviar PAT Corregido';
+                document.getElementById('enviar-txt').textContent='Corrige las observaciones y reenvia.';
+            } else if(pat.estado==='Aprobado'){
+                document.getElementById('ban-aprobado').classList.remove('hidden');
+                document.getElementById('panel-enviar').classList.add('hidden');
+            } else if(pat.estado==='Pendiente Revision'){
+                document.getElementById('ban-pendiente').classList.remove('hidden');
+                document.getElementById('panel-enviar').classList.add('hidden');
+            }
+            renderSesiones();
+        } catch(e) { console.error(e); }
+        cargarSol();
+        ic();
+    }
+
+    function renderSesiones(){
+        var tb=document.getElementById('ses-tbody');
+        if(!sesiones.length){tb.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Sin sesiones</td></tr>';return;}
+        var done=sesiones.filter(function(s){return['Validada','Finalizada','Cancelada'].indexOf(s.estado)!==-1;}).length;
+        document.getElementById('ses-prog').textContent=done+'/'+sesiones.length+' completadas';
+        tb.innerHTML=sesiones.map(function(s){
+            var est='',acc='';
+            if(s.fecha_programada){
+                var ecfg={'Validada':'bg-green-100 text-green-700','Cancelada':'bg-red-100 text-red-700','Finalizada':'bg-yellow-100 text-yellow-700','Programada':'bg-blue-100 text-blue-700','Pendiente':'bg-gray-100 text-gray-600'};
+                est='<span class="px-2 py-0.5 rounded text-[10px] font-bold '+(ecfg[s.estado]||ecfg.Pendiente)+'">'+(s.estado||'Pendiente')+'</span><p class="text-xs text-gray-500 mt-1">'+s.fecha_programada+(s.hora_programada?' '+s.hora_programada:'')+'</p>';
+            } else {
+                est='<span class="text-xs text-gray-400">Sin agendar</span>';
+            }
+            if(!s.fecha_programada&&(s.estado==='Pendiente'||!s.estado)){
+                acc='<div class="flex gap-1 flex-wrap justify-center">'+
+                    '<button onclick="abrirProg('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100">Agendar</button>'+
+                    '<button onclick="abrirEdit('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-gray-50 text-gray-600 border rounded hover:bg-gray-100">Editar</button></div>';
+            } else if(s.estado==='Programada'||s.estado==='Pendiente'){
+                acc='<div class="flex gap-1 flex-wrap justify-center">'+
+                    '<button onclick="abrirFin('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100">Finalizar</button>'+
+                    '<button onclick="abrirCan('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100">Cancelar</button>'+
+                    '<button onclick="abrirEdit('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-gray-50 text-gray-600 border rounded hover:bg-gray-100">Editar</button></div>';
+            } else if(s.estado==='Validada'){
+                acc='<span class="text-[10px] text-green-600 font-bold"><i data-lucide="shield-check" class="h-3 w-3 inline mr-1"></i>Firmada por JG</span>';
+            } else if(s.estado==='Finalizada'){
+                acc='<span class="text-[10px] text-yellow-600"><i data-lucide="clock" class="h-3 w-3 inline mr-1"></i>Esperando firma JG</span>';
+            } else if(s.estado==='Cancelada'){
+                acc='<span class="text-[10px] text-red-500 italic">'+(s.motivo_cancelacion||'Cancelada')+'</span>';
+            } else {acc='<span class="text-[10px] text-gray-400">-</span>';}
+            return '<tr class="hover:bg-gray-50">'+
+                '<td class="px-3 py-3 text-center font-bold text-gray-700">'+s.num_sesion+'</td>'+
+                '<td class="px-3 py-3"><span class="px-1.5 py-0.5 bg-gray-100 text-[10px] rounded font-bold">'+(s.corte_parcial||'')+'</span></td>'+
+                '<td class="px-3 py-3 text-sm">'+(s.tematica||'')+'</td>'+
+                '<td class="px-3 py-3 text-xs text-gray-600">'+(s.objetivo||'')+'</td>'+
+                '<td class="px-3 py-3">'+est+'</td>'+
+                '<td class="px-3 py-3 text-center">'+acc+'</td></tr>';
+        }).join('');
+        ic();
+    }
+
+    // === DESCARGAR MI PAT (PDF) ===
+    function descargarMiPAT(event) {
+        if (!pat) {
+            toast('Aún no tienes datos del PAT cargados.', false);
+            return;
         }
-        renderSesiones();
-    }catch(e){console.error(e);}
-    cargarSol();ic();
-}
+        
+        const btnIcon = event.currentTarget.querySelector('i');
+        if(btnIcon) btnIcon.className = "h-3 w-3 mr-1 animate-spin lucide lucide-loader-2";
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
-function renderSesiones(){
-    var tb=document.getElementById('ses-tbody');
-    if(!sesiones.length){tb.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Sin sesiones</td></tr>';return;}
-    var done=sesiones.filter(function(s){return['Validada','Finalizada','Cancelada'].indexOf(s.estado)!==-1;}).length;
-    document.getElementById('ses-prog').textContent=done+'/'+sesiones.length+' completadas';
-    tb.innerHTML=sesiones.map(function(s){
-        var est='',acc='';
-        // Estado
-        if(s.fecha_programada){
-            var ecfg={'Validada':'bg-green-100 text-green-700','Cancelada':'bg-red-100 text-red-700','Finalizada':'bg-yellow-100 text-yellow-700','Programada':'bg-blue-100 text-blue-700','Pendiente':'bg-gray-100 text-gray-600'};
-            est='<span class="px-2 py-0.5 rounded text-[10px] font-bold '+(ecfg[s.estado]||ecfg.Pendiente)+'">'+(s.estado||'Pendiente')+'</span><p class="text-xs text-gray-500 mt-1">'+s.fecha_programada+(s.hora_programada?' '+s.hora_programada:'')+'</p>';
-        }else{
-            est='<span class="text-xs text-gray-400">Sin agendar</span>';
+        try {
+            generarPDFPat({
+                carrera: pat.programa_educativo || pat.carrera || miCarrera,
+                tutor: pat.nombre_tutor || pat.tutor_nombre_completo || '',
+                grupo: pat.grupo,
+                periodo: pat.periodo_cuatrimestral || pat.periodo_nombre || '',
+                h: pat.alumnos_h || 0,
+                m: pat.alumnos_m || 0,
+                sesiones: sesiones,
+                tipo: 'completo',
+                filename: `Mi_PAT_${pat.grupo}_${(pat.nombre_tutor || '').replace(/ /g, '_')}.pdf`
+            });
+            toast('PDF generado con éxito', true);
+        } catch (e) {
+            console.error(e);
+            toast('Error al generar el PDF', false);
+        } finally {
+            setTimeout(() => {
+                if(btnIcon) btnIcon.className = "h-3 w-3 mr-1 lucide lucide-file-down";
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }, 1000);
         }
-        // Acciones segun estado
-        if(!s.fecha_programada&&(s.estado==='Pendiente'||!s.estado)){
-            acc='<div class="flex gap-1 flex-wrap justify-center">'+
-                '<button onclick="abrirProg('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100">Agendar</button>'+
-                '<button onclick="abrirEdit('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-gray-50 text-gray-600 border rounded hover:bg-gray-100">Editar</button></div>';
-        }else if(s.estado==='Programada'||s.estado==='Pendiente'){
-            acc='<div class="flex gap-1 flex-wrap justify-center">'+
-                '<button onclick="abrirFin('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100">Finalizar</button>'+
-                '<button onclick="abrirCan('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100">Cancelar</button>'+
-                '<button onclick="abrirEdit('+s.id+','+s.num_sesion+')" class="px-2 py-1 text-xs bg-gray-50 text-gray-600 border rounded hover:bg-gray-100">Editar</button></div>';
-        }else if(s.estado==='Validada'){
-            acc='<span class="text-[10px] text-green-600 font-bold"><i data-lucide="shield-check" class="h-3 w-3 inline mr-1"></i>Firmada por JG</span>';
-        }else if(s.estado==='Finalizada'){
-            acc='<span class="text-[10px] text-yellow-600"><i data-lucide="clock" class="h-3 w-3 inline mr-1"></i>Esperando firma JG</span>';
-        }else if(s.estado==='Cancelada'){
-            acc='<span class="text-[10px] text-red-500 italic">'+(s.motivo_cancelacion||'Cancelada')+'</span>';
-        }else{acc='<span class="text-[10px] text-gray-400">-</span>';}
-        return '<tr class="hover:bg-gray-50">'+
-            '<td class="px-3 py-3 text-center font-bold text-gray-700">'+s.num_sesion+'</td>'+
-            '<td class="px-3 py-3"><span class="px-1.5 py-0.5 bg-gray-100 text-[10px] rounded font-bold">'+(s.corte_parcial||'')+'</span></td>'+
-            '<td class="px-3 py-3 text-sm">'+(s.tematica||'')+'</td>'+
-            '<td class="px-3 py-3 text-xs text-gray-600">'+(s.objetivo||'')+'</td>'+
-            '<td class="px-3 py-3">'+est+'</td>'+
-            '<td class="px-3 py-3 text-center">'+acc+'</td></tr>';
-    }).join('');ic();
-}
+    }
 
-// === PROGRAMAR ===
-function abrirProg(id,n){curSesId=id;document.getElementById('mp-num').textContent=n;document.getElementById('mp-fecha').value='';document.getElementById('mp-hora').value='';abrirM('m-prog');}
-document.getElementById('f-prog').addEventListener('submit',async function(e){e.preventDefault();
-    try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha_programada:document.getElementById('mp-fecha').value,hora_programada:document.getElementById('mp-hora').value,estado:'Programada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-prog');await init();}catch(e){toast('Error',false);}
-});
+    // === ACCIONES DE SESIÓN ===
+    function abrirProg(id,n){curSesId=id;document.getElementById('mp-num').textContent=n;document.getElementById('mp-fecha').value='';document.getElementById('mp-hora').value='';abrirM('m-prog');}
+    document.getElementById('f-prog').addEventListener('submit',async function(e){e.preventDefault();
+        try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha_programada:document.getElementById('mp-fecha').value,hora_programada:document.getElementById('mp-hora').value,estado:'Programada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-prog');await init();}catch(e){toast('Error',false);}
+    });
 
-// === FINALIZAR ===
-function abrirFin(id,n){curSesId=id;document.getElementById('mf-num').textContent=n;document.getElementById('mf-res').value='';document.querySelectorAll('.ch-canal').forEach(function(c){c.checked=false;});abrirM('m-fin');}
-document.getElementById('f-fin').addEventListener('submit',async function(e){e.preventDefault();
-    var canales=[].slice.call(document.querySelectorAll('.ch-canal:checked')).map(function(c){return c.value;}).join(', ');
-    try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados_obtenidos:document.getElementById('mf-res').value,canalizaciones:canales,estado:'Finalizada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-fin');await init();}catch(e){toast('Error',false);}
-});
+    function abrirFin(id,n){curSesId=id;document.getElementById('mf-num').textContent=n;document.getElementById('mf-res').value='';document.querySelectorAll('.ch-canal').forEach(function(c){c.checked=false;});abrirM('m-fin');}
+    document.getElementById('f-fin').addEventListener('submit',async function(e){e.preventDefault();
+        var canales=[].slice.call(document.querySelectorAll('.ch-canal:checked')).map(function(c){return c.value;}).join(', ');
+        try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados_obtenidos:document.getElementById('mf-res').value,canalizaciones:canales,estado:'Finalizada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-fin');await init();}catch(e){toast('Error',false);}
+    });
 
-// === CANCELAR ===
-function abrirCan(id,n){curSesId=id;document.getElementById('mc-num').textContent=n;document.getElementById('mc-mot').value='';abrirM('m-can');}
-document.getElementById('f-can').addEventListener('submit',async function(e){e.preventDefault();
-    try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({motivo_cancelacion:document.getElementById('mc-mot').value,estado:'Cancelada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-can');await init();}catch(e){toast('Error',false);}
-});
+    function abrirCan(id,n){curSesId=id;document.getElementById('mc-num').textContent=n;document.getElementById('mc-mot').value='';abrirM('m-can');}
+    document.getElementById('f-can').addEventListener('submit',async function(e){e.preventDefault();
+        try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({motivo_cancelacion:document.getElementById('mc-mot').value,estado:'Cancelada'})});var d=await r.json();toast(d.message,d.success);cerrarM('m-can');await init();}catch(e){toast('Error',false);}
+    });
 
-// === EDITAR ACTIVIDAD ===
-function abrirEdit(id,n){curSesId=id;var s=sesiones.find(function(x){return x.id===id;});document.getElementById('me-num').textContent=n;document.getElementById('me-tema').value=s?s.tematica||'':'';document.getElementById('me-obj').value=s?s.objetivo||'':'';document.getElementById('me-resexp').value=s?s.resultados_esperados||'':'';abrirM('m-edit');}
-document.getElementById('f-edit').addEventListener('submit',async function(e){e.preventDefault();
-    try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({tematica:document.getElementById('me-tema').value,objetivo:document.getElementById('me-obj').value,resultados_esperados:document.getElementById('me-resexp').value})});var d=await r.json();toast(d.message,d.success);cerrarM('m-edit');await init();}catch(e){toast('Error',false);}
-});
+    function abrirEdit(id,n){curSesId=id;var s=sesiones.find(function(x){return x.id===id;});document.getElementById('me-num').textContent=n;document.getElementById('me-tema').value=s?s.tematica||'':'';document.getElementById('me-obj').value=s?s.objetivo||'':'';document.getElementById('me-resexp').value=s?s.resultados_esperados||'':'';abrirM('m-edit');}
+    document.getElementById('f-edit').addEventListener('submit',async function(e){e.preventDefault();
+        try{var r=await fetch(API+'/sesiones/'+curSesId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({tematica:document.getElementById('me-tema').value,objetivo:document.getElementById('me-obj').value,resultados_esperados:document.getElementById('me-resexp').value})});var d=await r.json();toast(d.message,d.success);cerrarM('m-edit');await init();}catch(e){toast('Error',false);}
+    });
 
-// === GUARDAR DATOS ===
-async function guardarDatos(){if(!pat)return;try{var r=await fetch(API+'/pats/'+pat.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({alumnos_h:parseInt(document.getElementById('in-h').value)||0,alumnos_m:parseInt(document.getElementById('in-m').value)||0,comentarios_tutor:document.getElementById('in-com').value})});var d=await r.json();toast(d.success?'Datos guardados':'Error: '+d.message,d.success);}catch(e){toast('Error',false);}}
+    async function guardarDatos(){if(!pat)return;try{var r=await fetch(API+'/pats/'+pat.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({alumnos_h:parseInt(document.getElementById('in-h').value)||0,alumnos_m:parseInt(document.getElementById('in-m').value)||0,comentarios_tutor:document.getElementById('in-com').value})});var d=await r.json();toast(d.success?'Datos guardados':'Error: '+d.message,d.success);}catch(e){toast('Error',false);}}
 
-// === ENVIAR/REENVIAR PAT ===
-async function enviarPAT(){if(!pat)return;var msg=pat.estado==='Rechazado'?'Reenviar PAT corregido?':'Enviar PAT para revision?';if(!confirm(msg))return;
-    try{var r=await fetch(API+'/pats/'+pat.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:'Pendiente Revision',observaciones_director:''})});var d=await r.json();toast(d.success?'PAT enviado':'Error',d.success);await init();}catch(e){toast('Error',false);}}
+    async function enviarPAT(){if(!pat)return;var msg=pat.estado==='Rechazado'?'Reenviar PAT corregido?':'Enviar PAT para revision?';if(!confirm(msg))return;
+        try{var r=await fetch(API+'/pats/'+pat.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:'Pendiente Revision',observaciones_director:''})});var d=await r.json();toast(d.success?'PAT enviado':'Error',d.success);await init();}catch(e){toast('Error',false);}}
 
-// === SOLICITUD JEFE DE GRUPO ===
-document.getElementById('form-jefe').addEventListener('submit',async function(e){e.preventDefault();
-    try{var r=await fetch(API+'/solicitudes-jefe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({solicitante_id:miId,nombre_alumno:document.getElementById('jf-nom').value.trim(),apellidos_alumno:document.getElementById('jf-ape').value.trim(),email_alumno:document.getElementById('jf-email').value.trim().toLowerCase(),grupo:document.getElementById('jf-grupo').value.trim().toUpperCase(),carrera:miCarrera})});var d=await r.json();toast(d.message,d.success);if(d.success){this.reset();cargarSol();}}catch(e){toast('Error',false);}
-});
-async function cargarSol(){try{var r=await fetch(API+'/solicitudes-jefe?solicitante_id='+miId);var d=await r.json();var ct=document.getElementById('mis-sol');if(!d.success||!d.solicitudes.length){ct.innerHTML='<p class="text-gray-400 text-xs italic">Sin solicitudes.</p>';return;}ct.innerHTML=d.solicitudes.map(function(s){var bc={'Pendiente':'bg-yellow-100 text-yellow-800','Aprobada':'bg-green-100 text-green-800','Rechazada':'bg-red-100 text-red-800'};return '<div class="flex items-center justify-between py-2 border-b last:border-0"><div><p class="font-medium text-sm">'+s.nombre_alumno+' '+s.apellidos_alumno+'</p><p class="text-xs text-gray-500">'+s.grupo+'</p></div><span class="px-2 py-0.5 rounded-full text-xs '+(bc[s.estado]||'')+'">'+s.estado+'</span></div>';}).join('');}catch(e){}}
+    document.getElementById('form-jefe').addEventListener('submit',async function(e){e.preventDefault();
+        try{var r=await fetch(API+'/solicitudes-jefe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({solicitante_id:miId,nombre_alumno:document.getElementById('jf-nom').value.trim(),apellidos_alumno:document.getElementById('jf-ape').value.trim(),email_alumno:document.getElementById('jf-email').value.trim().toLowerCase(),grupo:document.getElementById('jf-grupo').value.trim().toUpperCase(),carrera:miCarrera})});var d=await r.json();toast(d.message,d.success);if(d.success){this.reset();cargarSol();}}catch(e){toast('Error',false);}
+    });
+    
+    async function cargarSol(){try{var r=await fetch(API+'/solicitudes-jefe?solicitante_id='+miId);var d=await r.json();var ct=document.getElementById('mis-sol');if(!d.success||!d.solicitudes.length){ct.innerHTML='<p class="text-gray-400 text-xs italic">Sin solicitudes.</p>';return;}ct.innerHTML=d.solicitudes.map(function(s){var bc={'Pendiente':'bg-yellow-100 text-yellow-800','Aprobada':'bg-green-100 text-green-800','Rechazada':'bg-red-100 text-red-800'};return '<div class="flex items-center justify-between py-2 border-b last:border-0"><div><p class="font-medium text-sm">'+s.nombre_alumno+' '+s.apellidos_alumno+'</p><p class="text-xs text-gray-500">'+s.grupo+'</p></div><span class="px-2 py-0.5 rounded-full text-xs '+(bc[s.estado]||'')+'">'+s.estado+'</span></div>';}).join('');}catch(e){}}
 
-init();
+    init();
 </script>
 </body>
 </html>

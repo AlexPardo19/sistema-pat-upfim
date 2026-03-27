@@ -4,6 +4,8 @@ import sqlite3
 import os
 import datetime
 import json
+import io
+from flask import send_file
 
 CARPETA_ACTUAL = os.path.dirname(os.path.abspath(__file__))
 CARPETA_RAIZ = os.path.dirname(CARPETA_ACTUAL)
@@ -363,7 +365,150 @@ def upload_excel():
         return jsonify(success=False, message='openpyxl no instalado. Ejecuta: pip install openpyxl'), 500
     except Exception as e:
         return jsonify(success=False, message='Error procesando Excel: ' + str(e)), 500
+    # --- DESCARGAR FORMATO EXCEL ---
+# --- DESCARGAR FORMATO EXCEL (VISTA INSTITUCIONAL) ---
+@app.route('/api/plantillas/download-excel', methods=['GET'])
+def download_excel_format():
+    try:
+        import io
+        import openpyxl
+        from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
+        from flask import send_file, jsonify
 
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Formato PAT"
+
+        # --- DEFINICIÓN DE ESTILOS ---
+        font_title = Font(name='Arial', size=12, bold=True)
+        font_bold = Font(name='Arial', size=10, bold=True)
+        font_header = Font(name='Arial', size=10, bold=True, color="FFFFFF")
+        
+        # Color institucional para los encabezados de tabla (Verde UPFIM)
+        fill_header = PatternFill(start_color="69B22E", end_color="69B22E", fill_type="solid") 
+        
+        align_center = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        align_left_center = Alignment(horizontal='left', vertical='center', wrap_text=True)
+        align_top_left = Alignment(horizontal='left', vertical='top', wrap_text=True)
+        
+        thin_border = Border(
+            left=Side(style='thin'), right=Side(style='thin'), 
+            top=Side(style='thin'), bottom=Side(style='thin')
+        )
+        bottom_border = Border(bottom=Side(style='thin'))
+
+        # --- 1. ENCABEZADOS SUPERIORES (Filas 1-3) ---
+        ws.merge_cells('A1:F1')
+        ws['A1'] = "UNIVERSIDAD POLITÉCNICA DE FRANCISCO I. MADERO"
+        ws['A1'].font = font_title
+        ws['A1'].alignment = align_center
+
+        ws.merge_cells('A2:F2')
+        ws['A2'] = "DEPARTAMENTO DE ASESORÍAS Y TUTORÍAS"
+        ws['A2'].font = font_title
+        ws['A2'].alignment = align_center
+
+        ws.merge_cells('A3:F3')
+        ws['A3'] = "PLAN DE ACCIÓN TUTORIAL (PAT)"
+        ws['A3'].font = font_title
+        ws['A3'].alignment = align_center
+
+        # --- 2. DATOS DE IDENTIFICACIÓN (Filas 5-7) ---
+        # Fila 5
+        ws['A5'] = "PROGRAMA EDUCATIVO:"
+        ws['A5'].font = font_bold
+        ws.merge_cells('B5:D5')
+        ws['B5'].border = bottom_border
+        
+        ws['E5'] = "CUATRIMESTRE:"
+        ws['E5'].font = font_bold
+        ws['F5'].border = bottom_border
+
+        # Fila 6
+        ws['A6'] = "NOMBRE DEL TUTOR:"
+        ws['A6'].font = font_bold
+        ws.merge_cells('B6:D6')
+        ws['B6'].border = bottom_border
+        
+        ws['E6'] = "GRUPO:"
+        ws['E6'].font = font_bold
+        ws['F6'].border = bottom_border
+
+        # Fila 7
+        ws['A7'] = "PERIODO:"
+        ws['A7'].font = font_bold
+        ws.merge_cells('B7:D7')
+        ws['B7'].border = bottom_border
+        
+        ws['E7'] = "FECHA:"
+        ws['E7'].font = font_bold
+        ws['F7'].border = bottom_border
+
+        # --- 3. TÍTULO DE LA TABLA (Fila 10) ---
+        ws.merge_cells('A10:F10')
+        ws['A10'] = "PROGRAMA CUATRIMESTRAL (CALENDARIZACIÓN DE SESIONES)"
+        ws['A10'].font = font_header
+        ws['A10'].fill = fill_header
+        ws['A10'].alignment = align_center
+        ws['A10'].border = thin_border
+
+        # --- 4. ENCABEZADOS DE COLUMNAS (Fila 11) ---
+        headers = [
+            "No. de sesión", 
+            "Fecha de la sesión", 
+            "Corte parcial", 
+            "Temática", 
+            "Objetivo de la sesión", 
+            "Resultados Esperados"
+        ]
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=11, column=col_num)
+            cell.value = header
+            cell.font = font_header
+            cell.fill = fill_header
+            cell.alignment = align_center
+            cell.border = thin_border
+
+        # --- 5. CONFIGURACIÓN DE ANCHOS DE COLUMNA ---
+        ws.column_dimensions['A'].width = 15
+        ws.column_dimensions['B'].width = 20
+        ws.column_dimensions['C'].width = 15
+        ws.column_dimensions['D'].width = 45
+        ws.column_dimensions['E'].width = 45
+        ws.column_dimensions['F'].width = 45
+        
+        ws.row_dimensions[11].height = 25 # Encabezado más alto
+
+        # --- 6. ÁREA DE CAPTURA DE DATOS (Fila 12 a 26) ---
+        # Tu backend lee el excel específicamente desde el "row 12" en adelante.
+        for row in range(12, 27): # 15 sesiones
+            ws.row_dimensions[row].height = 40 # Filas más altas para escribir
+            ws.cell(row=row, column=1).value = row - 11 # Auto-numerar del 1 al 15
+            ws.cell(row=row, column=1).alignment = align_center
+            
+            for col in range(1, 7):
+                cell = ws.cell(row=row, column=col)
+                cell.border = thin_border
+                if col != 1:
+                    cell.alignment = align_top_left
+
+        # Preparar archivo para envío
+        out = io.BytesIO()
+        wb.save(out)
+        out.seek(0)
+
+        return send_file(
+            out,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='Formato_Plantilla_PAT.xlsx'
+        )
+    except ImportError:
+        from flask import jsonify
+        return jsonify(success=False, message='La librería openpyxl no está instalada.'), 500
+    except Exception as e:
+        from flask import jsonify
+        return jsonify(success=False, message='Error al generar el formato: ' + str(e)), 500
 # ============ PATs ============
 @app.route('/api/pats', methods=['GET'])
 def list_pats():
